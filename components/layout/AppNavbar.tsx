@@ -3,23 +3,23 @@
 import { usePathname, useRouter } from "next/navigation";
 import {
   AppShell,
-  Badge,
-  Divider,
   Group,
   NavLink,
   ScrollArea,
   Stack,
   Text,
   ThemeIcon,
+  Box,
 } from "@mantine/core";
 import {
   IconCalendarEvent,
   IconChartBar,
   IconLayoutDashboard,
-  IconMail,
   IconSettings,
   IconUsers,
   IconBriefcase,
+  IconHelp,
+  IconSquareAsterisk,
 } from "@tabler/icons-react";
 import classes from "./AppNavbar.module.css";
 
@@ -34,41 +34,40 @@ const navItems: NavItem[] = [
   {
     label: "Dashboard",
     href: "/",
-    icon: <IconLayoutDashboard size={18} />,
+    icon: <IconLayoutDashboard size={20} stroke={1.5} />,
   },
   {
     label: "Calendar",
     href: "/calendar",
-    icon: <IconCalendarEvent size={18} />,
+    icon: <IconCalendarEvent size={20} stroke={1.5} />,
   },
   {
     label: "Interviews",
     href: "/interviews",
-    icon: <IconBriefcase size={18} />,
-    badge: "3",
+    icon: <IconBriefcase size={20} stroke={1.5} />,
   },
   {
     label: "Candidates",
     href: "/candidates",
-    icon: <IconUsers size={18} />,
+    icon: <IconUsers size={20} stroke={1.5} />,
   },
   {
     label: "Reports",
     href: "/reports",
-    icon: <IconChartBar size={18} />,
+    icon: <IconChartBar size={20} stroke={1.5} />,
   },
 ];
 
 const bottomItems: NavItem[] = [
   {
-    label: "Email Templates",
-    href: "/templates",
-    icon: <IconMail size={18} />,
-  },
-  {
     label: "Settings",
     href: "/settings",
-    icon: <IconSettings size={18} />,
+    icon: <IconSettings size={20} stroke={1.5} />,
+  },
+  {
+    label: "Help",
+    href: "/help",
+    icon: <IconHelp size={20} stroke={1.5} />,
   },
 ];
 
@@ -89,59 +88,58 @@ export default function AppNavbar({ onClose }: AppNavbarProps) {
     href === "/" ? pathname === "/" : pathname.startsWith(href);
 
   return (
-    <AppShell.Section component={ScrollArea} grow className={classes.navbar}>
-      {/* Main nav */}
-      <Stack gap={2} p="xs" pt="sm">
-        {navItems.map((item) => (
-          <NavLink
-            key={item.href}
-            label={item.label}
-            leftSection={
-              <ThemeIcon
-                variant={isActive(item.href) ? "light" : "transparent"}
-                color={isActive(item.href) ? "blue" : "gray"}
-                size="sm"
-                radius="sm"
-              >
-                {item.icon}
-              </ThemeIcon>
-            }
-            rightSection={
-              item.badge ? (
-                <Badge size="xs" variant="filled" color="blue" circle>
-                  {item.badge}
-                </Badge>
-              ) : undefined
-            }
-            active={isActive(item.href)}
-            onClick={() => handleNav(item.href)}
-            className={classes.link}
-            variant="light"
-          />
-        ))}
-      </Stack>
+    <AppShell.Section className={classes.navbar}>
+      <Group px="md" py="xl" gap="sm">
+        <ThemeIcon size={34} radius="md" color="blue.9" variant="filled">
+          <IconSquareAsterisk size={24} />
+        </ThemeIcon>
+        <Box>
+            <Text fw={800} size="md" style={{ lineHeight: 1.1 }}>Formsly</Text>
+            <Text size="xs" c="dimmed" fw={500}>HR Management</Text>
+        </Box>
+      </Group>
 
-      {/* Bottom nav */}
-      <Stack gap={2} p="xs" pb="md" style={{ marginTop: "auto" }}>
-        <Divider mb="xs" />
+      <ScrollArea style={{ height: "calc(100vh - 180px)" }}>
+        <Stack gap={4} p="md">
+            {navItems.map((item) => (
+            <NavLink
+                key={item.href}
+                label={item.label}
+                leftSection={item.icon}
+                active={isActive(item.href)}
+                onClick={() => handleNav(item.href)}
+                className={classes.link}
+                styles={{
+                    label: { fontWeight: 600, fontSize: "14px" },
+                    root: { 
+                        borderRadius: "8px",
+                        height: "44px",
+                        backgroundColor: isActive(item.href) ? "var(--mantine-color-blue-9)" : "transparent",
+                        color: isActive(item.href) ? "white" : "var(--mantine-color-gray-7)",
+                    },
+                }}
+            />
+            ))}
+        </Stack>
+      </ScrollArea>
+
+      <Stack gap={4} p="md" style={{ position: "absolute", bottom: 0, width: "100%" }}>
         {bottomItems.map((item) => (
           <NavLink
             key={item.href}
             label={item.label}
-            leftSection={
-              <ThemeIcon
-                variant={isActive(item.href) ? "light" : "transparent"}
-                color={isActive(item.href) ? "blue" : "gray"}
-                size="sm"
-                radius="sm"
-              >
-                {item.icon}
-              </ThemeIcon>
-            }
+            leftSection={item.icon}
             active={isActive(item.href)}
             onClick={() => handleNav(item.href)}
             className={classes.link}
-            variant="light"
+            styles={{
+                label: { fontWeight: 600, fontSize: "14px" },
+                root: { 
+                    borderRadius: "8px",
+                    height: "44px",
+                    color: "var(--mantine-color-gray-7)",
+                },
+            }}
           />
         ))}
       </Stack>

@@ -9,6 +9,8 @@ import {
   Text,
   Tooltip,
   useMantineColorScheme,
+  TextInput,
+  Box,
 } from "@mantine/core";
 import {
   IconBell,
@@ -18,6 +20,8 @@ import {
   IconSettings,
   IconSun,
   IconUser,
+  IconSearch,
+  IconHistory,
 } from "@tabler/icons-react";
 import classes from "./AppHeader.module.css";
 
@@ -32,8 +36,8 @@ export default function AppHeader({ opened, toggle }: AppHeaderProps) {
 
   return (
     <Group h="100%" px="md" justify="space-between" className={classes.header}>
-      {/* Left: Burger + Logo */}
-      <Group gap="sm">
+      {/* Left: Burger + Search */}
+      <Group gap="xl">
         <Burger
           opened={opened}
           onClick={toggle}
@@ -41,62 +45,89 @@ export default function AppHeader({ opened, toggle }: AppHeaderProps) {
           size="sm"
           aria-label="Toggle navigation"
         />
-        <Group gap={8} visibleFrom="sm">
-          <IconCalendarEvent size={26} stroke={1.8} color="var(--mantine-color-blue-6)" />
-          <Text fw={700} size="lg" className={classes.logo}>
-            InterviewCal
-          </Text>
-        </Group>
+        <TextInput
+          placeholder="Search appointments or candidates..."
+          leftSection={<IconSearch size={16} stroke={1.5} />}
+          size="sm"
+          radius="md"
+          w={340}
+          visibleFrom="sm"
+          styles={{
+            input: {
+              backgroundColor: "var(--mantine-color-gray-0)",
+              border: "none",
+            },
+          }}
+        />
       </Group>
 
       {/* Right: Actions + User */}
-      <Group gap="xs">
-        <Tooltip label="Notifications" withArrow position="bottom">
-          <ActionIcon
-            variant="subtle"
-            color="gray"
-            size="lg"
-            radius="xl"
-            aria-label="Notifications"
-          >
-            <IconBell size={18} />
-          </ActionIcon>
-        </Tooltip>
+      <Group gap="md">
+        <Group gap="xs" visibleFrom="md">
+            <Text fw={700} size="sm" c="gray.8">Interview Scheduler</Text>
+        </Group>
 
-        <Tooltip
-          label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-          withArrow
-          position="bottom"
-        >
-          <ActionIcon
-            variant="subtle"
-            color="gray"
-            size="lg"
-            radius="xl"
-            onClick={() => toggleColorScheme()}
-            aria-label="Toggle color scheme"
+        <Group gap={8}>
+          <Tooltip label="Notifications" withArrow position="bottom">
+            <ActionIcon
+              variant="subtle"
+              color="gray"
+              size="lg"
+              radius="xl"
+              aria-label="Notifications"
+            >
+              <IconBell size={20} stroke={1.5} />
+            </ActionIcon>
+          </Tooltip>
+
+          <Tooltip label="History" withArrow position="bottom">
+            <ActionIcon
+              variant="subtle"
+              color="gray"
+              size="lg"
+              radius="xl"
+              aria-label="History"
+            >
+              <IconHistory size={20} stroke={1.5} />
+            </ActionIcon>
+          </Tooltip>
+
+          <Tooltip
+            label={isDark ? "Light mode" : "Dark mode"}
+            withArrow
+            position="bottom"
           >
-            {isDark ? <IconSun size={18} /> : <IconMoon size={18} />}
-          </ActionIcon>
-        </Tooltip>
+            <ActionIcon
+              variant="subtle"
+              color="gray"
+              size="lg"
+              radius="xl"
+              onClick={() => toggleColorScheme()}
+              aria-label="Toggle color scheme"
+            >
+              {isDark ? <IconSun size={20} stroke={1.5} /> : <IconMoon size={20} stroke={1.5} />}
+            </ActionIcon>
+          </Tooltip>
+        </Group>
 
         <Menu shadow="md" width={200} position="bottom-end">
           <Menu.Target>
             <Avatar
-              size={34}
-              radius="xl"
-              color="blue"
-              className={classes.avatar}
-              style={{ cursor: "pointer" }}
-            >
-              EP
-            </Avatar>
+              size={36}
+              radius="md"
+              src="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-1.png"
+              style={{ cursor: "pointer", border: "2px solid white" }}
+            />
           </Menu.Target>
           <Menu.Dropdown>
             <Menu.Label>Account</Menu.Label>
             <Menu.Item leftSection={<IconUser size={14} />}>Profile</Menu.Item>
             <Menu.Item leftSection={<IconSettings size={14} />}>
               Settings
+            </Menu.Item>
+            <Menu.Divider />
+            <Menu.Item color="red" leftSection={<IconLogout size={14} />}>
+                Logout
             </Menu.Item>
           </Menu.Dropdown>
         </Menu>
