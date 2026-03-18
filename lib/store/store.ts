@@ -3,7 +3,8 @@ import { configureStore } from "@reduxjs/toolkit";
 export const store = configureStore({
   reducer: {
     // Add your slice reducers here
-    // e.g.  calendar: calendarReducer,
+    // For now, using a placeholder to prevent initialization errors
+    calendar: (state = {}) => state,
   },
 });
 

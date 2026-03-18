@@ -3,12 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --webpack",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start"
   },
   "dependencies": {
-    "@ducanh2912/next-pwa": "^10.2.9",
     "@emotion/react": "^11.14.0",
     "@emotion/server": "^11.11.0",
     "@google-analytics/data": "^5.2.1",
@@ -18,8 +17,6 @@
     "@mantine/modals": "^8.3.10",
     "@mantine/notifications": "^8.3.10",
     "@reduxjs/toolkit": "^2.11.2",
-    "@supabase/ssr": "^0.8.0",
-    "@supabase/supabase-js": "^2.89.0",
     "@tabler/icons-react": "^3.36.0",
     "clsx": "^2.1.1",
     "dayjs": "^1.11.19",
