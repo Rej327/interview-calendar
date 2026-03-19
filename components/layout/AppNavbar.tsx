@@ -10,16 +10,17 @@ import {
   Text,
   ThemeIcon,
   Box,
+  Divider,
 } from "@mantine/core";
 import {
+  IconBriefcase,
   IconCalendarEvent,
   IconChartBar,
+  IconHelp,
   IconLayoutDashboard,
   IconSettings,
-  IconUsers,
-  IconBriefcase,
-  IconHelp,
   IconSquareAsterisk,
+  IconUsers,
 } from "@tabler/icons-react";
 import classes from "./AppNavbar.module.css";
 
@@ -94,55 +95,66 @@ export default function AppNavbar({ onClose }: AppNavbarProps) {
           <IconSquareAsterisk size={24} />
         </ThemeIcon>
         <Box>
-            <Text fw={800} size="md" style={{ lineHeight: 1.1 }}>Formsly</Text>
-            <Text size="xs" c="dimmed" fw={500}>HR Management</Text>
+          <Text fw={800} size="md" style={{ lineHeight: 1.1 }}>
+            Formsly
+          </Text>
+          <Text size="xs" c="dimmed" fw={500}>
+            HR Management
+          </Text>
         </Box>
       </Group>
 
-      <ScrollArea style={{ height: "calc(100vh - 180px)" }}>
+      <ScrollArea style={{ flex: 1 }}>
         <Stack gap={4} p="md">
-            {navItems.map((item) => (
+          {navItems.map((item) => (
             <NavLink
-                key={item.href}
-                label={item.label}
-                leftSection={item.icon}
-                active={isActive(item.href)}
-                onClick={() => handleNav(item.href)}
-                className={classes.link}
-                styles={{
-                    label: { fontWeight: 600, fontSize: "14px" },
-                    root: { 
-                        borderRadius: "8px",
-                        height: "44px",
-                        backgroundColor: isActive(item.href) ? "var(--mantine-color-blue-9)" : "transparent",
-                        color: isActive(item.href) ? "white" : "var(--mantine-color-gray-7)",
-                    },
-                }}
+              key={item.href}
+              label={item.label}
+              leftSection={item.icon}
+              active={isActive(item.href)}
+              onClick={() => handleNav(item.href)}
+              className={classes.link}
+              styles={{
+                label: { fontWeight: 600, fontSize: "14px" },
+                root: {
+                  borderRadius: "8px",
+                  height: "44px",
+                  backgroundColor: isActive(item.href)
+                    ? "var(--mantine-color-blue-9)"
+                    : "transparent",
+                  color: isActive(item.href)
+                    ? "white"
+                    : "var(--mantine-color-gray-7)",
+                },
+              }}
             />
-            ))}
+          ))}
         </Stack>
       </ScrollArea>
 
-      <Stack gap={4} p="md" style={{ position: "absolute", bottom: 0, width: "100%" }}>
-        {bottomItems.map((item) => (
-          <NavLink
-            key={item.href}
-            label={item.label}
-            leftSection={item.icon}
-            active={isActive(item.href)}
-            onClick={() => handleNav(item.href)}
-            className={classes.link}
-            styles={{
+      <Box p="md">
+        <Divider mb="sm" color="gray.1" />
+        <Stack gap={4}>
+          {bottomItems.map((item) => (
+            <NavLink
+              key={item.href}
+              label={item.label}
+              leftSection={item.icon}
+              active={isActive(item.href)}
+              onClick={() => handleNav(item.href)}
+              className={classes.link}
+              styles={{
                 label: { fontWeight: 600, fontSize: "14px" },
-                root: { 
-                    borderRadius: "8px",
-                    height: "44px",
-                    color: "var(--mantine-color-gray-7)",
+                root: {
+                  borderRadius: "8px",
+                  height: "44px",
+                  color: "var(--mantine-color-gray-7)",
                 },
-            }}
-          />
-        ))}
-      </Stack>
+              }}
+            />
+          ))}
+        </Stack>
+      </Box>
     </AppShell.Section>
   );
 }

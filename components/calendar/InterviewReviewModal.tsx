@@ -60,7 +60,18 @@ export default function InterviewReviewModal({ opened, onClose, candidate }: Int
         {/* Left Section: Profile Info */}
         <Stack p={40} w={400} bg="blue.0" justify="space-between" align="center" style={{ position: "relative" }}>
           <Box style={{ position: "absolute", top: 20, left: 20 }}>
-            <Badge color="teal" variant="filled" size="sm">DONE</Badge>
+            <Badge 
+              color={
+                candidate.status === "DONE" ? "teal.6" : 
+                candidate.status === "CANCELLED" ? "red.6" : 
+                candidate.status === "RESCHEDULED" ? "indigo.6" : 
+                candidate.status === "CONFIRMED" ? "blue.6" : "indigo.6"
+              } 
+              variant="filled" 
+              size="sm"
+            >
+              {candidate.status}
+            </Badge>
           </Box>
           <Box style={{ position: "absolute", top: 20, right: 20 }}>
             <IconDots size={20} color="gray" style={{ cursor: "pointer" }} />
@@ -173,8 +184,15 @@ export default function InterviewReviewModal({ opened, onClose, candidate }: Int
           </Stack>
 
           <Group justify="flex-end" gap="md">
-              <Button variant="subtle" color="gray" fw={700}>Archive</Button>
-              <Button color="blue.9" radius="md" px="xl">View Full Profile</Button>
+            <Button variant="subtle" color="red.6" fw={700} leftSection={<IconX size={16} />}>
+              Cancel Interview
+            </Button>
+            <Button variant="light" color="blue.9" fw={700} leftSection={<IconCalendar size={16} />}>
+              Reschedule
+            </Button>
+            <Button color="blue.9" radius="md" px="xl" fw={700}>
+                View Full Profile
+            </Button>
           </Group>
         </Stack>
       </Group>
