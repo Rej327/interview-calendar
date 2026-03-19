@@ -263,36 +263,54 @@ export default function CalendarPage() {
                                 ))}
 
                                 {/* Example Events */}
-                                {day.date === "12" && (
-                                    <Box style={{ 
-                                        position: 'absolute', 
-                                        top: 180, 
-                                        left: 4, 
-                                        right: 4, 
-                                        height: 60,
-                                        backgroundColor: 'var(--mantine-color-blue-1)',
-                                        borderLeft: '4px solid var(--mantine-color-blue-9)',
-                                        borderRadius: '4px',
-                                        padding: '4px 8px'
-                                    }}>
+                                    <Box 
+                                        onClick={() => handleEventClick({
+                                            title: "TECH REVIEW: Sarah Jen",
+                                            avatars: ["https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah"],
+                                            status: "UPCOMING",
+                                            time: "10:00 AM - 11:00 AM",
+                                            assigned: "Sarah Miller"
+                                        })}
+                                        style={{ 
+                                            position: 'absolute', 
+                                            top: 180, 
+                                            left: 4, 
+                                            right: 4, 
+                                            height: 60,
+                                            backgroundColor: 'var(--mantine-color-blue-1)',
+                                            borderLeft: '4px solid var(--mantine-color-blue-9)',
+                                            borderRadius: '4px',
+                                            padding: '4px 8px',
+                                            cursor: 'pointer'
+                                        }}
+                                    >
                                         <Text size="10px" fw={800} c="blue.9">TECH REVIEW</Text>
                                         <Text size="10px" fw={600} truncate>Sarah J...</Text>
                                     </Box>
-                                )}
 
                                 {day.current && (
-                                     <Box style={{ 
-                                        position: 'absolute', 
-                                        top: 420, 
-                                        left: 4, 
-                                        right: 4, 
-                                        height: 100,
-                                        backgroundColor: 'var(--mantine-color-indigo-1)',
-                                        borderLeft: '4px solid var(--mantine-color-indigo-6)',
-                                        borderRadius: '4px',
-                                        padding: '8px',
-                                        zIndex: 2
-                                    }}>
+                                     <Box 
+                                         onClick={() => handleEventClick({
+                                             title: "EXECUTIVE FINAL: Liam O'Connell",
+                                             avatars: ["https://api.dicebear.com/7.x/avataaars/svg?seed=Liam"],
+                                             status: "UPCOMING",
+                                             time: "03:00 PM - 04:40 PM",
+                                             assigned: "HR Executive"
+                                         })}
+                                         style={{ 
+                                             position: 'absolute', 
+                                             top: 420, 
+                                             left: 4, 
+                                             right: 4, 
+                                             height: 100,
+                                             backgroundColor: 'var(--mantine-color-indigo-1)',
+                                             borderLeft: '4px solid var(--mantine-color-indigo-6)',
+                                             borderRadius: '4px',
+                                             padding: '8px',
+                                             zIndex: 2,
+                                             cursor: 'pointer'
+                                         }}
+                                     >
                                         <Text size="9px" fw={800} c="indigo.9" mb={2}>EXECUTIVE FINAL</Text>
                                         <Text size="11px" fw={800} mb={4}>Liam O'Connell</Text>
                                         <Avatar.Group spacing="xs">
@@ -303,34 +321,54 @@ export default function CalendarPage() {
                                 )}
 
                                 {day.date === "14" && (
-                                    <Box style={{ 
-                                        position: 'absolute', 
-                                        top: 260, 
-                                        left: 4, 
-                                        right: 4, 
-                                        height: 40,
-                                        backgroundColor: 'var(--mantine-color-teal-1)',
-                                        borderLeft: '4px solid var(--mantine-color-teal-6)',
-                                        borderRadius: '4px',
-                                        padding: '4px 8px'
-                                    }}>
+                                    <Box 
+                                        onClick={() => handleEventClick({
+                                            title: "SCREENING: Marcus Thorne",
+                                            avatars: ["https://api.dicebear.com/7.x/avataaars/svg?seed=Marcus"],
+                                            status: "DONE",
+                                            time: "11:30 AM - 12:00 PM",
+                                            assigned: "HR Ops"
+                                        })}
+                                        style={{ 
+                                            position: 'absolute', 
+                                            top: 260, 
+                                            left: 4, 
+                                            right: 4, 
+                                            height: 40,
+                                            backgroundColor: 'var(--mantine-color-teal-1)',
+                                            borderLeft: '4px solid var(--mantine-color-teal-6)',
+                                            borderRadius: '4px',
+                                            padding: '4px 8px',
+                                            cursor: 'pointer'
+                                        }}
+                                    >
                                         <Text size="10px" fw={800} c="teal.9">SCREENING</Text>
                                         <Text size="10px" fw={600} truncate>Marcus T.</Text>
                                     </Box>
                                 )}
 
                                 {day.date === "15" && (
-                                    <Box style={{ 
-                                        position: 'absolute', 
-                                        top: 600, 
-                                        left: 4, 
-                                        right: 4, 
-                                        height: 80,
-                                        backgroundColor: 'var(--mantine-color-blue-1)',
-                                        borderLeft: '4px solid var(--mantine-color-blue-9)',
-                                        borderRadius: '4px',
-                                        padding: '8px'
-                                    }}>
+                                    <Box 
+                                        onClick={() => handleEventClick({
+                                            title: "PORTFOLIO REVIEW: Emma Wilson",
+                                            avatars: ["https://api.dicebear.com/7.x/avataaars/svg?seed=Emma"],
+                                            status: "UPCOMING",
+                                            time: "04:00 PM - 05:00 PM",
+                                            assigned: "Design Lead"
+                                        })}
+                                        style={{ 
+                                            position: 'absolute', 
+                                            top: 600, 
+                                            left: 4, 
+                                            right: 4, 
+                                            height: 80,
+                                            backgroundColor: 'var(--mantine-color-blue-1)',
+                                            borderLeft: '4px solid var(--mantine-color-blue-9)',
+                                            borderRadius: '4px',
+                                            padding: '8px',
+                                            cursor: 'pointer'
+                                        }}
+                                    >
                                         <Text size="10px" fw={800} c="blue.9" mb={2}>PORTFOLIO REVIEW</Text>
                                         <Text size="11px" fw={800}>Emma ...</Text>
                                     </Box>
@@ -397,7 +435,19 @@ export default function CalendarPage() {
                             
                             <Stack gap={2}>
                                 {day.events.map((ev, idx) => (
-                                    <Box key={idx} p={4} bg={ev.color === "teal" ? "teal.0" : "blue.1"} style={{ borderRadius: "4px" }}>
+                                    <Box 
+                                        key={idx} 
+                                        p={4} 
+                                        bg={ev.color === "teal" ? "teal.0" : "blue.1"} 
+                                        style={{ borderRadius: "4px", cursor: "pointer" }}
+                                        onClick={() => handleEventClick({
+                                            title: `Interview: ${ev.name}`,
+                                            avatars: [`https://api.dicebear.com/7.x/avataaars/svg?seed=${ev.name}`],
+                                            status: "UPCOMING",
+                                            time: ev.time,
+                                            assigned: "Recruiter Hub"
+                                        })}
+                                    >
                                         <Text size="8px" fw={800} c={ev.color === "teal" ? "teal.9" : "blue.9"} truncate>
                                             {ev.time} • {ev.name}
                                         </Text>
