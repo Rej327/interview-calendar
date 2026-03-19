@@ -2,20 +2,20 @@
 /* Mantine handles component styles via its own CSS import.       */
 /* This file is reserved for global resets & custom properties.   */
 
-:root {
-  --font-inter: "Inter", sans-serif;
-}
-
 *,
 *::before,
 *::after {
   box-sizing: border-box;
 }
 
+
 html,
 body {
   margin: 0;
   padding: 0;
   min-height: 100vh;
-  font-family: var(--font-inter);
+  font-family: var(--font-poppins);
+  background-color: #f8f9fa;
 }
+
+

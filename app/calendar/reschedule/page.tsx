@@ -42,7 +42,7 @@ export default function ReschedulePage() {
   ));
 
   return (
-    <Container fluid p="xl" bg="gray.0" style={{ minHeight: "100vh" }}>
+    <Container fluid p="xl" bg="transparent" style={{ minHeight: "100vh" }}>
       <Stack gap="xl">
         <Breadcrumbs separator={<IconChevronRight size={12} stroke={3} color="gray" />}>{items}</Breadcrumbs>
         
@@ -92,7 +92,7 @@ export default function ReschedulePage() {
                                 </Group>
                             </Card>
 
-                            <Card withBorder radius="md" p="md" style={{ borderStyle: "dashed" }} bg="gray.0">
+                            <Card withBorder radius="md" p="md" style={{ borderStyle: "dashed" }} bg="transparent">
                                 <Group justify="center" gap="sm">
                                     <IconUserPlus size={20} color="gray" />
                                     <Text size="sm" fw={700} c="dimmed">Change Interviewer</Text>
@@ -213,3 +213,4 @@ export default function ReschedulePage() {
     </Container>
   );
 }
+

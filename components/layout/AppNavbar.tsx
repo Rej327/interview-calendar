@@ -90,16 +90,16 @@ export default function AppNavbar({ onClose }: AppNavbarProps) {
 
   return (
     <AppShell.Section className={classes.navbar}>
-      <Group px="md" py="xl" gap="sm">
+      <Group px="md" pt="xl" gap="sm">
         <ThemeIcon size={34} radius="md" color="blue.9" variant="filled">
           <IconSquareAsterisk size={24} />
         </ThemeIcon>
         <Box>
           <Text fw={800} size="md" style={{ lineHeight: 1.1 }}>
-            Formsly
+            Calendar Interview
           </Text>
           <Text size="xs" c="dimmed" fw={500}>
-            HR Management
+            Powered by Formsly
           </Text>
         </Box>
       </Group>

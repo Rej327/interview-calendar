@@ -96,7 +96,7 @@ const upcomingInterviews = [
 
 export default function DashboardPage() {
   return (
-    <Container fluid p="xl" bg="gray.0" style={{ minHeight: "100vh" }}>
+    <Container fluid p="xl" bg="transparent" style={{ minHeight: "100vh" }}>
       <Stack gap="xl">
         {/* Header Section */}
         <Group justify="space-between" align="flex-end">
@@ -427,3 +427,4 @@ export default function DashboardPage() {
     </Container>
   );
 }
+

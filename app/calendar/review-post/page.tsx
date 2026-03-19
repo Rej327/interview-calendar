@@ -34,7 +34,7 @@ import {
 
 export default function PostReviewPage() {
   return (
-    <Container fluid p="xl" bg="gray.0" style={{ minHeight: "100vh" }}>
+    <Container fluid p="xl" bg="transparent" style={{ minHeight: "100vh" }}>
       <Stack gap="xl">
         <Box>
             <Text size="xs" fw={800} tt="uppercase" c="dimmed">Candidates › Post-Interview Review</Text>
@@ -112,7 +112,7 @@ export default function PostReviewPage() {
                             </Card>
                         </Grid.Col>
                         <Grid.Col span={6}>
-                            <Card bg="gray.0" p="xl" radius="lg">
+                            <Card bg="transparent" p="xl" radius="lg">
                                 <Group gap="xs" mb="md">
                                     <ThemeIcon variant="transparent" color="orange.6"><IconBulb size={20}/></ThemeIcon>
                                     <Text size="xs" fw={800} tt="uppercase" c="orange.6">Growth Areas</Text>
@@ -208,3 +208,4 @@ export default function PostReviewPage() {
     </Container>
   );
 }
+

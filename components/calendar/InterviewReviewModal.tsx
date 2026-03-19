@@ -54,15 +54,16 @@ export default function InterviewReviewModal({ opened, onClose, candidate }: Int
       size="70%"
       radius="xl"
       padding={0}
-      styles={{ content: { overflow: "hidden" } }}
     >
-      <Group gap={0} wrap="nowrap" align="stretch">
+      <Group gap={0} wrap="nowrap" align="stretch" style={{ minHeight: '600px' }}>
+
         {/* Left Section: Profile Info */}
-        <Stack p={40} w={400} bg="blue.0" justify="space-between" align="center" style={{ position: "relative" }}>
+        <Stack p={40} w={400} bg="var(--mantine-color-blue-light)" justify="space-between" align="center" style={{ position: "relative" }}>
+
           <Box style={{ position: "absolute", top: 20, left: 20 }}>
             <Badge 
               color={
-                candidate.status === "DONE" ? "teal.6" : 
+                candidate.status === "COMPLETED" ? "teal.6" : 
                 candidate.status === "CANCELLED" ? "red.6" : 
                 candidate.status === "RESCHEDULED" ? "indigo.6" : 
                 candidate.status === "CONFIRMED" ? "blue.6" : "indigo.6"
@@ -72,15 +73,17 @@ export default function InterviewReviewModal({ opened, onClose, candidate }: Int
             >
               {candidate.status}
             </Badge>
+
           </Box>
           <Box style={{ position: "absolute", top: 20, right: 20 }}>
             <IconDots size={20} color="gray" style={{ cursor: "pointer" }} />
           </Box>
 
           <Stack align="center" mt="xl" gap="md">
-            <Paper radius="xl" p={8} bg="white" shadow="sm">
+            <Paper radius="xl" p={8} bg="var(--mantine-color-body)" shadow="sm">
                 <Avatar src={candidate.avatar} size={120} radius="xl" />
             </Paper>
+
             <Stack align="center" gap={4}>
               <Title order={3} fw={800}>{candidate.name}</Title>
               <Text size="sm" c="dimmed" fw={600}>{candidate.role}</Text>
@@ -126,7 +129,8 @@ export default function InterviewReviewModal({ opened, onClose, candidate }: Int
 
           <Stack gap="xl">
             {/* Join Meeting Box */}
-            <Card withBorder radius="md" p="md" bg="blue.0" style={{ borderColor: "var(--mantine-color-blue-2)" }}>
+            <Card withBorder radius="md" p="md" bg="var(--mantine-color-blue-light)" style={{ borderColor: "var(--mantine-color-blue-outline)" }}>
+
                 <Group justify="space-between">
                     <Group>
                         <ThemeIcon color="blue.9" size="xl" radius="md"><IconVideo size={24} /></ThemeIcon>
@@ -159,8 +163,8 @@ export default function InterviewReviewModal({ opened, onClose, candidate }: Int
                     <Text size="xs" fw={700} c="dimmed" tt="uppercase">Meeting Notes</Text>
                     <Text size="xs" fw={700} c="blue.9" style={{ cursor: "pointer" }}>Edit Notes</Text>
                 </Group>
-                <Card withBorder radius="md" p="md" bg="gray.0">
-                    <Text size="xs" style={{ fontStyle: "italic", lineHeight: 1.6 }} c="gray.7">
+                <Card withBorder radius="md" p="md" bg="var(--mantine-color-gray-light)">
+                    <Text size="xs" style={{ fontStyle: "italic", lineHeight: 1.6 }} c="var(--mantine-color-text)">
                         "{candidate.notes}"
                     </Text>
                 </Card>
@@ -168,18 +172,19 @@ export default function InterviewReviewModal({ opened, onClose, candidate }: Int
 
             {/* Metrics */}
             <Group grow gap="md">
-                <Card withBorder radius="md" p="sm" ta="center" bg="gray.0">
+                <Card withBorder radius="md" p="sm" ta="center" bg="var(--mantine-color-gray-light)">
                     <Text size="xs" c="dimmed" fw={700} tt="uppercase">Duration</Text>
                     <Title order={5} fw={900}>82m</Title>
                 </Card>
-                <Card withBorder radius="md" p="sm" ta="center" bg="gray.0">
+                <Card withBorder radius="md" p="sm" ta="center" bg="var(--mantine-color-gray-light)">
                     <Text size="xs" c="dimmed" fw={700} tt="uppercase">Participants</Text>
                     <Title order={5} fw={900}>04</Title>
                 </Card>
-                <Card withBorder radius="md" p="sm" ta="center" bg="gray.0">
+                <Card withBorder radius="md" p="sm" ta="center" bg="var(--mantine-color-gray-light)">
                     <Text size="xs" c="dimmed" fw={700} tt="uppercase">Avg Score</Text>
                     <Title order={5} fw={900} c="teal.6">4.8/5</Title>
                 </Card>
+
             </Group>
           </Stack>
 

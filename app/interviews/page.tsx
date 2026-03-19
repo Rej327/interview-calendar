@@ -58,7 +58,7 @@ export default function InterviewsPage() {
   };
 
   return (
-    <Container fluid p="xl" bg="gray.0" style={{ minHeight: "100vh" }}>
+    <Container fluid p="xl" bg="transparent" style={{ minHeight: "100vh" }}>
       <Stack gap="xl">
         {/* Header */}
         <Group justify="space-between" align="flex-end">
@@ -86,60 +86,78 @@ export default function InterviewsPage() {
 
                     <Tabs.Panel value="today" pt="xl">
                         <Stack gap="md">
-                            {interviewSessions.map(session => (
-                                <Card 
-                                    key={session.id} 
-                                    p="xl" 
-                                    radius="xl" 
-                                    shadow="sm" 
-                                    withBorder={false} 
-                                    onClick={() => handleCardClick(session)}
-                                    style={{ cursor: "pointer", borderLeft: `6px solid var(--mantine-color-${session.color}-6)` }}
-                                >
-                                    <Grid align="center" gutter={30}>
-                                        <Grid.Col span={4}>
-                                            <Group gap="md">
-                                                <Avatar src={session.avatar} radius="xl" size="md" />
-                                                <Box>
-                                                    <Text size="sm" fw={800}>{session.candidate}</Text>
-                                                    <Text size="10px" c="dimmed" fw={600}>{session.role}</Text>
-                                                </Box>
-                                            </Group>
-                                        </Grid.Col>
-                                        <Grid.Col span={3}>
-                                            <Stack gap={4}>
-                                                <Text size="xs" fw={800} c="gray.6">{(session.id === 2 || session.id === 3) ? "Video Call" : "In-Person"}</Text>
-                                                <Group gap={6}>
-                                                    {(session.id === 2 || session.id === 3) ? <IconVideo size={14} color="#adb5bd"/> : <IconMapPin size={14} color="#adb5bd"/>}
-                                                    <Text size="xs" fw={700}>{session.id % 2 === 0 ? "Zoom Meet" : "HQ • Office 204"}</Text>
+                            {interviewSessions.length > 0 ? (
+                                interviewSessions.map(session => (
+                                    <Card 
+                                        key={session.id} 
+                                        p="xl" 
+                                        radius="xl" 
+                                        shadow="sm" 
+                                        withBorder={false} 
+                                        onClick={() => handleCardClick(session)}
+                                        style={{ cursor: "pointer", borderLeft: `6px solid var(--mantine-color-${session.color}-6)` }}
+                                    >
+                                        <Grid align="center" gutter={30}>
+                                            <Grid.Col span={4}>
+                                                <Group gap="md">
+                                                    <Avatar src={session.avatar} radius="xl" size="md" />
+                                                    <Box>
+                                                        <Text size="sm" fw={800}>{session.candidate}</Text>
+                                                        <Text size="10px" c="dimmed" fw={600}>{session.role}</Text>
+                                                    </Box>
                                                 </Group>
-                                            </Stack>
-                                        </Grid.Col>
-                                        <Grid.Col span={3}>
-                                            <Stack gap={4}>
-                                                <Text size="xs" fw={800} c="gray.6">{session.time}</Text>
-                                                <Group gap={6}>
-                                                    <IconClock size={14} color="#adb5bd"/>
-                                                    <Text size="xs" fw={700}>Interviewers: 2</Text>
+                                            </Grid.Col>
+                                            <Grid.Col span={3}>
+                                                <Stack gap={4}>
+                                                    <Text size="xs" fw={800} c="gray.6">{(session.id === 2 || session.id === 3) ? "Video Call" : "In-Person"}</Text>
+                                                    <Group gap={6}>
+                                                        {(session.id === 2 || session.id === 3) ? <IconVideo size={14} color="#adb5bd"/> : <IconMapPin size={14} color="#adb5bd"/>}
+                                                        <Text size="xs" fw={700}>{session.id % 2 === 0 ? "Zoom Meet" : "HQ • Office 204"}</Text>
+                                                    </Group>
+                                                </Stack>
+                                            </Grid.Col>
+                                            <Grid.Col span={3}>
+                                                <Stack gap={4}>
+                                                    <Text size="xs" fw={800} c="gray.6">{session.time}</Text>
+                                                    <Group gap={6}>
+                                                        <IconClock size={14} color="#adb5bd"/>
+                                                        <Text size="xs" fw={700}>Interviewers: 2</Text>
+                                                    </Group>
+                                                </Stack>
+                                            </Grid.Col>
+                                            <Grid.Col span={2}>
+                                                <Group justify="flex-end" gap="xs">
+                                                    <Badge 
+                                                        size="xs" 
+                                                        radius="sm" 
+                                                        color={session.status === "COMPLETED" ? "teal.6" : session.status === "CANCELLED" ? "red.6" : session.status === "CONFIRMED" ? "blue.6" : "indigo.6"}
+                                                    >
+                                                        {session.status}
+                                                    </Badge>
+                                                    <ActionIcon variant="subtle" color="gray"><IconDotsVertical size={16}/></ActionIcon>
                                                 </Group>
-                                            </Stack>
-                                        </Grid.Col>
-                                        <Grid.Col span={2}>
-                                            <Group justify="flex-end" gap="xs">
-                                                <Badge 
-                                                    size="xs" 
-                                                    radius="sm" 
-                                                    color={session.status === "COMPLETED" ? "teal.6" : session.status === "CANCELLED" ? "red.6" : session.status === "CONFIRMED" ? "blue.6" : "indigo.6"}
-                                                >
-                                                    {session.status}
-                                                </Badge>
-                                                <ActionIcon variant="subtle" color="gray"><IconDotsVertical size={16}/></ActionIcon>
-                                            </Group>
-                                        </Grid.Col>
-                                    </Grid>
+                                            </Grid.Col>
+                                        </Grid>
+                                    </Card>
+                                ))
+                            ) : (
+                                <Card p={80} radius="xl" withBorder style={{ borderStyle: "dashed" }}>
+                                    <Stack align="center" gap="md">
+                                        <ThemeIcon size={64} radius="xl" variant="light" color="gray.4">
+                                            <IconCalendarEvent size={32} color="gray" />
+                                        </ThemeIcon>
+                                        <Box ta="center">
+                                            <Title order={4} fw={800}>No Sessions Found</Title>
+                                            <Text size="sm" c="dimmed" fw={500}>There are no interviews scheduled for this period.</Text>
+                                        </Box>
+                                        <Button variant="light" color="blue" radius="md">
+                                            Clear Filters
+                                        </Button>
+                                    </Stack>
                                 </Card>
-                            ))}
+                            )}
                         </Stack>
+
                     </Tabs.Panel>
                 </Tabs>
             </Stack>
@@ -200,3 +218,4 @@ export default function InterviewsPage() {
     </Container>
   );
 }
+

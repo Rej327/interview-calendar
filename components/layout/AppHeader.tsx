@@ -36,37 +36,34 @@ export default function AppHeader({ opened, toggle }: AppHeaderProps) {
 
   return (
     <Group h="100%" px="md" justify="space-between" className={classes.header}>
-      {/* Left: Burger + Search */}
-      <Group gap="xl">
-        <Burger
-          opened={opened}
-          onClick={toggle}
-          hiddenFrom="sm"
-          size="sm"
-          aria-label="Toggle navigation"
-        />
-        <TextInput
-          placeholder="Search appointments or candidates..."
-          leftSection={<IconSearch size={16} stroke={1.5} />}
-          size="sm"
-          radius="md"
-          w={340}
-          visibleFrom="sm"
-          styles={{
-            input: {
-              backgroundColor: "var(--mantine-color-gray-0)",
-              border: "none",
-            },
-          }}
-        />
-      </Group>
+      <Burger
+        opened={opened}
+        onClick={toggle}
+        hiddenFrom="sm"
+        size="sm"
+        mr="xl"
+        aria-label="Toggle navigation"
+      />
+
+      <TextInput
+        placeholder="Search appointments or candidates..."
+        leftSection={<IconSearch size={16} stroke={1.5} />}
+        size="sm"
+        radius="md"
+        style={{ flex: 1 }}
+        styles={{
+          input: {
+            backgroundColor: "var(--mantine-color-gray-light)",
+            border: "none",
+            height: "42px",
+          },
+        }}
+      />
+
+
 
       {/* Right: Actions + User */}
       <Group gap="md">
-        <Group gap="xs" visibleFrom="md">
-            <Text fw={700} size="sm" c="gray.8">Interview Scheduler</Text>
-        </Group>
-
         <Group gap={8}>
           <Tooltip label="Notifications" withArrow position="bottom">
             <ActionIcon
@@ -105,7 +102,11 @@ export default function AppHeader({ opened, toggle }: AppHeaderProps) {
               onClick={() => toggleColorScheme()}
               aria-label="Toggle color scheme"
             >
-              {isDark ? <IconSun size={20} stroke={1.5} /> : <IconMoon size={20} stroke={1.5} />}
+              {isDark ? (
+                <IconSun size={20} stroke={1.5} />
+              ) : (
+                <IconMoon size={20} stroke={1.5} />
+              )}
             </ActionIcon>
           </Tooltip>
         </Group>
@@ -127,7 +128,7 @@ export default function AppHeader({ opened, toggle }: AppHeaderProps) {
             </Menu.Item>
             <Menu.Divider />
             <Menu.Item color="red" leftSection={<IconLogout size={14} />}>
-                Logout
+              Logout
             </Menu.Item>
           </Menu.Dropdown>
         </Menu>

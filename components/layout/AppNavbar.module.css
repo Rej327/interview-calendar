@@ -1,5 +1,5 @@
 .navbar {
-  border-right: 1px solid var(--mantine-color-default-border);
+  border-right: none;
   background: var(--mantine-color-body);
   display: flex;
   flex-direction: column;

@@ -1,11 +1,15 @@
 .header {
-  border-bottom: 1px solid var(--mantine-color-default-border);
+  border-bottom: none;
   background: var(--mantine-color-body);
 }
 
 .logo {
   letter-spacing: -0.3px;
-  background: linear-gradient(135deg, var(--mantine-color-blue-6), var(--mantine-color-indigo-5));
+  background: linear-gradient(
+    135deg,
+    var(--mantine-color-blue-6),
+    var(--mantine-color-indigo-5)
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
