@@ -7,7 +7,6 @@
     "build": "next build",
     "start": "next start",
     "test": "jest"
-
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -24,6 +23,7 @@
     "@mantine/modals": "^8.3.10",
     "@mantine/notifications": "^8.3.10",
     "@reduxjs/toolkit": "^2.11.2",
+    "@supabase/supabase-js": "^2.99.3",
     "@tabler/icons-react": "^3.36.0",
     "clsx": "^2.1.1",
     "dayjs": "^1.11.19",
@@ -46,11 +46,12 @@
     "@types/nprogress": "^0.2.3",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv": "^17.3.1",
     "eslint": "^10.0.3",
     "jest": "^30.3.0",
     "jest-environment-jsdom": "^30.3.0",
     "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
-    "typescript": "^5"
+    "typescript": "^5.9.3"
   }
 }
