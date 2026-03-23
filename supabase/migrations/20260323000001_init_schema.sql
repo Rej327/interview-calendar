@@ -66,6 +66,8 @@ CREATE TABLE IF NOT EXISTS public.roles_table (
 -- Hiring Process links a candidate to a role and tracks the overall journey
 CREATE TABLE IF NOT EXISTS public.hiring_processes_table (
     hiring_process_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    hiring_process_candidate_id UUID REFERENCES public.candidates_table(candidate_id) ON DELETE CASCADE,
+    hiring_process_role_id UUID REFERENCES public.roles_table(role_id) ON DELETE CASCADE,
     hiring_process_status public.hiring_process_status DEFAULT 'ACTIVE',
     hiring_process_created_at TIMESTAMPTZ DEFAULT now()
 );
@@ -73,6 +75,7 @@ CREATE TABLE IF NOT EXISTS public.hiring_processes_table (
 -- Interview Steps define the sequence of evaluations
 CREATE TABLE IF NOT EXISTS public.interview_steps_table (
     interview_step_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    interview_step_hiring_process_id UUID REFERENCES public.hiring_processes_table(hiring_process_id) ON DELETE CASCADE,
     interview_step_name TEXT NOT NULL, -- e.g. "Technical Round 1", "HR Screening"
     interview_step_type public.interview_type NOT NULL,
     interview_step_order_index INTEGER NOT NULL, -- The sequence in the process
@@ -84,6 +87,8 @@ CREATE TABLE IF NOT EXISTS public.interview_steps_table (
 -- Interviews are the actual sessions scheduled for a session/step
 CREATE TABLE IF NOT EXISTS public.interviews_table (
     interview_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    interview_step_id UUID REFERENCES public.interview_steps_table(interview_step_id) ON DELETE CASCADE,
+    interview_interviewer_id UUID REFERENCES public.interviewers_table(interviewer_id) ON DELETE SET NULL,
     interview_start_at TIMESTAMPTZ NOT NULL,
     interview_end_at TIMESTAMPTZ NOT NULL,
     interview_status public.interview_status DEFAULT 'PENDING',
