@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { fetchCalendarEvents } from "@/app/actions/get";
 
+/**
+ * Fetch calendar events within a specified date range.
+ * 
+ * @endpoint GET /api/events
+ * @param {string} [start_date] - Filter events starting from this date (ISO 8601).
+ * @param {string} [end_date] - Filter events up to this date (ISO 8601).
+ * @returns {Promise<NextResponse>} Success: { success: true, data: Event[] } | Error: { success: false, message: string }
+ */
 export async function fetchEventHandler(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const start_date = searchParams.get("start_date") || undefined;

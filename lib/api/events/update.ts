@@ -1,6 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { updateInterview } from "@/app/actions/update";
 
+/**
+ * Update an existing interview session's status or details.
+ * 
+ * @endpoint PATCH /api/events
+ * @requestBody {
+ *   interview_id: string (required),
+ *   interview_status: string (optional),
+ *   interview_notes: string (optional),
+ *   interview_start_at: string (optional, ISO 8601),
+ *   interview_end_at: string (optional, ISO 8601)
+ * }
+ * @returns {Promise<NextResponse>} 200 Success | 400 Validation Error | 500 Server Error
+ */
 export async function updateEventHandler(req: NextRequest) {
   try {
     const body = await req.json();
