@@ -1,4 +1,4 @@
-import { Interview } from "../types/interview";
+import { Interview, InterviewStatus, InterviewType, INTERVIEW_STATUS } from "../types/interview";
 import dayjs from "dayjs";
 
 const now = dayjs().startOf("day");
@@ -12,8 +12,8 @@ export const mockInterviews: Interview[] = [
     role: "Senior Frontend Engineer",
     start: now.add(10, "hour").toISOString(),
     end: now.add(11, "hour").toISOString(),
-    status: "confirmed",
-    type: "technical",
+    status: InterviewStatus.CONFIRMED,
+    type: InterviewType.TECHNICAL,
   },
   {
     id: "2",
@@ -23,8 +23,8 @@ export const mockInterviews: Interview[] = [
     role: "Product Designer",
     start: now.add(11, "hour").add(30, "minute").toISOString(),
     end: now.add(12, "hour").add(30, "minute").toISOString(),
-    status: "confirmed",
-    type: "culture",
+    status: InterviewStatus.CONFIRMED,
+    type: InterviewType.CULTURE,
   },
   {
     id: "3",
@@ -34,8 +34,8 @@ export const mockInterviews: Interview[] = [
     role: "Backend Engineer",
     start: now.add(14, "hour").toISOString(),
     end: now.add(15, "hour").toISOString(),
-    status: "pending",
-    type: "technical",
+    status: InterviewStatus.PENDING,
+    type: InterviewType.TECHNICAL,
   },
   {
     id: "4",
@@ -45,8 +45,8 @@ export const mockInterviews: Interview[] = [
     role: "Engineering Manager",
     start: now.add(16, "hour").toISOString(),
     end: now.add(17, "hour").toISOString(),
-    status: "confirmed",
-    type: "leadership",
+    status: InterviewStatus.CONFIRMED,
+    type: InterviewType.LEADERSHIP,
   },
   {
     id: "5",
@@ -56,8 +56,8 @@ export const mockInterviews: Interview[] = [
     role: "Software Developer",
     start: now.add(1, "day").add(9, "hour").toISOString(),
     end: now.add(1, "day").add(9, "hour").add(30, "minute").toISOString(),
-    status: "scheduled",
-    type: "screening",
+    status: InterviewStatus.SCHEDULED,
+    type: InterviewType.SCREENING,
   },
   {
     id: "6",
@@ -67,8 +67,8 @@ export const mockInterviews: Interview[] = [
     role: "Data Scientist",
     start: now.add(1, "day").add(11, "hour").toISOString(),
     end: now.add(1, "day").add(12, "hour").toISOString(),
-    status: "scheduled",
-    type: "technical",
+    status: InterviewStatus.SCHEDULED,
+    type: InterviewType.TECHNICAL,
   },
   {
     id: "7",
@@ -78,18 +78,19 @@ export const mockInterviews: Interview[] = [
     role: "Marketing Manager",
     start: now.subtract(1, "day").add(10, "hour").toISOString(),
     end: now.subtract(1, "day").add(11, "hour").toISOString(),
-    status: "completed",
-    type: "culture",
+    status: InterviewStatus.COMPLETED,
+    type: InterviewType.CULTURE,
   },
 ];
 
-export const getStatusColor = (status: Interview["status"]) => {
+export const getStatusColor = (status: INTERVIEW_STATUS) => {
   switch (status) {
-    case "scheduled": return "var(--mantine-color-blue-6)";
-    case "confirmed": return "var(--mantine-color-teal-6)";
-    case "pending": return "var(--mantine-color-yellow-6)";
-    case "completed": return "var(--mantine-color-gray-5)";
-    case "cancelled": return "var(--mantine-color-red-6)";
+    case InterviewStatus.SCHEDULED: return "var(--mantine-color-blue-6)";
+    case InterviewStatus.CONFIRMED: return "var(--mantine-color-teal-6)";
+    case InterviewStatus.PENDING: return "var(--mantine-color-yellow-6)";
+    case InterviewStatus.COMPLETED: return "var(--mantine-color-gray-5)";
+    case InterviewStatus.CANCELLED: return "var(--mantine-color-red-6)";
+    case InterviewStatus.RESCHEDULED: return "var(--mantine-color-indigo-6)";
     default: return "var(--mantine-color-blue-6)";
   }
 };

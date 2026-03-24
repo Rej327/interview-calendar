@@ -163,6 +163,7 @@ BEGIN
             'color', CASE 
                 WHEN interviews_table.interview_status = 'COMPLETED' THEN 'teal'
                 WHEN interviews_table.interview_status = 'CANCELLED' THEN 'red'
+                WHEN interviews_table.interview_status = 'RESCHEDULED' THEN 'indigo'
                 ELSE 'blue'
             END,
             'extendedProps', jsonb_build_object(

@@ -1,3 +1,14 @@
+import { 
+  InterviewStatus, 
+  InterviewType, 
+  HiringProcessStatus, 
+  StepStatus,
+  INTERVIEW_STATUS,
+  INTERVIEW_TYPE,
+  HIRING_PROCESS_STATUS,
+  STEP_STATUS
+} from './types';
+
 export interface Interview {
   id: string;
   title: string;
@@ -6,8 +17,8 @@ export interface Interview {
   role: string;
   start: string; // ISO 8601 string
   end: string;   // ISO 8601 string
-  status: "scheduled" | "confirmed" | "completed" | "cancelled" | "pending";
-  type: "technical" | "behavioral" | "screening" | "leadership" | "culture";
+  status: INTERVIEW_STATUS;
+  type: INTERVIEW_TYPE;
   notes?: string;
   color?: string; // Optional color override for the calendar
 }
@@ -21,10 +32,21 @@ export interface CalendarEvent {
     candidate: string;
     interviewer: string;
     role: string;
-    status: Interview["status"];
-    type: Interview["type"];
+    status: INTERVIEW_STATUS;
+    type: INTERVIEW_TYPE;
   };
   backgroundColor?: string;
   borderColor?: string;
   textColor?: string;
 }
+
+export { 
+  InterviewStatus, 
+  InterviewType, 
+  HiringProcessStatus, 
+  StepStatus,
+  type INTERVIEW_STATUS,
+  type INTERVIEW_TYPE,
+  type HIRING_PROCESS_STATUS,
+  type STEP_STATUS
+};

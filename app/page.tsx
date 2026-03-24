@@ -73,7 +73,7 @@ const upcomingInterviews = [
     role: "Senior Frontend Engineer",
     time: "10:00 AM",
     type: "Technical Interview",
-    status: "confirmed",
+    status: "CONFIRMED",
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah",
   },
   {
@@ -81,7 +81,7 @@ const upcomingInterviews = [
     role: "Product Designer",
     time: "11:30 AM",
     type: "Portfolio Walkthrough",
-    status: "confirmed",
+    status: "CONFIRMED",
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Marcus",
   },
   {
@@ -89,7 +89,7 @@ const upcomingInterviews = [
     role: "Backend Engineer",
     time: "2:00 PM",
     type: "System Design Round",
-    status: "pending",
+    status: "PENDING",
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Anya",
   },
 ];
@@ -202,17 +202,17 @@ export default function DashboardPage() {
                             </Text>
                           </Box>
                           <Group gap="xs">
-                            <Badge
-                              size="xs"
-                              radius="sm"
-                              color={
-                                item.status === "confirmed"
-                                  ? "teal.6"
-                                  : "yellow.6"
-                              }
-                            >
-                              {item.status}
-                            </Badge>
+                          <Badge
+                            size="xs"
+                            radius="sm"
+                            color={
+                              item.status === "CONFIRMED"
+                                ? "teal.6"
+                                : "yellow.6"
+                            }
+                          >
+                            {item.status}
+                          </Badge>
                             <ActionIcon variant="subtle" color="gray">
                               <IconDotsVertical size={16} />
                             </ActionIcon>
