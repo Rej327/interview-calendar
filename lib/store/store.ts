@@ -1,10 +1,13 @@
 import { configureStore } from "@reduxjs/toolkit";
+import calendarReducer from "./calendarSlice";
+import candidatesReducer from "./candidatesSlice";
+import interviewReducer from "./interviewSlice";
 
 export const store = configureStore({
   reducer: {
-    // Add your slice reducers here
-    // For now, using a placeholder to prevent initialization errors
-    calendar: (state = {}) => state,
+    calendar: calendarReducer,
+    candidates: candidatesReducer,
+    interviews: interviewReducer,
   },
 });
 
