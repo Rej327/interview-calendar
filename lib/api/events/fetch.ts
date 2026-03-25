@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { fetchCalendarEvents } from "@/app/actions/get";
+import { mapSupabaseToCalendarEvents } from "@/lib/utils/eventMapper";
 
 /**
  * Fetch calendar events within a specified date range.
@@ -26,7 +27,8 @@ export async function fetchEventHandler(req: NextRequest) {
   const result = await fetchCalendarEvents(start_date, end_date);
   
   if (result.success) {
-    return NextResponse.json(result);
+    const data = mapSupabaseToCalendarEvents(result.data);
+    return NextResponse.json({ success: true, data });
   } else {
     return NextResponse.json(result, { status: 500 });
   }

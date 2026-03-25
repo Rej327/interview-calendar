@@ -34,6 +34,7 @@ export interface CalendarEvent {
     role: string;
     status: INTERVIEW_STATUS;
     type: INTERVIEW_TYPE;
+    avatar?: string;
   };
   backgroundColor?: string;
   borderColor?: string;

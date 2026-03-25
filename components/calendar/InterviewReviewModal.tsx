@@ -52,6 +52,8 @@ export default function InterviewReviewModal({
   onClose,
   candidate,
 }: InterviewReviewModalProps) {
+  if (!candidate) return null;
+
   return (
     <Modal
       opened={opened}
@@ -79,20 +81,20 @@ export default function InterviewReviewModal({
           <Box style={{ position: "absolute", top: 20, left: 20 }}>
             <Badge
               color={
-                candidate.status === InterviewStatus.COMPLETED
+                candidate?.status === InterviewStatus.COMPLETED
                   ? "teal.6"
-                  : candidate.status === InterviewStatus.CANCELLED
+                  : candidate?.status === InterviewStatus.CANCELLED
                     ? "red.6"
-                    : candidate.status === InterviewStatus.RESCHEDULED
+                    : candidate?.status === InterviewStatus.RESCHEDULED
                       ? "indigo.6"
-                      : candidate.status === InterviewStatus.CONFIRMED
+                      : candidate?.status === InterviewStatus.CONFIRMED
                         ? "blue.6"
                         : "indigo.6"
               }
               variant="filled"
               size="sm"
             >
-              {candidate.status}
+              {candidate?.status}
             </Badge>
           </Box>
           <Box style={{ position: "absolute", top: 20, right: 20 }}>

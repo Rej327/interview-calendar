@@ -95,11 +95,11 @@ export default function AppNavbar({ onClose }: AppNavbarProps) {
           <IconSquareAsterisk size={24} />
         </ThemeIcon>
         <Box>
-          <Text fw={800} size="md" style={{ lineHeight: 1.1 }}>
-            Calendar Interview
+          <Text fw={800} size="md" style={{ lineHeight: 1.1 }} suppressHydrationWarning>
+            {"Calendar Interview"}
           </Text>
-          <Text size="xs" c="dimmed" fw={500}>
-            Powered by Formsly
+          <Text size="xs" c="dimmed" fw={500} suppressHydrationWarning>
+            {"Powered by Formsly"}
           </Text>
         </Box>
       </Group>

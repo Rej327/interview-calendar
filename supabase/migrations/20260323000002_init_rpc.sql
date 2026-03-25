@@ -170,7 +170,8 @@ BEGIN
                 'candidate_name', candidates_table.candidate_full_name,
                 'interviewer_name', interviewers_table.interviewer_full_name,
                 'avatar', candidates_table.candidate_avatar_url,
-                'role', roles_table.role_title
+                'role', roles_table.role_title,
+                'type', interview_steps_table.interview_step_type
             )
         )
     ) INTO return_data
