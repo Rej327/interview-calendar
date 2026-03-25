@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useMemo, useEffect } from "react";
 import {
   Badge,
   Box,
@@ -18,6 +18,8 @@ import {
   ThemeIcon,
   Progress,
   AvatarGroup,
+  Center,
+  Loader,
 } from "@mantine/core";
 import {
   IconCalendarEvent,
@@ -26,75 +28,99 @@ import {
   IconUsers,
   IconArrowUpRight,
   IconArrowDownRight,
-  IconChevronRight,
-  IconHistory,
   IconDotsVertical,
   IconPlus,
 } from "@tabler/icons-react";
-
-const stats = [
-  {
-    label: "Total Interviews",
-    value: "48",
-    change: "+12%",
-    positive: true,
-    icon: <IconBriefcase size={22} />,
-    color: "blue",
-  },
-  {
-    label: "Candidates",
-    value: "132",
-    change: "+5%",
-    positive: true,
-    icon: <IconUsers size={22} />,
-    color: "indigo",
-  },
-  {
-    label: "Scheduled Today",
-    value: "7",
-    change: "+2",
-    positive: true,
-    icon: <IconCalendarEvent size={22} />,
-    color: "teal",
-  },
-  {
-    label: "Avg. Duration",
-    value: "52m",
-    change: "-3m",
-    positive: false,
-    icon: <IconClock size={22} />,
-    color: "orange",
-  },
-];
-
-const upcomingInterviews = [
-  {
-    candidate: "Sarah Chen",
-    role: "Senior Frontend Engineer",
-    time: "10:00 AM",
-    type: "Technical Interview",
-    status: "CONFIRMED",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah",
-  },
-  {
-    candidate: "Marcus Oliveira",
-    role: "Product Designer",
-    time: "11:30 AM",
-    type: "Portfolio Walkthrough",
-    status: "CONFIRMED",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Marcus",
-  },
-  {
-    candidate: "Anya Sharma",
-    role: "Backend Engineer",
-    time: "2:00 PM",
-    type: "System Design Round",
-    status: "PENDING",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Anya",
-  },
-];
+import dayjs from "dayjs";
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
+import { fetchEvents } from "@/lib/store/calendarSlice";
+import { fetchCandidates } from "@/lib/store/candidatesSlice";
 
 export default function DashboardPage() {
+  const dispatch = useAppDispatch();
+  const { events, loading: eventsLoading } = useAppSelector((state) => state.calendar);
+  const { candidates, loading: candidatesLoading } = useAppSelector((state) => state.candidates);
+
+  useEffect(() => {
+    // Only fetch if data is empty or we specifically want to refresh on mount
+    if (events.length === 0) dispatch(fetchEvents());
+    if (candidates.length === 0) dispatch(fetchCandidates());
+  }, [dispatch, events.length, candidates.length]);
+
+  const stats = useMemo(() => {
+    const todayCount = events.filter(e => dayjs(e.start).isSame(dayjs(), 'day')).length;
+    
+    // Calculate avg duration
+    let totalMinutes = 0;
+    events.forEach(e => {
+        totalMinutes += dayjs(e.end).diff(dayjs(e.start), 'minute');
+    });
+    const avgDuration = events.length > 0 ? Math.round(totalMinutes / events.length) : 0;
+
+    return [
+      {
+        label: "Total Interviews",
+        value: events.length.toString(),
+        change: "+5%",
+        positive: true,
+        icon: <IconBriefcase size={22} />,
+        color: "blue",
+      },
+      {
+        label: "Candidates",
+        value: candidates.length.toString(),
+        change: "+12%",
+        positive: true,
+        icon: <IconUsers size={22} />,
+        color: "indigo",
+      },
+      {
+        label: "Scheduled Today",
+        value: todayCount.toString(),
+        change: todayCount > 0 ? "+2" : "0",
+        positive: true,
+        icon: <IconCalendarEvent size={22} />,
+        color: "teal",
+      },
+      {
+        label: "Avg. Duration",
+        value: `${avgDuration}m`,
+        change: "-2m",
+        positive: false,
+        icon: <IconClock size={22} />,
+        color: "orange",
+      },
+    ];
+  }, [events, candidates]);
+
+  const todaySchedule = useMemo(() => {
+    return events
+        .filter(e => dayjs(e.start).isSame(dayjs(), 'day'))
+        .sort((a, b) => dayjs(a.start).diff(dayjs(b.start)));
+  }, [events]);
+
+  const pipeline = useMemo(() => {
+    const total = candidates.length;
+    const hired = candidates.filter((c: any) => c.status === 'HIRED').length;
+    const active = candidates.filter((c: any) => c.status === 'ACTIVE').length;
+    const rejected = candidates.filter((c: any) => c.status === 'REJECTED').length;
+
+    return [
+      { label: "Total Candidates", value: total, color: "blue.9", total },
+      { label: "Active Pipeline", value: active, color: "blue.7", total },
+      { label: "Hired", value: hired, color: "teal.6", total },
+      { label: "Rejected", value: rejected, color: "red.4", total },
+    ];
+  }, [candidates]);
+
+  if (eventsLoading || candidatesLoading) {
+    return (
+        <Center h="100vh">
+            <Loader color="blue" variant="dots" />
+        </Center>
+    );
+  }
+
   return (
     <Container fluid p="xl" bg="transparent" style={{ minHeight: "100vh" }}>
       <Stack gap="xl">
@@ -178,40 +204,36 @@ export default function DashboardPage() {
                 </Group>
 
                 <Stack gap="md">
-                  {upcomingInterviews.map((item, i) => (
-                    <Card key={i} p="lg" radius="lg" withBorder>
+                  {todaySchedule.length > 0 ? todaySchedule.map((item) => (
+                    <Card key={item.id} p="lg" radius="lg" withBorder>
                       <Group justify="space-between">
                         <Group gap="lg">
-                          <Avatar src={item.avatar} radius="xl" size="md" />
+                          <Avatar src={item.extendedProps.avatar} radius="xl" size="md" />
                           <Box>
                             <Text size="sm" fw={800}>
-                              {item.candidate}
+                              {item.extendedProps.candidate}
                             </Text>
                             <Text size="xs" c="dimmed" fw={600}>
-                              {item.role}
+                              {item.extendedProps.role}
                             </Text>
                           </Box>
                         </Group>
                         <Group gap={40}>
                           <Box>
                             <Text size="xs" fw={800} c="gray.6">
-                              {i === 0 || i === 2 ? "Video Call" : "In-Person"}
+                              {item.extendedProps.type}
                             </Text>
                             <Text size="xs" fw={700}>
-                              {item.time} — {item.type}
+                              {dayjs(item.start).format("hh:mm A")} — {item.title}
                             </Text>
                           </Box>
                           <Group gap="xs">
                           <Badge
                             size="xs"
                             radius="sm"
-                            color={
-                              item.status === "CONFIRMED"
-                                ? "teal.6"
-                                : "yellow.6"
-                            }
+                            color={item.extendedProps.status === "COMPLETED" ? "teal.6" : "yellow.6"}
                           >
-                            {item.status}
+                            {item.extendedProps.status}
                           </Badge>
                             <ActionIcon variant="subtle" color="gray">
                               <IconDotsVertical size={16} />
@@ -220,7 +242,11 @@ export default function DashboardPage() {
                         </Group>
                       </Group>
                     </Card>
-                  ))}
+                  )) : (
+                    <Center py={40}>
+                        <Text c="dimmed" fw={500}>No interviews scheduled for today.</Text>
+                    </Center>
+                  )}
                 </Stack>
               </Card>
 
@@ -229,32 +255,7 @@ export default function DashboardPage() {
                   Hiring Pipeline Overview
                 </Title>
                 <Stack gap="xl">
-                  {[
-                    {
-                      label: "Applied",
-                      value: 132,
-                      color: "blue.9",
-                      total: 132,
-                    },
-                    {
-                      label: "Screening",
-                      value: 64,
-                      color: "blue.7",
-                      total: 132,
-                    },
-                    {
-                      label: "Technical",
-                      value: 28,
-                      color: "blue.4",
-                      total: 132,
-                    },
-                    {
-                      label: "Final Round",
-                      value: 11,
-                      color: "indigo.3",
-                      total: 132,
-                    },
-                  ].map((stage, i) => (
+                  {pipeline.map((stage, i) => (
                     <Box key={i}>
                       <Group justify="space-between" mb={8}>
                         <Text size="xs" fw={800} c="gray.7">
@@ -265,7 +266,7 @@ export default function DashboardPage() {
                         </Text>
                       </Group>
                       <Progress
-                        value={(stage.value / stage.total) * 100}
+                        value={stage.total > 0 ? (stage.value / stage.total) * 100 : 0}
                         color={stage.color}
                         size="lg"
                         radius="xl"
@@ -280,75 +281,12 @@ export default function DashboardPage() {
           {/* Right Column: Sidebar Widgets */}
           <Grid.Col span={{ base: 12, lg: 4 }}>
             <Stack gap="xl">
-              <Card p="xl" radius="xl" shadow="sm">
-                <Title order={5} fw={900} mb="xl">
-                  RECENT CHANGES
-                </Title>
-                <Stack gap="lg">
-                  {[
-                    {
-                      name: "Elena R.",
-                      update: "Moved to Final Round",
-                      time: "12m ago",
-                      color: "blue",
-                    },
-                    {
-                      name: "Marcus T.",
-                      update: "New Application",
-                      time: "1h ago",
-                      color: "teal",
-                    },
-                    {
-                      name: "Julia V.",
-                      update: "Offer Accepted",
-                      time: "3h ago",
-                      color: "indigo",
-                    },
-                  ].map((item, i) => (
-                    <Group key={i} gap="md">
-                      <ThemeIcon
-                        variant="light"
-                        color={item.color}
-                        size="md"
-                        radius="md"
-                      >
-                        <IconHistory size={16} />
-                      </ThemeIcon>
-                      <Box style={{ flex: 1 }}>
-                        <Group justify="space-between">
-                          <Text size="xs" fw={800}>
-                            {item.name}
-                          </Text>
-                          <Text size="10px" c="dimmed" fw={600}>
-                            {item.time}
-                          </Text>
-                        </Group>
-                        <Text size="10px" c="dimmed" fw={700}>
-                          {item.update}
-                        </Text>
-                      </Box>
-                    </Group>
-                  ))}
-                </Stack>
-                <Button
-                  fullWidth
-                  mt="xl"
-                  variant="subtle"
-                  color="gray"
-                  size="xs"
-                  fw={700}
-                >
-                  VIEW ACTIVITY LOG
-                </Button>
-              </Card>
-
               <Card p="xl" radius="xl" shadow="sm" bg="blue.9" c="white">
                 <Title order={6} fw={800} mb="lg">
                   WEEKLY EFFICIENCY
                 </Title>
                 <Text size="xs" c="blue.1" fw={500} mb="xl">
-                  Great job! Your team has processed 24% more interviews than
-                  last week.
+                    Performance summary based on {events.length} system entries.
                 </Text>
                 <Stack gap="xl">
                   <Box
@@ -358,10 +296,10 @@ export default function DashboardPage() {
                     }}
                   >
                     <Text size="10px" fw={700} c="blue.2" tt="uppercase" mb={4}>
-                      Avg Time to Hire
+                      Completed This Month
                     </Text>
                     <Text size="24px" fw={900}>
-                      12 Days
+                      {events.filter(e => dayjs(e.start).isSame(dayjs(), 'month') && e.extendedProps.status === 'COMPLETED').length}
                     </Text>
                   </Box>
                   <Box
@@ -371,10 +309,10 @@ export default function DashboardPage() {
                     }}
                   >
                     <Text size="10px" fw={700} c="blue.2" tt="uppercase" mb={4}>
-                      Recruitment Cost
+                      Avg. Preparation Time
                     </Text>
                     <Text size="24px" fw={900}>
-                      $3,420
+                      15m
                     </Text>
                   </Box>
                 </Stack>
@@ -390,7 +328,7 @@ export default function DashboardPage() {
                       <Group key={i} justify="space-between">
                         <Group gap="sm">
                           <Avatar
-                            src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${i}`}
+                            src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${i + 20}`}
                             size="sm"
                             radius="xl"
                           />
@@ -412,10 +350,10 @@ export default function DashboardPage() {
                 >
                   <AvatarGroup spacing="sm">
                     <Avatar size="sm" radius="xl">
-                      +12
+                      +4
                     </Avatar>
                     <Text size="xs" fw={700} c="dimmed" ml="xs">
-                      Others active
+                      Team members active
                     </Text>
                   </AvatarGroup>
                 </Box>
@@ -427,4 +365,3 @@ export default function DashboardPage() {
     </Container>
   );
 }
-
