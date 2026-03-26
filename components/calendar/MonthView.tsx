@@ -20,40 +20,67 @@ import {
   IconCalendar,
   IconDots,
 } from "@tabler/icons-react";
+import dayjs from "dayjs";
+import { CalendarEvent } from "@/lib/types/interview";
 
 interface MonthViewProps {
+  events: CalendarEvent[];
   onEventClick: (event: any) => void;
+  selectedDate: Date;
+  onDateChange: (date: Date) => void;
 }
 
-export default function MonthView({ onEventClick }: MonthViewProps) {
+export default function MonthView({ events, onEventClick, selectedDate, onDateChange }: MonthViewProps) {
     const weekdays = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
-    const days = Array.from({ length: 35 }, (_, i) => {
-        const d = i - 1; // Start from Sep 29
+    
+    // Navigation handler
+    const handleNavigate = (direction: 'prev' | 'next' | 'today') => {
+        let newDate = dayjs(selectedDate);
+        if (direction === 'prev') newDate = newDate.subtract(1, 'month');
+        else if (direction === 'next') newDate = newDate.add(1, 'month');
+        else newDate = dayjs();
+        onDateChange(newDate.toDate());
+    };
+
+    // Generate days for the month view based on selectedDate
+    const startOfMonth = dayjs(selectedDate).startOf('month');
+    const startOfGrid = startOfMonth.startOf('week');
+    
+    const days = Array.from({ length: 42 }, (_, i) => {
+        const d = startOfGrid.add(i, 'day');
+        const dayEvents = events.filter(e => dayjs(e.start).isSame(d, 'day'));
+        
         return {
-            date: d <= 0 ? (30 + d) : (d > 31 ? d - 31 : d),
-            isCurrentMonth: d > 0 && d <= 31,
-            isToday: d === 8,
-            events: d === 1 ? [
-                { time: "10:00 AM", name: "Sarah Jen", color: "blue" },
-                { time: "02:30 PM", name: "Marc Rus", color: "blue" }
-            ] : d === 8 ? [
-                { time: "09:00 AM", name: "Review S", color: "teal" },
-                { time: "11:30 AM", name: "Alex Chen", color: "blue.9" },
-                { time: "03:00 PM", name: "Maria Gar", color: "blue.9" }
-            ] : d === 17 ? [
-                { time: "All Day", name: "Global Sync", color: "teal" }
-            ] : []
+            fullDate: d,
+            date: d.format("D"),
+            isCurrentMonth: d.isSame(startOfMonth, 'month'),
+            isToday: d.isSame(dayjs(), 'day'),
+            events: dayEvents.map(e => ({
+                id: e.id,
+                name: e.extendedProps.candidate,
+                time: dayjs(e.start).format("h:mm A"),
+                color: e.extendedProps.color || 'blue',
+                raw: e
+            }))
         };
     });
 
+    const monthTitle = dayjs(selectedDate).format("MMMM YYYY");
+
     return (
         <Stack gap="xl">
-            <Group justify="space-between">
-                <Title order={4} fw={800}>October 2024</Title>
-                <Group gap={4}>
-                    <ActionIcon variant="subtle" color="gray" size="sm"><IconChevronLeft size={16}/></ActionIcon>
-                    <Button variant="subtle" color="gray" size="xs" fw={700}>TODAY</Button>
-                    <ActionIcon variant="subtle" color="gray" size="sm"><IconChevronRight size={16}/></ActionIcon>
+            <Group justify="space-between" align="center">
+                <Title order={4} fw={800}>{monthTitle}</Title>
+                <Group gap={8}>
+                    <ActionIcon variant="light" color="blue.9" radius="md" size="lg" onClick={() => handleNavigate('prev')}>
+                        <IconChevronLeft size={18}/>
+                    </ActionIcon>
+                    <Button variant="light" color="blue.9" radius="md" size="sm" fw={800} onClick={() => handleNavigate('today')}>
+                        TODAY
+                    </Button>
+                    <ActionIcon variant="light" color="blue.9" radius="md" size="lg" onClick={() => handleNavigate('next')}>
+                        <IconChevronRight size={18}/>
+                    </ActionIcon>
                 </Group>
             </Group>
 
@@ -67,7 +94,7 @@ export default function MonthView({ onEventClick }: MonthViewProps) {
                     {days.map((day, i) => (
                         <Grid.Col key={i} span={1} h={120} p="xs" style={{ 
                             borderRight: (i + 1) % 7 === 0 ? 'none' : '1px solid var(--mantine-color-gray-1)',
-                            borderBottom: i < 28 ? '1px solid var(--mantine-color-gray-1)' : 'none',
+                            borderBottom: i < 35 ? '1px solid var(--mantine-color-gray-1)' : 'none',
                             backgroundColor: day.isToday ? 'var(--mantine-color-blue-0)' : 'transparent',
                             position: 'relative'
                         }}>
@@ -76,28 +103,34 @@ export default function MonthView({ onEventClick }: MonthViewProps) {
                             </Text>
                             {day.isToday && <Box h={2} bg="blue.9" style={{ position: "absolute", top: 0, left: 10, right: 10 }} />}
                             
-                            <Stack gap={2}>
-                                {day.events.map((ev, idx) => (
+                            <Stack gap={2} style={{ overflow: 'hidden' }}>
+                                {day.events.slice(0, 3).map((ev, idx) => (
                                     <Box 
-                                        key={idx} 
+                                        key={ev.id} 
                                         p={4} 
-                                        bg={ev.color === "teal" ? "teal.0" : "blue.1"} 
+                                        bg={`${ev.color}.1`} 
                                         style={{ borderRadius: "4px", cursor: "pointer" }}
                                         onClick={() => onEventClick({
-                                            title: `Interview: ${ev.name}`,
-                                            avatars: [`https://api.dicebear.com/7.x/avataaars/svg?seed=${ev.name}`],
-                                            status: "UPCOMING",
-                                            time: ev.time,
-                                            assigned: "Recruiter Hub"
+                                            id: ev.id,
+                                            title: ev.raw.title,
+                                            candidateName: ev.raw.extendedProps.candidate,
+                                            role: ev.raw.extendedProps.role,
+                                            avatar: ev.raw.extendedProps.avatar,
+                                            status: ev.raw.extendedProps.status === "COMPLETED" ? "DONE" : ev.raw.extendedProps.status,
+                                            time: `${dayjs(ev.raw.start).format("hh:mm A")} - ${dayjs(ev.raw.end).format("hh:mm A")}`,
+                                            assigned: ev.raw.extendedProps.interviewer,
+                                            type: ev.raw.extendedProps.type,
+                                            color: ev.color,
+                                            avatars: [ev.raw.extendedProps.avatar].filter(Boolean)
                                         })}
                                     >
-                                        <Text size="8px" fw={800} c={ev.color === "teal" ? "teal.9" : "blue.9"} truncate>
+                                        <Text size="8px" fw={800} c={`${ev.color}.9`} truncate>
                                             {ev.time} • {ev.name}
                                         </Text>
                                     </Box>
                                 ))}
-                                {day.events.length > 2 && day.isToday && (
-                                    <Text size="8px" fw={700} c="blue.6" ta="center">+ 2 more</Text>
+                                {day.events.length > 3 && (
+                                    <Text size="8px" fw={700} c="blue.6" ta="center">+ {day.events.length - 3} more</Text>
                                 )}
                             </Stack>
                         </Grid.Col>
@@ -111,43 +144,28 @@ export default function MonthView({ onEventClick }: MonthViewProps) {
                     <Title order={4} fw={800}>Upcoming Agenda</Title>
                 </Group>
                 <Stack gap="md">
-                    <Card radius="lg" p="lg" withBorder shadow="sm">
-                        <Group justify="space-between">
-                            <Group gap="xl">
-                                <Stack gap={0} align="center">
-                                    <Text size="xs" fw={800} c="dimmed">OCT</Text>
-                                    <Text size="xl" fw={900}>08</Text>
-                                </Stack>
-                                <Box>
-                                    <Text fw={800} size="md">Technical Assessment • Senior UX Lead</Text>
-                                    <Text size="xs" c="dimmed" fw={600}>11:30 AM — 12:30 PM • Zoom Conference</Text>
-                                </Box>
+                    {events.filter(e => dayjs(e.start).isAfter(dayjs())).slice(0, 2).map(event => (
+                        <Card key={event.id} radius="lg" p="lg" withBorder shadow="sm">
+                            <Group justify="space-between" align="center">
+                                <Group gap="xl">
+                                    <Stack gap={0} align="center">
+                                        <Text size="xs" fw={800} c="dimmed">{dayjs(event.start).format("MMM")}</Text>
+                                        <Text size="xl" fw={900}>{dayjs(event.start).format("DD")}</Text>
+                                    </Stack>
+                                    <Box>
+                                        <Text fw={800} size="md">{event.title}</Text>
+                                        <Text size="xs" c="dimmed" fw={600}>
+                                            {dayjs(event.start).format("hh:mm A")} — {dayjs(event.end).format("hh:mm A")} • {event.extendedProps.role}
+                                        </Text>
+                                    </Box>
+                                </Group>
+                                <Group gap="md">
+                                    <Avatar src={event.extendedProps.avatar} size="sm" radius="xl" />
+                                    <ActionIcon variant="subtle" color="gray"><IconDots size={16}/></ActionIcon>
+                                </Group>
                             </Group>
-                            <Group gap="md">
-                                <Avatar src="https://api.dicebear.com/7.x/avataaars/svg?seed=Maria" size="sm" radius="xl" />
-                                <ActionIcon variant="subtle" color="gray"><IconDots size={16}/></ActionIcon>
-                            </Group>
-                        </Group>
-                    </Card>
-
-                    <Card radius="lg" p="lg" withBorder shadow="sm">
-                        <Group justify="space-between">
-                            <Group gap="xl">
-                                <Stack gap={0} align="center">
-                                    <Text size="xs" fw={800} c="dimmed">OCT</Text>
-                                    <Text size="xl" fw={900}>08</Text>
-                                </Stack>
-                                <Box>
-                                    <Text fw={800} size="md">Culture Fit • Maria Garcia</Text>
-                                    <Text size="xs" c="dimmed" fw={600}>03:00 PM — 04:00 PM • Meeting Room A</Text>
-                                </Box>
-                            </Group>
-                            <Group gap="md">
-                                <Badge color="green.1" c="green.9" radius="sm">In-Person</Badge>
-                                <ActionIcon variant="subtle" color="gray"><IconDots size={16}/></ActionIcon>
-                            </Group>
-                        </Group>
-                    </Card>
+                        </Card>
+                    ))}
                 </Stack>
             </Box>
         </Stack>
