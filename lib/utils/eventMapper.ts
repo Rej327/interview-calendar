@@ -31,6 +31,7 @@ export function mapSupabaseToCalendarEvent(supabaseEvent: any): CalendarEvent {
       status: supabaseEvent.status as INTERVIEW_STATUS,
       type: supabaseEvent.extendedProps?.type as INTERVIEW_TYPE || "TECHNICAL", 
       avatar: supabaseEvent.extendedProps?.avatar,
+      color: supabaseEvent.color || 'blue',
     },
     borderColor: 'transparent',
     textColor: 'white',

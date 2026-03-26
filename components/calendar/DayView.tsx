@@ -45,7 +45,7 @@ export default function DayView({ scheduleData, onEventClick }: DayViewProps) {
     <Stack gap="xl">
         {scheduleData.length > 0 ? (
             scheduleData.map((day) => (
-                <Group key={day.date} gap="xl" align="flex-start" wrap="nowrap">
+                <Group key={`${day.date}-${day.month}`} gap="xl" align="flex-start" wrap="nowrap">
                     <Stack align="center" gap={0} w={60}>
                         <Text fw={800} size="xl" c="blue.9">{day.date}</Text>
                         <Text fw={800} size="xs" c="dimmed">{day.day}</Text>

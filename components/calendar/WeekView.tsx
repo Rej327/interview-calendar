@@ -12,87 +12,293 @@ import {
   ActionIcon,
   Grid,
 } from "@mantine/core";
-import {
-  IconChevronLeft,
-  IconChevronRight,
-} from "@tabler/icons-react";
+import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
+import dayjs from "dayjs";
+import { CalendarEvent } from "@/lib/types/interview";
 
 interface WeekViewProps {
+  events: CalendarEvent[];
   onEventClick: (event: any) => void;
+  selectedDate: Date;
+  onDateChange: (date: Date) => void;
 }
 
-export default function WeekView({ onEventClick }: WeekViewProps) {
-    const hours = ["08 AM", "09 AM", "10 AM", "11 AM", "12 PM", "01 PM", "02 PM", "03 PM", "04 PM", "05 PM"];
-    const days = [
-        { name: "MON", date: "11" },
-        { name: "TUE", date: "12" },
-        { name: "WED", date: "13", current: true },
-        { name: "THU", date: "14" },
-        { name: "FRI", date: "15" },
-        { name: "SAT", date: "16" },
-        { name: "SUN", date: "17" },
-    ];
+export default function WeekView({
+  events,
+  onEventClick,
+  selectedDate,
+  onDateChange,
+}: WeekViewProps) {
+  const hours = [
+    "08 AM",
+    "09 AM",
+    "10 AM",
+    "11 AM",
+    "12 PM",
+    "01 PM",
+    "02 PM",
+    "03 PM",
+    "04 PM",
+    "05 PM",
+  ];
 
-    return (
-        <Stack gap="xl">
-            <Group justify="space-between">
-                <Title order={4} fw={800}>September 11 – 17, 2023</Title>
-                <Group gap={4}>
-                    <ActionIcon variant="subtle" color="gray" size="sm"><IconChevronLeft size={16}/></ActionIcon>
-                    <Button variant="subtle" color="gray" size="xs" fw={700}>TODAY</Button>
-                    <ActionIcon variant="subtle" color="gray" size="sm"><IconChevronRight size={16}/></ActionIcon>
-                </Group>
-            </Group>
+  // Helper to change the selected date from local navigation
+  const handleNavigate = (direction: "prev" | "next" | "today") => {
+    let newDate = dayjs(selectedDate);
+    if (direction === "prev") newDate = newDate.subtract(1, "week");
+    else if (direction === "next") newDate = newDate.add(1, "week");
+    else newDate = dayjs();
 
-            <Card radius="xl" p={0} withBorder shadow="sm" style={{ overflow: "hidden" }}>
-                <Box p="md" bg="blue.0" style={{ borderBottom: "1px solid var(--mantine-color-blue-1)" }}>
-                    <Grid columns={15} gutter={0}>
-                        <Grid.Col span={1} />
-                        {days.map((day) => (
-                            <Grid.Col key={day.name} span={2}>
-                                <Stack gap={0} align="center">
-                                    <Text size="10px" fw={800} c={day.current ? "blue.9" : "gray.6"}>{day.name}</Text>
-                                    <Text size="xl" fw={900} c={day.current ? "blue.9" : "black"}>{day.date}</Text>
-                                </Stack>
-                            </Grid.Col>
-                        ))}
-                    </Grid>
-                </Box>
+    onDateChange(newDate.toDate());
+  };
 
-                <Box style={{ position: "relative" }}>
-                    {hours.map((hour) => (
-                        <Box key={hour} style={{ borderBottom: "1px solid var(--mantine-color-gray-1)", height: "80px" }}>
-                            <Grid columns={15} h="100%" gutter={0}>
-                                <Grid.Col span={1} p="xs">
-                                    <Text size="9px" fw={700} c="dimmed">{hour}</Text>
-                                </Grid.Col>
-                                {days.map((day, i) => (
-                                    <Grid.Col key={i} span={2} style={{ borderLeft: "1px solid var(--mantine-color-gray-0)" }}>
-                                        {day.current && hour === "10 AM" && (
-                                            <Box 
-                                                m={4} 
-                                                p={8} 
-                                                bg="blue.6" 
-                                                style={{ borderRadius: "8px", cursor: 'pointer', height: '140px', position: 'absolute', width: '13%', zIndex: 10 }}
-                                                onClick={() => onEventClick({
-                                                    title: "Culture Fit: Alexander Wright",
-                                                    avatars: ["https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah"],
-                                                    status: "UPCOMING",
-                                                    time: "10:00 AM - 11:30 AM",
-                                                    assigned: "HR Team"
-                                                })}
-                                            >
-                                                <Text size="9px" fw={800} c="blue.1">10:00 AM — 11:30 AM</Text>
-                                                <Text size="xs" fw={800} c="white">Interview: Alexander W.</Text>
-                                            </Box>
-                                        )}
-                                    </Grid.Col>
-                                ))}
-                            </Grid>
+  // Generate dates for the week containing selectedDate
+  const startOfWeek = dayjs(selectedDate).startOf("week");
+  const days = Array.from({ length: 7 }, (_, i) => {
+    const d = startOfWeek.add(i, "day");
+    return {
+      name: d.format("ddd").toUpperCase(),
+      date: d.format("DD"),
+      fullDate: d,
+      current: d.isSame(dayjs(), "day"),
+      selected: d.isSame(dayjs(selectedDate), "day"),
+    };
+  });
+
+  const weekTitle = `${startOfWeek.format("MMMM DD")} – ${startOfWeek.add(6, "day").format("DD, YYYY")}`;
+
+  return (
+    <Stack gap="xl">
+      <Group justify="space-between" align="center">
+        <Title order={4} fw={800}>
+          {weekTitle}
+        </Title>
+        <Group gap={8}>
+          <ActionIcon
+            variant="light"
+            color="blue.9"
+            radius="md"
+            size="lg"
+            onClick={() => handleNavigate("prev")}
+          >
+            <IconChevronLeft size={18} />
+          </ActionIcon>
+          <Button
+            variant="light"
+            color="blue.9"
+            radius="md"
+            size="sm"
+            fw={800}
+            onClick={() => handleNavigate("today")}
+          >
+            TODAY
+          </Button>
+          <ActionIcon
+            variant="light"
+            color="blue.9"
+            radius="md"
+            size="lg"
+            onClick={() => handleNavigate("next")}
+          >
+            <IconChevronRight size={18} />
+          </ActionIcon>
+        </Group>
+      </Group>
+
+      <Card
+        radius="xl"
+        p={0}
+        withBorder
+        shadow="sm"
+        style={{ overflow: "hidden" }}
+      >
+        <Box
+          p="md"
+          bg="blue.0"
+          style={{ borderBottom: "1px solid var(--mantine-color-blue-1)" }}
+        >
+          <Grid columns={15} gutter={0}>
+            <Grid.Col span={1} />
+            {days.map((day) => (
+              <Grid.Col key={day.name} span={2}>
+                <Stack
+                  gap={0}
+                  align="center"
+                  justify="center"
+                  h={70}
+                  style={{
+                    backgroundColor: day.current
+                      ? "var(--mantine-color-blue-9)"
+                      : "transparent",
+                    borderRadius: "16px",
+                    border:
+                      day.selected && !day.current
+                        ? "2px solid var(--mantine-color-blue-4)"
+                        : "none",
+                    position: "relative",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                    boxShadow: day.current
+                      ? "var(--mantine-shadow-md)"
+                      : "none",
+                  }}
+                  onClick={() => onDateChange(day.fullDate.toDate())}
+                >
+                  <Text
+                    size="10px"
+                    fw={800}
+                    c={
+                      day.current ? "white" : day.selected ? "blue.9" : "gray.6"
+                    }
+                  >
+                    {day.name}
+                  </Text>
+                  <Text size="xl" fw={900} c={day.current ? "white" : "black"}>
+                    {day.date}
+                  </Text>
+                  {!day.current && day.selected && (
+                    <Box
+                      w={4}
+                      h={4}
+                      bg="blue.9"
+                      style={{
+                        borderRadius: "50%",
+                        position: "absolute",
+                        bottom: 6,
+                      }}
+                    />
+                  )}
+                  {day.current && (
+                    <Box
+                      w={6}
+                      h={6}
+                      bg="white"
+                      style={{
+                        borderRadius: "50%",
+                        position: "absolute",
+                        bottom: 6,
+                      }}
+                    />
+                  )}
+                </Stack>
+              </Grid.Col>
+            ))}
+          </Grid>
+        </Box>
+
+        <Box style={{ position: "relative" }}>
+          {hours.map((hour) => (
+            <Box
+              key={hour}
+              style={{
+                borderBottom: "1px solid var(--mantine-color-gray-1)",
+                minHeight: "100px",
+              }}
+            >
+              <Grid columns={15} h="100%" gutter={0}>
+                <Grid.Col span={1} p="xs">
+                  <Text size="9px" fw={800} c="dimmed">
+                    {hour}
+                  </Text>
+                </Grid.Col>
+                {days.map((day, i) => {
+                  const dayEvents = events.filter((e) => {
+                    const eventStart = dayjs(e.start);
+                    return (
+                      eventStart.isSame(day.fullDate, "day") &&
+                      eventStart.format("hh A") === hour
+                    );
+                  });
+
+                  return (
+                    <Grid.Col
+                      key={i}
+                      span={2}
+                      style={{
+                        borderLeft: "1px solid var(--mantine-color-gray-0)",
+                        position: "relative",
+                        display: "flex",
+                        flexWrap: "wrap",
+                        alignContent: "flex-start",
+                        padding: 2,
+                      }}
+                    >
+                      {dayEvents.map((event) => (
+                        <Box
+                          key={event.id}
+                          m={2}
+                          p={6}
+                          style={{
+                            borderRadius: "10px",
+                            cursor: "pointer",
+                            minHeight: "80px",
+                            flex:
+                              dayEvents.length > 1
+                                ? `1 0 calc(${Math.floor(100 / dayEvents.length)}% - 4px)`
+                                : "1 0 calc(100% - 4px)",
+                            backgroundColor: `var(--mantine-color-${event.extendedProps.color || "blue"}-6)`,
+                            transition:
+                              "transform 0.2s ease, box-shadow 0.2s ease",
+                            boxShadow: "var(--mantine-shadow-xs)",
+                          }}
+                          onClick={() =>
+                            onEventClick({
+                              id: event.id,
+                              title: event.title,
+                              candidateName: event.extendedProps.candidate,
+                              role: event.extendedProps.role,
+                              avatar: event.extendedProps.avatar,
+                              status:
+                                event.extendedProps.status === "COMPLETED"
+                                  ? "DONE"
+                                  : event.extendedProps.status,
+                              time: `${dayjs(event.start).format("hh:mm A")} - ${dayjs(event.end).format("hh:mm A")}`,
+                              assigned: event.extendedProps.interviewer,
+                              type: event.extendedProps.type,
+                              color: event.extendedProps.color || "blue",
+                              avatars: [event.extendedProps.avatar].filter(
+                                Boolean,
+                              ),
+                            })
+                          }
+                        >
+                          <Stack gap={2}>
+                            <Text
+                              size="8px"
+                              fw={900}
+                              c="white"
+                              style={{ opacity: 0.8 }}
+                            >
+                              {dayjs(event.start).format("h:mm A")}
+                            </Text>
+                            <Text
+                              size="10px"
+                              fw={900}
+                              c="white"
+                              style={{ lineHeight: 1.1 }}
+                            >
+                              {event.extendedProps.candidate}
+                            </Text>
+                            <Text
+                              size="7px"
+                              fw={700}
+                              c="white"
+                              style={{ opacity: 0.9 }}
+                              truncate
+                            >
+                              {event.extendedProps.role}
+                            </Text>
+                          </Stack>
                         </Box>
-                    ))}
-                </Box>
-            </Card>
-        </Stack>
-    );
+                      ))}
+                    </Grid.Col>
+                  );
+                })}
+              </Grid>
+            </Box>
+          ))}
+        </Box>
+      </Card>
+    </Stack>
+  );
 }

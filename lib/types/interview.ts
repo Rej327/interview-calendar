@@ -28,14 +28,15 @@ export interface CalendarEvent {
   title: string;
   start: string;
   end: string;
-  extendedProps: {
-    candidate: string;
-    interviewer: string;
-    role: string;
-    status: INTERVIEW_STATUS;
-    type: INTERVIEW_TYPE;
-    avatar?: string;
-  };
+    extendedProps: {
+      candidate: string;
+      interviewer: string;
+      role: string;
+      status: INTERVIEW_STATUS;
+      type: INTERVIEW_TYPE;
+      avatar?: string;
+      color?: string; // Mantine color token (e.g., 'teal', 'blue')
+    };
   backgroundColor?: string;
   borderColor?: string;
   textColor?: string;

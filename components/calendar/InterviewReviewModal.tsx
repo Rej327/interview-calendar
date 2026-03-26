@@ -38,13 +38,13 @@ interface InterviewReviewModalProps {
   candidate: {
     name: string;
     role: string;
-    avatar: string;
-    status: string; // Keep as string or update to InterviewStatus if applicable
+    avatar?: string;
+    status: string; 
     time: string;
     type: string;
     assignedHR: string;
     notes: string;
-  };
+  } | null;
 }
 
 export default function InterviewReviewModal({
