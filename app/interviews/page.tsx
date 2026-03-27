@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useEffect } from "react";
 import {
   Badge,
   Box,
@@ -15,47 +15,91 @@ import {
   Avatar,
   ActionIcon,
   Tabs,
-  rem,
   ThemeIcon,
   AvatarGroup,
+  Loader,
+  Center,
 } from "@mantine/core";
 import {
   IconBriefcase,
   IconVideo,
-  IconMapPin,
   IconClock,
-  IconChevronRight,
   IconCalendarEvent,
   IconDotsVertical,
 } from "@tabler/icons-react";
-import { useDisclosure } from "@mantine/hooks";
-import InterviewReviewModal from "@/components/calendar/InterviewReviewModal";
+import dayjs from "dayjs";
+import isBetween from "dayjs/plugin/isBetween";
+import isToday from "dayjs/plugin/isToday";
+import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 
-const interviewSessions = [
-  { id: 1, candidate: "Marcus Thorne", role: "Senior Frontend Engineer", time: "11:00 AM - 12:00 PM", type: "PRACTICAL TEST", status: "PENDING", color: "indigo", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Marcus", interviewer: "Sarah Miller" },
-  { id: 2, candidate: "Elena Rodriguez", role: "Technical Lead", time: "2:30 PM - 3:30 PM", type: "DEPARTMENT INTERVIEW", status: "CONFIRMED", color: "blue", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Elena", interviewer: "David Chen" },
-  { id: 3, candidate: "Julia Vance", role: "Backend Engineer", time: "4:00 PM - 5:00 PM", type: "BACKGROUND CHECK", status: "COMPLETED", color: "teal", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Julia", interviewer: "HR Ops" },
-  { id: 4, candidate: "Aiden Scott", role: "UX Researcher", time: "9:00 AM - 10:00 AM", type: "HR INTERVIEW", status: "CANCELLED", color: "red", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Aiden", interviewer: "Sarah Miller" },
-];
+import InterviewReviewModal from "@/components/calendar/InterviewReviewModal";
+import { CalendarEvent } from "@/lib/types/interview";
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
+import { fetchInterviews, setActiveTab, setSelectedInterview } from "@/lib/store/interviewSlice";
+
+// Register dayjs plugins
+dayjs.extend(isBetween);
+dayjs.extend(isToday);
+dayjs.extend(isSameOrAfter);
+dayjs.extend(isSameOrBefore);
 
 export default function InterviewsPage() {
-  const [activeTab, setActiveTab] = useState<string | null>("today");
-  const [opened, { open, close }] = useDisclosure(false);
-  const [selectedCandidate, setSelectedCandidate] = useState<any>(null);
+  const dispatch = useAppDispatch();
+  const { items: events, loading, activeTab, selectedInterview } = useAppSelector((state) => state.interviews);
 
-  const handleCardClick = (session: any) => {
-    setSelectedCandidate({
-        name: session.candidate,
-        role: session.role,
-        avatar: session.avatar,
-        status: session.status,
-        time: session.time,
-        type: session.type,
-        assignedHR: session.interviewer,
-        notes: "Candidate has strong initial performance in general screening. Expected to perform well in deep tech rounds. High aptitude for systemic thinking."
-    });
-    open();
+  useEffect(() => {
+    if (events.length === 0) dispatch(fetchInterviews());
+  }, [dispatch, events.length]);
+
+  const stats = useMemo(() => {
+    return {
+      today: events.filter(e => dayjs(e.start).isToday()).length,
+      thisWeek: events.filter(e => dayjs(e.start).isBetween(dayjs().startOf("week"), dayjs().endOf("week"), null, "[]")).length,
+      upcoming: events.filter(e => dayjs(e.start).isAfter(dayjs())).length,
+    };
+  }, [events]);
+
+  const filteredSessions = useMemo(() => {
+    const now = dayjs();
+    const startOfWeek = now.startOf("week");
+    const endOfWeek = now.endOf("week");
+
+    switch (activeTab) {
+      case "today":
+        return events.filter(e => dayjs(e.start).isToday());
+      case "this-week":
+        return events.filter(e => dayjs(e.start).isBetween(startOfWeek, endOfWeek, null, "[]"));
+      case "upcoming":
+        return events.filter(e => dayjs(e.start).isAfter(now));
+      case "past":
+        return events.filter(e => dayjs(e.start).isBefore(now));
+      default:
+        return events;
+    }
+  }, [events, activeTab]);
+
+  const handleCardClick = (event: CalendarEvent) => {
+    dispatch(setSelectedInterview(event));
   };
+
+  const handleCloseModal = () => {
+      dispatch(setSelectedInterview(null));
+  };
+
+  const modalCandidate = useMemo(() => {
+      if (!selectedInterview) return null;
+      return {
+        name: selectedInterview.extendedProps.candidate,
+        role: selectedInterview.extendedProps.role,
+        avatar: selectedInterview.extendedProps.avatar,
+        status: selectedInterview.extendedProps.status,
+        time: `${dayjs(selectedInterview.start).format("hh:mm A")} - ${dayjs(selectedInterview.end).format("hh:mm A")}`,
+        type: selectedInterview.extendedProps.type,
+        assignedHR: selectedInterview.extendedProps.interviewer,
+        notes: "Real-time session details synchronized with the global interview management state."
+      };
+  }, [selectedInterview]);
 
   return (
     <Container fluid p="xl" bg="transparent" style={{ minHeight: "100vh" }}>
@@ -68,7 +112,7 @@ export default function InterviewsPage() {
           </Box>
           <Group gap="md">
             <Button leftSection={<IconCalendarEvent size={16} />} radius="md" color="blue.9" px="xl">
-                Schedule New Session
+              Schedule New Session
             </Button>
           </Group>
         </Group>
@@ -76,18 +120,20 @@ export default function InterviewsPage() {
         <Grid gutter={40}>
           <Grid.Col span={{ base: 12, lg: 8 }}>
             <Stack gap="xl">
-                <Tabs value={activeTab} onChange={setActiveTab} color="blue" variant="pills" radius="md">
+                <Tabs value={activeTab} onChange={(val) => dispatch(setActiveTab(val || "today"))} color="blue" variant="pills" radius="md">
                     <Tabs.List>
-                        <Tabs.Tab value="today" fw={700}>Today (4)</Tabs.Tab>
-                        <Tabs.Tab value="this-week" fw={700}>This Week (12)</Tabs.Tab>
-                        <Tabs.Tab value="upcoming" fw={700}>Upcoming (28)</Tabs.Tab>
+                        <Tabs.Tab value="today" fw={700}>Today ({stats.today})</Tabs.Tab>
+                        <Tabs.Tab value="this-week" fw={700}>This Week ({stats.thisWeek})</Tabs.Tab>
+                        <Tabs.Tab value="upcoming" fw={700}>Upcoming ({stats.upcoming})</Tabs.Tab>
                         <Tabs.Tab value="past" fw={700}>Past Interviews</Tabs.Tab>
                     </Tabs.List>
 
-                    <Tabs.Panel value="today" pt="xl">
+                    <Tabs.Panel value={activeTab} pt="xl">
                         <Stack gap="md">
-                            {interviewSessions.length > 0 ? (
-                                interviewSessions.map(session => (
+                            {loading ? (
+                                <Center py={100}><Loader color="blue" variant="dots" /></Center>
+                            ) : filteredSessions.length > 0 ? (
+                                filteredSessions.map(session => (
                                     <Card 
                                         key={session.id} 
                                         p="xl" 
@@ -95,33 +141,38 @@ export default function InterviewsPage() {
                                         shadow="sm" 
                                         withBorder={false} 
                                         onClick={() => handleCardClick(session)}
-                                        style={{ cursor: "pointer", borderLeft: `6px solid var(--mantine-color-${session.color}-6)` }}
+                                        style={{ 
+                                          cursor: "pointer", 
+                                          borderLeft: `6px solid ${session.backgroundColor || 'var(--mantine-color-blue-6)'}` 
+                                        }}
                                     >
                                         <Grid align="center" gutter={30}>
                                             <Grid.Col span={4}>
                                                 <Group gap="md">
-                                                    <Avatar src={session.avatar} radius="xl" size="md" />
+                                                    <Avatar src={session.extendedProps.avatar} radius="xl" size="md" />
                                                     <Box>
-                                                        <Text size="sm" fw={800}>{session.candidate}</Text>
-                                                        <Text size="10px" c="dimmed" fw={600}>{session.role}</Text>
+                                                        <Text size="sm" fw={800}>{session.extendedProps.candidate}</Text>
+                                                        <Text size="10px" c="dimmed" fw={600}>{session.extendedProps.role}</Text>
                                                     </Box>
                                                 </Group>
                                             </Grid.Col>
                                             <Grid.Col span={3}>
                                                 <Stack gap={4}>
-                                                    <Text size="xs" fw={800} c="gray.6">{(session.id === 2 || session.id === 3) ? "Video Call" : "In-Person"}</Text>
+                                                    <Text size="xs" fw={800} c="gray.6">{session.extendedProps.type}</Text>
                                                     <Group gap={6}>
-                                                        {(session.id === 2 || session.id === 3) ? <IconVideo size={14} color="#adb5bd"/> : <IconMapPin size={14} color="#adb5bd"/>}
-                                                        <Text size="xs" fw={700}>{session.id % 2 === 0 ? "Zoom Meet" : "HQ • Office 204"}</Text>
+                                                        <IconVideo size={14} color="#adb5bd"/>
+                                                        <Text size="xs" fw={700}>Zoom Meet</Text>
                                                     </Group>
                                                 </Stack>
                                             </Grid.Col>
                                             <Grid.Col span={3}>
                                                 <Stack gap={4}>
-                                                    <Text size="xs" fw={800} c="gray.6">{session.time}</Text>
+                                                    <Text size="xs" fw={800} c="gray.6">
+                                                      {dayjs(session.start).format("hh:mm A")}
+                                                    </Text>
                                                     <Group gap={6}>
                                                         <IconClock size={14} color="#adb5bd"/>
-                                                        <Text size="xs" fw={700}>Interviewers: 2</Text>
+                                                        <Text size="xs" fw={700}>Interviewer: {session.extendedProps.interviewer}</Text>
                                                     </Group>
                                                 </Stack>
                                             </Grid.Col>
@@ -130,9 +181,10 @@ export default function InterviewsPage() {
                                                     <Badge 
                                                         size="xs" 
                                                         radius="sm" 
-                                                        color={session.status === "COMPLETED" ? "teal.6" : session.status === "CANCELLED" ? "red.6" : session.status === "CONFIRMED" ? "blue.6" : "indigo.6"}
+                                                        color={session.backgroundColor}
+                                                        variant="light"
                                                     >
-                                                        {session.status}
+                                                        {session.extendedProps.status}
                                                     </Badge>
                                                     <ActionIcon variant="subtle" color="gray"><IconDotsVertical size={16}/></ActionIcon>
                                                 </Group>
@@ -157,7 +209,6 @@ export default function InterviewsPage() {
                                 </Card>
                             )}
                         </Stack>
-
                     </Tabs.Panel>
                 </Tabs>
             </Stack>
@@ -170,12 +221,12 @@ export default function InterviewsPage() {
                     <Stack gap="xl">
                         <Box style={{ borderLeft: "4px solid var(--mantine-color-blue-9)", paddingLeft: "16px" }}>
                             <Text size="xs" fw={700} c="dimmed" tt="uppercase" mb={4}>Interviews Today</Text>
-                            <Text size="24px" fw={900}>12 Sessions</Text>
-                            <Text size="10px" fw={700} c="teal.6">+2 From Yesterday</Text>
+                            <Text size="24px" fw={900}>{stats.today} Sessions</Text>
+                            <Text size="10px" fw={700} c="teal.6">Real-time Data</Text>
                         </Box>
                         <Box style={{ borderLeft: "4px solid var(--mantine-color-teal-6)", paddingLeft: "16px" }}>
-                            <Text size="xs" fw={700} c="dimmed" tt="uppercase" mb={4}>Avg. Satisfaction</Text>
-                            <Text size="24px" fw={900}>4.8/5.0</Text>
+                            <Text size="xs" fw={700} c="dimmed" tt="uppercase" mb={4}>Planned This Week</Text>
+                            <Text size="24px" fw={900}>{stats.thisWeek} Sessions</Text>
                         </Box>
                     </Stack>
                 </Card>
@@ -202,20 +253,10 @@ export default function InterviewsPage() {
       </Stack>
 
       <InterviewReviewModal 
-        opened={opened} 
-        onClose={close} 
-        candidate={selectedCandidate || {
-            name: "",
-            role: "",
-            avatar: "",
-            status: "",
-            time: "",
-            type: "",
-            assignedHR: "",
-            notes: ""
-        }} 
+        opened={!!selectedInterview} 
+        onClose={handleCloseModal} 
+        candidate={modalCandidate} 
       />
     </Container>
   );
 }
-
