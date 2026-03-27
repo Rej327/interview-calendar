@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   Badge,
   Box,
@@ -18,6 +18,8 @@ import {
   Menu,
   rem,
   ThemeIcon,
+  Loader,
+  Center,
 } from "@mantine/core";
 import { DataTable } from "mantine-datatable";
 import {
@@ -32,39 +34,48 @@ import {
 } from "@tabler/icons-react";
 import { useDisclosure } from "@mantine/hooks";
 import InterviewReviewModal from "@/components/calendar/InterviewReviewModal";
-
-const candidatesData = [
-  { id: 1, name: "Elena Rodriguez", role: "Product Designer", status: "INTERVIEWING", source: "LATAM Tech", date: "24 May 2024", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Elena" },
-  { id: 2, name: "Marcus Thorne", role: "Senior Frontend Engineer", status: "SCREENING", source: "LinkedIn", date: "23 May 2024", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Marcus" },
-  { id: 3, name: "Julia Vance", role: "Backend Engineer", status: "HIRED", source: "Referral", date: "20 May 2024", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Julia" },
-  { id: 4, name: "Aiden Scott", role: "UX Researcher", status: "REJECTED", source: "Indeed", date: "18 May 2024", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Aiden" },
-  { id: 5, name: "Sarah Miller", role: "Full Stack Developer", status: "NEW", source: "LinkedIn", date: "15 May 2024", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah" },
-  { id: 6, name: "David Chen", role: "DevOps Engineer", status: "INTERVIEWING", source: "Glassdoor", date: "12 May 2024", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=David" },
-];
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
+import { fetchCandidates } from "@/lib/store/candidatesSlice";
 
 export default function CandidatesPage() {
   const [query, setQuery] = useState("");
   const [opened, { open, close }] = useDisclosure(false);
   const [selectedCandidate, setSelectedCandidate] = useState<any>(null);
 
+  const dispatch = useAppDispatch();
+  const { candidates, loading } = useAppSelector((state) => state.candidates);
+
+  useEffect(() => {
+    if (candidates.length === 0) dispatch(fetchCandidates());
+  }, [dispatch, candidates.length]);
+
   const handleRowClick = (candidate: any) => {
     setSelectedCandidate({
         name: candidate.name,
         role: candidate.role,
         avatar: candidate.avatar,
-        status: candidate.status === "INTERVIEWING" ? "CONFIRMED" : (candidate.status === "HIRED" ? "DONE" : "CANCELLED"),
-        time: "Scheduled for Tomorrow, 10:00 AM",
-        type: "Technical Assessment",
-        assignedHR: "Sarah Miller",
-        notes: "Excellent portfolio review. Candidate showed strong understanding of design systems and accessibility. Highly recommended for follow-up."
+        status: candidate.status === "HIRED" ? "COMPLETED" : candidate.status === "REJECTED" ? "CANCELLED" : "CONFIRMED",
+        time: "Session Details in Pipeline",
+        type: "Hiring Process Step",
+        assignedHR: "Recruitment Team",
+        notes: `Candidate is currently in ${candidate.status} state. Applied on ${new Date(candidate.applied_date).toLocaleDateString()}.`
     });
     open();
   };
 
-  const filteredData = candidatesData.filter((c) => 
-    c.name.toLowerCase().includes(query.toLowerCase()) || 
-    c.role.toLowerCase().includes(query.toLowerCase())
-  );
+  const filteredData = useMemo(() => {
+    return candidates.filter((c: any) => 
+      c.name.toLowerCase().includes(query.toLowerCase()) || 
+      c.role.toLowerCase().includes(query.toLowerCase())
+    );
+  }, [candidates, query]);
+
+  const stats = useMemo(() => {
+    return {
+      total: candidates.length,
+      interviewing: candidates.filter((c: any) => c.status === 'ACTIVE').length,
+    };
+  }, [candidates]);
 
   return (
     <Container fluid p="xl" bg="transparent" style={{ minHeight: "100vh" }}>
@@ -105,73 +116,81 @@ export default function CandidatesPage() {
                 </Group>
               </Box>
 
-              <DataTable
-                height={500}
-                records={filteredData}
-                columns={[
-                  { 
-                    accessor: "name", 
-                    title: "CANDIDATE",
-                    width: 280,
-                    render: ({ name, role, avatar }) => (
-                      <Group gap="sm">
-                        <Avatar src={avatar} radius="xl" size="sm" />
-                        <Box>
-                          <Text size="sm" fw={800}>{name}</Text>
-                          <Text size="10px" c="dimmed" fw={600}>{role}</Text>
-                        </Box>
-                      </Group>
-                    )
-                  },
-                  { 
-                    accessor: "status",
-                    render: ({ status }) => (
-                      <Badge 
-                        variant="filled" 
-                        size="xs"
-                        radius="sm"
-                        color={
-                            status === "HIRED" ? "teal.6" : 
-                            status === "INTERVIEWING" ? "blue.6" : 
-                            status === "REJECTED" ? "red.6" : 
-                            status === "SCREENING" ? "indigo.6" : "gray.6"
-                        }
-                      >
-                        {status}
-                      </Badge>
-                    )
-                  },
-                  { accessor: "source", title: "SOURCE", render: (c) => <Text size="xs" fw={700} c="dimmed">{c.source}</Text> },
-                  { accessor: "date", title: "APPLIED DATE", render: (c) => <Text size="xs" fw={700} c="dimmed">{c.date}</Text> },
-                  { 
-                    accessor: "actions", 
-                    title: "", 
-                    textAlign: "right",
-                    render: () => (
-                      <Group gap={4} justify="flex-end">
-                        <ActionIcon variant="subtle" color="gray"><IconMail size={16}/></ActionIcon>
-                        <Menu position="bottom-end">
-                            <Menu.Target>
-                                <ActionIcon variant="subtle" color="gray"><IconDotsVertical size={16}/></ActionIcon>
-                            </Menu.Target>
-                            <Menu.Dropdown>
-                                <Menu.Item leftSection={<IconPhone style={{ width: rem(14), height: rem(14) }} />}>Call Candidate</Menu.Item>
-                                <Menu.Item leftSection={<IconMail style={{ width: rem(14), height: rem(14) }} />}>Send Email</Menu.Item>
-                            </Menu.Dropdown>
-                        </Menu>
-                      </Group>
-                    )
-                  },
-                ]}
-                onRowClick={({ record }) => handleRowClick(record)}
-                verticalSpacing="md"
-                horizontalSpacing="xl"
-                styles={{
-                    root: { border: "none" },
-                    header: { backgroundColor: "white", borderBottom: "1px solid var(--mantine-color-gray-1)" },
-                    table: { backgroundColor: "white" }
-                }}
-              />
+              {loading ? (
+                <Center py={100}><Loader color="blue" variant="dots" /></Center>
+              ) : (
+                <DataTable
+                  height={500}
+                  records={filteredData}
+                  idAccessor="candidate_id"
+                  columns={[
+                    { 
+                      accessor: "name", 
+                      title: "CANDIDATE",
+                      width: 280,
+                      render: ({ name, role, avatar }: any) => (
+                        <Group gap="sm">
+                          <Avatar src={avatar} radius="xl" size="sm" />
+                          <Box>
+                            <Text size="sm" fw={800}>{name}</Text>
+                            <Text size="10px" c="dimmed" fw={600}>{role}</Text>
+                          </Box>
+                        </Group>
+                      )
+                    },
+                    { 
+                      accessor: "status",
+                      render: ({ status }) => (
+                        <Badge 
+                          variant="filled" 
+                          size="xs"
+                          radius="sm"
+                          color={
+                              status === "HIRED" ? "teal.6" : 
+                              status === "ACTIVE" ? "blue.6" : 
+                              status === "REJECTED" ? "red.6" : 
+                              status === "WITHDRAWN" ? "indigo.6" : "gray.6"
+                          }
+                        >
+                          {status}
+                        </Badge>
+                      )
+                    },
+                    { 
+                      accessor: "applied_date", 
+                      title: "APPLIED DATE", 
+                      render: (c) => <Text size="xs" fw={700} c="dimmed">{new Date(c.applied_date).toLocaleDateString()}</Text> 
+                    },
+                    { 
+                      accessor: "actions", 
+                      title: "", 
+                      textAlign: "right",
+                      render: () => (
+                        <Group gap={4} justify="flex-end">
+                          <ActionIcon variant="subtle" color="gray"><IconMail size={16}/></ActionIcon>
+                          <Menu position="bottom-end">
+                              <Menu.Target>
+                                  <ActionIcon variant="subtle" color="gray"><IconDotsVertical size={16}/></ActionIcon>
+                              </Menu.Target>
+                              <Menu.Dropdown>
+                                  <Menu.Item leftSection={<IconPhone style={{ width: rem(14), height: rem(14) }} />}>Call Candidate</Menu.Item>
+                                  <Menu.Item leftSection={<IconMail style={{ width: rem(14), height: rem(14) }} />}>Send Email</Menu.Item>
+                              </Menu.Dropdown>
+                          </Menu>
+                        </Group>
+                      )
+                    },
+                  ]}
+                  onRowClick={({ record }) => handleRowClick(record)}
+                  verticalSpacing="md"
+                  horizontalSpacing="xl"
+                  styles={{
+                      root: { border: "none" },
+                      header: { backgroundColor: "white", borderBottom: "1px solid var(--mantine-color-gray-1)" },
+                      table: { backgroundColor: "white" }
+                  }}
+                />
+              )}
             </Card>
           </Grid.Col>
 
@@ -182,15 +201,11 @@ export default function CandidatesPage() {
                     <Stack gap="xl">
                         <Box style={{ borderLeft: "4px solid var(--mantine-color-blue-9)", paddingLeft: "16px" }}>
                             <Text size="xs" fw={700} c="dimmed" tt="uppercase" mb={4}>Total Candidates</Text>
-                            <Text size="24px" fw={900}>1,402</Text>
-                        </Box>
-                        <Box style={{ borderLeft: "4px solid var(--mantine-color-teal-6)", paddingLeft: "16px" }}>
-                            <Text size="xs" fw={700} c="dimmed" tt="uppercase" mb={4}>New Applications</Text>
-                            <Text size="24px" fw={900}>124 <Text span size="xs" fw={700} c="teal.6">(+12%)</Text></Text>
+                            <Text size="24px" fw={900}>{stats.total}</Text>
                         </Box>
                         <Box style={{ borderLeft: "4px solid var(--mantine-color-indigo-6)", paddingLeft: "16px" }}>
-                            <Text size="xs" fw={700} c="dimmed" tt="uppercase" mb={4}>Interviewing</Text>
-                            <Text size="24px" fw={900}>38</Text>
+                            <Text size="xs" fw={700} c="dimmed" tt="uppercase" mb={4}>Active Pipeline</Text>
+                            <Text size="24px" fw={900}>{stats.interviewing}</Text>
                         </Box>
                     </Stack>
                 </Card>
@@ -220,18 +235,8 @@ export default function CandidatesPage() {
       <InterviewReviewModal 
         opened={opened} 
         onClose={close} 
-        candidate={selectedCandidate || {
-            name: "",
-            role: "",
-            avatar: "",
-            status: "",
-            time: "",
-            type: "",
-            assignedHR: "",
-            notes: ""
-        }} 
+        candidate={selectedCandidate} 
       />
     </Container>
   );
 }
-
