@@ -47,7 +47,7 @@ export default function DayView({ scheduleData, onEventClick }: DayViewProps) {
             scheduleData.map((day) => (
                 <Group key={`${day.date}-${day.month}`} gap="xl" align="flex-start" wrap="nowrap">
                     <Stack align="center" gap={0} w={60}>
-                        <Text fw={800} size="xl" c="blue.9">{day.date}</Text>
+                        <Text fw={800} size="xl" c="var(--mantine-color-text)">{day.date}</Text>
                         <Text fw={800} size="xs" c="dimmed">{day.day}</Text>
                     </Stack>
                     <Stack gap="md" style={{ flex: 1 }}>
@@ -62,8 +62,8 @@ export default function DayView({ scheduleData, onEventClick }: DayViewProps) {
                                     onClick={() => onEventClick(event)}
                                     style={{ 
                                         cursor: "pointer",
-                                        backgroundColor: event.status === "DONE" ? "var(--mantine-color-teal-0)" : 
-                                                        event.status === "RESCHEDULED" ? "var(--mantine-color-gray-0)" : "white",
+                                        backgroundColor: event.status === "DONE" ? "var(--mantine-color-teal-light)" : 
+                                                        event.status === "RESCHEDULED" ? "var(--mantine-color-gray-light)" : "var(--mantine-color-default-hover)",
                                         borderLeft: `4px solid var(--mantine-color-${event.color}-6)`,
                                         position: "relative"
                                     }}
@@ -72,9 +72,9 @@ export default function DayView({ scheduleData, onEventClick }: DayViewProps) {
                                         <Stack gap={4}>
                                             <Group gap="xs">
                                                 <Badge size="xs" color={event.color} variant="filled" radius="sm">{event.status}</Badge>
-                                                <Text size="xs" fw={700} c="gray.7">{event.time}</Text>
+                                                <Text size="xs" fw={700} c="dimmed">{event.time}</Text>
                                             </Group>
-                                            <Title order={5} fw={800}>{event.title}</Title>
+                                            <Title order={5} fw={800} c="var(--mantine-color-text)">{event.title}</Title>
                                             <Text size="xs" c="dimmed" fw={600}>Assigned to: {event.assigned}</Text>
                                         </Stack>
                                         <Group gap="xs">
@@ -96,13 +96,13 @@ export default function DayView({ scheduleData, onEventClick }: DayViewProps) {
                 </Group>
             ))
         ) : (
-            <Card p={100} radius="xl" withBorder style={{ borderStyle: "dashed" }}>
+            <Card p={100} radius="xl" withBorder style={{ borderStyle: "dashed", backgroundColor: "transparent" }}>
                 <Stack align="center" gap="md">
                     <ThemeIcon size={64} radius="xl" variant="light" color="blue">
                         <IconCalendar size={32} />
                     </ThemeIcon>
                     <Box ta="center">
-                        <Title order={4} fw={800}>Nothing Scheduled</Title>
+                        <Title order={4} fw={800} c="var(--mantine-color-text)">Nothing Scheduled</Title>
                         <Text size="sm" c="dimmed">Your calendar is clear for this period.</Text>
                     </Box>
                 </Stack>
@@ -113,7 +113,7 @@ export default function DayView({ scheduleData, onEventClick }: DayViewProps) {
         <Box mt={60}>
             <Title order={3} fw={800} mb="lg">Recent Changes</Title>
             <Card radius="lg" p={0} withBorder>
-                <Box p="md" bg="blue.0" style={{ borderTopLeftRadius: "12px", borderTopRightRadius: "12px" }}>
+                <Box p="md" bg="var(--mantine-color-blue-light)" style={{ borderTopLeftRadius: "12px", borderTopRightRadius: "12px" }}>
                     <Grid>
                         <Grid.Col span={3}><Text size="xs" fw={800} c="blue.9" tt="uppercase">Candidate</Text></Grid.Col>
                         <Grid.Col span={3}><Text size="xs" fw={800} c="blue.9" tt="uppercase">Update Type</Text></Grid.Col>

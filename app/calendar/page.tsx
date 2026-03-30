@@ -113,7 +113,7 @@ export default function CalendarPage() {
         <Group justify="space-between" align="flex-start">
           <Box>
             <Title order={1} fw={800} size="h2">
-              Weekly Schedule
+              {view === "day" ? "Day" : view === "week" ? "Weekly" : "Monthly"} Schedule
             </Title>
             <Text c="dimmed" size="sm">
               Manage and track candidate interview progressions.
@@ -132,7 +132,7 @@ export default function CalendarPage() {
               size="sm"
               color="blue.9"
               styles={{
-                root: { backgroundColor: "white", border: "1px solid var(--mantine-color-gray-2)" },
+                root: { border: "1px solid var(--mantine-color-default-border)" },
                 indicator: { boxShadow: "var(--mantine-shadow-xs)" },
                 label: { fontWeight: 700 },
               }}
@@ -217,8 +217,8 @@ export default function CalendarPage() {
                         if (hasEvent) {
                           return {
                             style: {
-                              backgroundColor: "var(--mantine-color-blue-0)",
-                              color: "var(--mantine-color-blue-9)",
+                              backgroundColor: "var(--mantine-color-blue-filled)",
+                              color: "var(--mantine-color-white)",
                               fontWeight: 800,
                             },
                           };

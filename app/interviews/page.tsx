@@ -111,7 +111,7 @@ export default function InterviewsPage() {
             <Text c="dimmed" size="sm" fw={500}>Monitor and manage all candidate interview sessions.</Text>
           </Box>
           <Group gap="md">
-            <Button leftSection={<IconCalendarEvent size={16} />} radius="md" color="blue.9" px="xl">
+            <Button leftSection={<IconCalendarEvent size={16} />} radius="md" color="var(--mantine-color-blue-filled)" px="xl">
               Schedule New Session
             </Button>
           </Group>
@@ -158,20 +158,20 @@ export default function InterviewsPage() {
                                             </Grid.Col>
                                             <Grid.Col span={3}>
                                                 <Stack gap={4}>
-                                                    <Text size="xs" fw={800} c="gray.6">{session.extendedProps.type}</Text>
+                                                    <Text size="xs" fw={800} c="dimmed">{session.extendedProps.type}</Text>
                                                     <Group gap={6}>
-                                                        <IconVideo size={14} color="#adb5bd"/>
+                                                        <IconVideo size={14} color="var(--mantine-color-dimmed)"/>
                                                         <Text size="xs" fw={700}>Zoom Meet</Text>
                                                     </Group>
                                                 </Stack>
                                             </Grid.Col>
                                             <Grid.Col span={3}>
                                                 <Stack gap={4}>
-                                                    <Text size="xs" fw={800} c="gray.6">
+                                                    <Text size="xs" fw={800} c="dimmed">
                                                       {dayjs(session.start).format("hh:mm A")}
                                                     </Text>
                                                     <Group gap={6}>
-                                                        <IconClock size={14} color="#adb5bd"/>
+                                                        <IconClock size={14} color="var(--mantine-color-dimmed)"/>
                                                         <Text size="xs" fw={700}>Interviewer: {session.extendedProps.interviewer}</Text>
                                                     </Group>
                                                 </Stack>
@@ -195,16 +195,13 @@ export default function InterviewsPage() {
                             ) : (
                                 <Card p={80} radius="xl" withBorder style={{ borderStyle: "dashed" }}>
                                     <Stack align="center" gap="md">
-                                        <ThemeIcon size={64} radius="xl" variant="light" color="gray.4">
-                                            <IconCalendarEvent size={32} color="gray" />
+                                        <ThemeIcon size={64} radius="xl" variant="light" color="gray">
+                                            <IconCalendarEvent size={32} />
                                         </ThemeIcon>
                                         <Box ta="center">
                                             <Title order={4} fw={800}>No Sessions Found</Title>
                                             <Text size="sm" c="dimmed" fw={500}>There are no interviews scheduled for this period.</Text>
                                         </Box>
-                                        <Button variant="light" color="blue" radius="md">
-                                            Clear Filters
-                                        </Button>
                                     </Stack>
                                 </Card>
                             )}
@@ -219,7 +216,7 @@ export default function InterviewsPage() {
                 <Card p="xl" radius="xl" shadow="sm">
                     <Title order={5} fw={800} mb="xl">SESSION INSIGHTS</Title>
                     <Stack gap="xl">
-                        <Box style={{ borderLeft: "4px solid var(--mantine-color-blue-9)", paddingLeft: "16px" }}>
+                        <Box style={{ borderLeft: "4px solid var(--mantine-color-blue-6)", paddingLeft: "16px" }}>
                             <Text size="xs" fw={700} c="dimmed" tt="uppercase" mb={4}>Interviews Today</Text>
                             <Text size="24px" fw={900}>{stats.today} Sessions</Text>
                             <Text size="10px" fw={700} c="teal.6">Real-time Data</Text>

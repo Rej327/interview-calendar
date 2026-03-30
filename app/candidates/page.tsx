@@ -87,7 +87,7 @@ export default function CandidatesPage() {
             <Text c="dimmed" size="sm" fw={500}>Track and manage your talent pool pipeline.</Text>
           </Box>
           <Group gap="md">
-            <Button variant="outline" color="gray.4" c="gray.7" leftSection={<IconDownload size={16} />} radius="md">
+            <Button variant="default" leftSection={<IconDownload size={16} />} radius="md">
                 Export Pool
             </Button>
             <Button leftSection={<IconUserPlus size={16} />} radius="md" color="blue.9" px="xl">
@@ -99,7 +99,7 @@ export default function CandidatesPage() {
         <Grid gutter={40}>
           <Grid.Col span={{ base: 12, lg: 9 }}>
             <Card p={0} radius="xl" shadow="sm" withBorder={false} style={{ overflow: "hidden" }}>
-              <Box p="md" bg="white" style={{ borderBottom: "1px solid var(--mantine-color-gray-1)" }}>
+              <Box p="md" style={{ borderBottom: "1px solid var(--mantine-color-default-border)" }}>
                 <Group justify="space-between">
                     <TextInput
                         placeholder="Search candidates, roles, skills..."
@@ -108,10 +108,10 @@ export default function CandidatesPage() {
                         w={400}
                         value={query}
                         onChange={(e) => setQuery(e.currentTarget.value)}
-                        styles={{ input: { border: "none", backgroundColor: "var(--mantine-color-gray-0)" } }}
+                        styles={{ input: { border: "none" } }}
                     />
-                    <ActionIcon variant="outline" color="gray.4" size="lg" radius="md">
-                        <IconFilter size={18} color="gray" />
+                    <ActionIcon variant="default" size="lg" radius="md">
+                        <IconFilter size={18} />
                     </ActionIcon>
                 </Group>
               </Box>
@@ -186,8 +186,7 @@ export default function CandidatesPage() {
                   horizontalSpacing="xl"
                   styles={{
                       root: { border: "none" },
-                      header: { backgroundColor: "white", borderBottom: "1px solid var(--mantine-color-gray-1)" },
-                      table: { backgroundColor: "white" }
+                      header: { borderBottom: "1px solid var(--mantine-color-default-border)" },
                   }}
                 />
               )}

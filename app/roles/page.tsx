@@ -167,9 +167,7 @@ export default function RolesPage() {
           </Box>
           <Group gap="md">
             <Button
-              variant="outline"
-              color="gray.4"
-              c="gray.7"
+              variant="default"
               radius="md"
               leftSection={<IconDownload size={16} />}
               onClick={handleExport}
@@ -199,9 +197,8 @@ export default function RolesPage() {
             >
               <Box
                 p="md"
-                bg="white"
                 style={{
-                  borderBottom: "1px solid var(--mantine-color-gray-1)",
+                  borderBottom: "1px solid var(--mantine-color-default-border)",
                 }}
               >
                 <Group justify="stretch" w="100%">
@@ -217,7 +214,6 @@ export default function RolesPage() {
                     styles={{
                       input: {
                         border: "none",
-                        backgroundColor: "var(--mantine-color-gray-0)",
                       },
                     }}
                   />
@@ -327,10 +323,8 @@ export default function RolesPage() {
                   styles={{
                     root: { border: "none" },
                     header: {
-                      backgroundColor: "white",
-                      borderBottom: "1px solid var(--mantine-color-gray-1)",
+                      borderBottom: "1px solid var(--mantine-color-default-border)",
                     },
-                    table: { backgroundColor: "white" },
                   }}
                 />
               )}

@@ -138,9 +138,7 @@ export default function ReportsPage() {
           </Box>
           <Group gap="md">
             <Button
-              variant="outline"
-              color="gray.4"
-              c="gray.7"
+              variant="default"
               leftSection={<IconCalendar size={16} />}
               radius="md"
             >
@@ -426,12 +424,12 @@ export default function ReportsPage() {
           justify="space-between"
           mt="xl"
           pt="xl"
-          style={{ borderTop: "1px solid var(--mantine-color-gray-2)" }}
+          style={{ borderTop: "1px solid var(--mantine-color-default-border)" }}
         >
-          <Text size="xs" fw={800} c="gray.5">
+          <Text size="xs" fw={800} c="dimmed">
             POWERED BY FORMSLY
           </Text>
-          <Text size="xs" c="gray.4" fw={500}>
+          <Text size="xs" c="dimmed" fw={500}>
             Confidential HR Analytics • Generated {dayjs().format("DD MMMM YYYY")}
           </Text>
         </Group>

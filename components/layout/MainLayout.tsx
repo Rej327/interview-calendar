@@ -29,7 +29,7 @@ export default function MainLayout({
       withBorder={false}
       styles={{
         main: { 
-          backgroundColor: "var(--mantine-color-gray-light)", // gray.0 equivalent
+          backgroundColor: "var(--mantine-color-body)",
           minHeight: "100vh"
         },
         navbar: { 

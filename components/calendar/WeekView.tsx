@@ -114,8 +114,8 @@ export default function WeekView({
       >
         <Box
           p="md"
-          bg="blue.0"
-          style={{ borderBottom: "1px solid var(--mantine-color-blue-1)" }}
+          bg="var(--mantine-color-blue-light)"
+          style={{ borderBottom: "1px solid var(--mantine-color-default-border)" }}
         >
           <Grid columns={15} gutter={0}>
             <Grid.Col span={1} />
@@ -128,12 +128,12 @@ export default function WeekView({
                   h={70}
                   style={{
                     backgroundColor: day.current
-                      ? "var(--mantine-color-blue-9)"
+                      ? "var(--mantine-color-blue-filled)"
                       : "transparent",
                     borderRadius: "16px",
                     border:
                       day.selected && !day.current
-                        ? "2px solid var(--mantine-color-blue-4)"
+                        ? "2px solid var(--mantine-color-blue-light)"
                         : "none",
                     position: "relative",
                     cursor: "pointer",
@@ -148,19 +148,19 @@ export default function WeekView({
                     size="10px"
                     fw={800}
                     c={
-                      day.current ? "white" : day.selected ? "blue.9" : "gray.6"
+                      day.current ? "white" : day.selected ? "var(--mantine-color-blue-text)" : "dimmed"
                     }
                   >
                     {day.name}
                   </Text>
-                  <Text size="xl" fw={900} c={day.current ? "white" : "black"}>
+                  <Text size="xl" fw={900} c={day.current ? "white" : "var(--mantine-color-text)"}>
                     {day.date}
                   </Text>
                   {!day.current && day.selected && (
                     <Box
                       w={4}
                       h={4}
-                      bg="blue.9"
+                      bg="var(--mantine-color-blue-filled)"
                       style={{
                         borderRadius: "50%",
                         position: "absolute",
@@ -191,7 +191,7 @@ export default function WeekView({
             <Box
               key={hour}
               style={{
-                borderBottom: "1px solid var(--mantine-color-gray-1)",
+                borderBottom: "1px solid var(--mantine-color-default-border)",
                 minHeight: "100px",
               }}
             >
@@ -215,7 +215,7 @@ export default function WeekView({
                       key={i}
                       span={2}
                       style={{
-                        borderLeft: "1px solid var(--mantine-color-gray-0)",
+                        borderLeft: "1px solid var(--mantine-color-default-border)",
                         position: "relative",
                         display: "flex",
                         flexWrap: "wrap",

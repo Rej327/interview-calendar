@@ -87,28 +87,28 @@ export default function MonthView({ events, onEventClick, selectedDate, onDateCh
             <Card radius="xl" p={0} withBorder style={{ overflow: "hidden" }}>
                 <Grid gutter={0} columns={7}>
                     {weekdays.map(wd => (
-                        <Grid.Col key={wd} span={1} p="sm" bg="blue.0" ta="center">
-                            <Text size="xs" fw={800} c="gray.6">{wd}</Text>
+                        <Grid.Col key={wd} span={1} p="sm" bg="var(--mantine-color-blue-light)" ta="center">
+                            <Text size="xs" fw={800} c="dimmed">{wd}</Text>
                         </Grid.Col>
                     ))}
                     {days.map((day, i) => (
                         <Grid.Col key={i} span={1} h={120} p="xs" style={{ 
-                            borderRight: (i + 1) % 7 === 0 ? 'none' : '1px solid var(--mantine-color-gray-1)',
-                            borderBottom: i < 35 ? '1px solid var(--mantine-color-gray-1)' : 'none',
-                            backgroundColor: day.isToday ? 'var(--mantine-color-blue-0)' : 'transparent',
+                            borderRight: (i + 1) % 7 === 0 ? 'none' : '1px solid var(--mantine-color-default-border)',
+                            borderBottom: i < 35 ? '1px solid var(--mantine-color-default-border)' : 'none',
+                            backgroundColor: day.isToday ? 'var(--mantine-color-blue-light)' : 'transparent',
                             position: 'relative'
                         }}>
-                             <Text size="xs" fw={day.isToday ? 900 : 700} c={day.isCurrentMonth ? (day.isToday ? "blue.9" : "black") : "gray.4"} mb={4}>
-                                {day.date}
-                            </Text>
-                            {day.isToday && <Box h={2} bg="blue.9" style={{ position: "absolute", top: 0, left: 10, right: 10 }} />}
+                             <Text size="xs" fw={day.isToday ? 900 : 700} c={day.isCurrentMonth ? (day.isToday ? "var(--mantine-color-blue-text)" : "var(--mantine-color-text)") : "dimmed"} mb={4}>
+                                 {day.date}
+                             </Text>
+                             {day.isToday && <Box h={2} bg="var(--mantine-color-blue-filled)" style={{ position: "absolute", top: 0, left: 10, right: 10 }} />}
                             
                             <Stack gap={2} style={{ overflow: 'hidden' }}>
                                 {day.events.slice(0, 3).map((ev, idx) => (
                                     <Box 
                                         key={ev.id} 
                                         p={4} 
-                                        bg={`${ev.color}.1`} 
+                                        bg={`var(--mantine-color-${ev.color}-light)`}
                                         style={{ borderRadius: "4px", cursor: "pointer" }}
                                         onClick={() => onEventClick({
                                             id: ev.id,
@@ -124,7 +124,7 @@ export default function MonthView({ events, onEventClick, selectedDate, onDateCh
                                             avatars: [ev.raw.extendedProps.avatar].filter(Boolean)
                                         })}
                                     >
-                                        <Text size="8px" fw={800} c={`${ev.color}.9`} truncate>
+                                        <Text size="8px" fw={800} c={`var(--mantine-color-${ev.color}-light-color)`} truncate>
                                             {ev.time} • {ev.name}
                                         </Text>
                                     </Box>

@@ -132,7 +132,7 @@ export default function AppNavbar({ onClose }: AppNavbarProps) {
                     : "transparent",
                   color: isActive(item.href)
                     ? "white"
-                    : "var(--mantine-color-gray-7)",
+                    : "inherit",
                 },
               }}
             />
@@ -141,7 +141,7 @@ export default function AppNavbar({ onClose }: AppNavbarProps) {
       </ScrollArea>
 
       <Box p="md">
-        <Divider mb="sm" color="gray.1" />
+        <Divider mb="sm" color="var(--mantine-color-default-border)" />
         <Stack gap={4}>
           {bottomItems.map((item) => (
             <NavLink
@@ -156,12 +156,17 @@ export default function AppNavbar({ onClose }: AppNavbarProps) {
                 root: {
                   borderRadius: "8px",
                   height: "44px",
-                  color: "var(--mantine-color-gray-7)",
+                  color: "inherit",
                 },
               }}
             />
           ))}
         </Stack>
+        <Box mt="md" px="xs">
+          <Text size="10px" c="dimmed" fw={600} tt="uppercase">
+            © 2026 FORMSLY INC.
+          </Text>
+        </Box>
       </Box>
     </AppShell.Section>
   );

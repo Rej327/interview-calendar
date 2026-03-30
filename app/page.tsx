@@ -183,9 +183,7 @@ export default function DashboardPage() {
             <Button
               component={Link}
               href="/roles"
-              variant="outline"
-              color="gray.4"
-              c="gray.7"
+              variant="default"
               radius="md"
               px="xl"
               leftSection={<IconBriefcase size={16} />}
@@ -404,7 +402,7 @@ export default function DashboardPage() {
           {/* Right Column: Sidebar Widgets */}
           <Grid.Col span={{ base: 12, lg: 4 }}>
             <Stack gap="xl">
-              <Card p="xl" radius="xl" shadow="sm" bg="blue.9" c="white">
+              <Card p="xl" radius="xl" shadow="sm" bg="var(--mantine-color-blue-filled)" c="white">
                 <Title order={6} fw={800} mb="lg">
                   WEEKLY EFFICIENCY
                 </Title>
@@ -465,7 +463,7 @@ export default function DashboardPage() {
                             {recruiter.name}
                           </Text>
                         </Group>
-                        <Badge size="xs" radius="sm" color="blue.1" c="blue.9">
+                        <Badge size="xs" radius="sm" color="var(--mantine-color-blue-light)" c="var(--mantine-color-blue-text)">
                           Active
                         </Badge>
                       </Group>
@@ -481,7 +479,7 @@ export default function DashboardPage() {
                   <Box
                     mt="xl"
                     pt="md"
-                    style={{ borderTop: "1px solid var(--mantine-color-gray-1)" }}
+                    style={{ borderTop: "1px solid var(--mantine-color-default-border)" }}
                   >
                     <AvatarGroup spacing="sm">
                       <Avatar size="sm" radius="xl">

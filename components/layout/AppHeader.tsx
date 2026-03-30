@@ -53,8 +53,6 @@ export default function AppHeader({ opened, toggle }: AppHeaderProps) {
         style={{ flex: 1 }}
         styles={{
           input: {
-            backgroundColor: "var(--mantine-color-gray-light)",
-            border: "none",
             height: "42px",
           },
         }}
@@ -117,7 +115,7 @@ export default function AppHeader({ opened, toggle }: AppHeaderProps) {
               size={36}
               radius="md"
               src="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-1.png"
-              style={{ cursor: "pointer", border: "2px solid white" }}
+              style={{ cursor: "pointer", border: "2px solid var(--mantine-color-default-border)" }}
             />
           </Menu.Target>
           <Menu.Dropdown>
