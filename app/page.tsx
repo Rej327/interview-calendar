@@ -21,6 +21,7 @@ import {
   Center,
   Loader,
 } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import {
   IconCalendarEvent,
   IconClock,
@@ -30,32 +31,52 @@ import {
   IconArrowDownRight,
   IconDotsVertical,
   IconPlus,
+  IconSettings,
 } from "@tabler/icons-react";
 import dayjs from "dayjs";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { fetchEvents } from "@/lib/store/calendarSlice";
 import { fetchCandidates } from "@/lib/store/candidatesSlice";
+import { fetchRolesAsync } from "@/lib/store/rolesSlice";
+import RoleModal from "@/components/calendar/RoleModal";
+import { useDisclosure } from "@mantine/hooks";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function DashboardPage() {
   const dispatch = useAppDispatch();
-  const { events, loading: eventsLoading } = useAppSelector((state) => state.calendar);
-  const { candidates, loading: candidatesLoading } = useAppSelector((state) => state.candidates);
+  const { events, loading: eventsLoading } = useAppSelector(
+    (state) => state.calendar,
+  );
+  const { candidates, loading: candidatesLoading } = useAppSelector(
+    (state) => state.candidates,
+  );
+  const { items: roles, loading: rolesLoading } = useAppSelector(
+    (state) => state.roles,
+  );
+  const [roleModalOpened, { open: openRoleModal, close: closeRoleModal }] =
+    useDisclosure(false);
 
+  const router = useRouter();
   useEffect(() => {
     // Only fetch if data is empty or we specifically want to refresh on mount
     if (events.length === 0) dispatch(fetchEvents());
     if (candidates.length === 0) dispatch(fetchCandidates());
-  }, [dispatch, events.length, candidates.length]);
+    if (roles.length === 0) dispatch(fetchRolesAsync());
+  }, [dispatch, events.length, candidates.length, roles.length]);
 
   const stats = useMemo(() => {
-    const todayCount = events.filter(e => dayjs(e.start).isSame(dayjs(), 'day')).length;
-    
+    const todayCount = events.filter((e) =>
+      dayjs(e.start).isSame(dayjs(), "day"),
+    ).length;
+
     // Calculate avg duration
     let totalMinutes = 0;
-    events.forEach(e => {
-        totalMinutes += dayjs(e.end).diff(dayjs(e.start), 'minute');
+    events.forEach((e) => {
+      totalMinutes += dayjs(e.end).diff(dayjs(e.start), "minute");
     });
-    const avgDuration = events.length > 0 ? Math.round(totalMinutes / events.length) : 0;
+    const avgDuration =
+      events.length > 0 ? Math.round(totalMinutes / events.length) : 0;
 
     return [
       {
@@ -90,20 +111,30 @@ export default function DashboardPage() {
         icon: <IconClock size={22} />,
         color: "orange",
       },
+      {
+        label: "Active Roles",
+        value: roles.length.toString(),
+        change: "+2",
+        positive: true,
+        icon: <IconSettings size={22} />,
+        color: "violet",
+      },
     ];
-  }, [events, candidates]);
+  }, [events, candidates, roles]);
 
   const todaySchedule = useMemo(() => {
     return events
-        .filter(e => dayjs(e.start).isSame(dayjs(), 'day'))
-        .sort((a, b) => dayjs(a.start).diff(dayjs(b.start)));
+      .filter((e) => dayjs(e.start).isSame(dayjs(), "day"))
+      .sort((a, b) => dayjs(a.start).diff(dayjs(b.start)));
   }, [events]);
 
   const pipeline = useMemo(() => {
     const total = candidates.length;
-    const hired = candidates.filter((c: any) => c.status === 'HIRED').length;
-    const active = candidates.filter((c: any) => c.status === 'ACTIVE').length;
-    const rejected = candidates.filter((c: any) => c.status === 'REJECTED').length;
+    const hired = candidates.filter((c: any) => c.status === "HIRED").length;
+    const active = candidates.filter((c: any) => c.status === "ACTIVE").length;
+    const rejected = candidates.filter(
+      (c: any) => c.status === "REJECTED",
+    ).length;
 
     return [
       { label: "Total Candidates", value: total, color: "blue.9", total },
@@ -113,11 +144,25 @@ export default function DashboardPage() {
     ];
   }, [candidates]);
 
+  const activeRecruiters = useMemo(() => {
+    const uniqueMap = new Map();
+    events.forEach((e) => {
+      const name = e.extendedProps?.interviewer;
+      if (name && !uniqueMap.has(name)) {
+        uniqueMap.set(name, {
+          name,
+          avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${name.replace(/\s+/g, '')}`
+        });
+      }
+    });
+    return Array.from(uniqueMap.values());
+  }, [events]);
+
   if (eventsLoading || candidatesLoading) {
     return (
-        <Center h="100vh">
-            <Loader color="blue" variant="dots" />
-        </Center>
+      <Center h="100vh">
+        <Loader color="blue" variant="dots" />
+      </Center>
     );
   }
 
@@ -136,10 +181,23 @@ export default function DashboardPage() {
           </Box>
           <Group gap="md">
             <Button
+              component={Link}
+              href="/roles"
+              variant="outline"
+              color="gray.4"
+              c="gray.7"
+              radius="md"
+              px="xl"
+              leftSection={<IconBriefcase size={16} />}
+            >
+              View All Roles
+            </Button>
+            <Button
               leftSection={<IconPlus size={16} />}
               radius="md"
               color="blue.9"
               px="xl"
+              onClick={openRoleModal}
             >
               Create New Role
             </Button>
@@ -147,7 +205,7 @@ export default function DashboardPage() {
         </Group>
 
         {/* Stats Grid */}
-        <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="xl">
+        <SimpleGrid cols={{ base: 1, sm: 2, lg: 5 }} spacing="xl">
           {stats.map((stat, i) => (
             <Card key={i} p="xl" radius="xl" shadow="sm">
               <Group justify="space-between" mb="xs">
@@ -198,53 +256,69 @@ export default function DashboardPage() {
                       Monitor and manage all candidate interview sessions.
                     </Text>
                   </Box>
-                  <Button variant="subtle" color="blue" size="xs" fw={700}>
+                  <Button
+                    onClick={() => router.push("/calendar")}
+                    variant="subtle"
+                    color="blue"
+                    size="xs"
+                    fw={700}
+                  >
                     VIEW ALL
                   </Button>
                 </Group>
 
                 <Stack gap="md">
-                  {todaySchedule.length > 0 ? todaySchedule.map((item) => (
-                    <Card key={item.id} p="lg" radius="lg" withBorder>
-                      <Group justify="space-between">
-                        <Group gap="lg">
-                          <Avatar src={item.extendedProps.avatar} radius="xl" size="md" />
-                          <Box>
-                            <Text size="sm" fw={800}>
-                              {item.extendedProps.candidate}
-                            </Text>
-                            <Text size="xs" c="dimmed" fw={600}>
-                              {item.extendedProps.role}
-                            </Text>
-                          </Box>
-                        </Group>
-                        <Group gap={40}>
-                          <Box>
-                            <Text size="xs" fw={800} c="gray.6">
-                              {item.extendedProps.type}
-                            </Text>
-                            <Text size="xs" fw={700}>
-                              {dayjs(item.start).format("hh:mm A")} — {item.title}
-                            </Text>
-                          </Box>
-                          <Group gap="xs">
-                          <Badge
-                            size="xs"
-                            radius="sm"
-                            color={item.extendedProps.status === "COMPLETED" ? "teal.6" : "yellow.6"}
-                          >
-                            {item.extendedProps.status}
-                          </Badge>
-                            <ActionIcon variant="subtle" color="gray">
-                              <IconDotsVertical size={16} />
-                            </ActionIcon>
+                  {todaySchedule.length > 0 ? (
+                    todaySchedule.map((item) => (
+                      <Card key={item.id} p="lg" radius="lg" withBorder>
+                        <Group justify="space-between">
+                          <Group gap="lg">
+                            <Avatar
+                              src={item.extendedProps.avatar}
+                              radius="xl"
+                              size="md"
+                            />
+                            <Box>
+                              <Text size="sm" fw={800}>
+                                {item.extendedProps.candidate}
+                              </Text>
+                              <Text size="xs" c="dimmed" fw={600}>
+                                {item.extendedProps.role}
+                              </Text>
+                            </Box>
+                          </Group>
+                          <Group gap={40}>
+                            <Box>
+                              <Text size="xs" fw={800} c="gray.6">
+                                {item.extendedProps.type}
+                              </Text>
+                              <Text size="xs" fw={700}>
+                                {dayjs(item.start).format("hh:mm A")} —{" "}
+                                {item.title}
+                              </Text>
+                            </Box>
+                            <Group gap="xs">
+                              <Badge
+                                size="xs"
+                                radius="sm"
+                                color={
+                                  item.extendedProps.status === "COMPLETED"
+                                    ? "teal.6"
+                                    : "yellow.6"
+                                }
+                              >
+                                {item.extendedProps.status}
+                              </Badge>
+                            </Group>
                           </Group>
                         </Group>
-                      </Group>
-                    </Card>
-                  )) : (
+                      </Card>
+                    ))
+                  ) : (
                     <Center py={40}>
-                        <Text c="dimmed" fw={500}>No interviews scheduled for today.</Text>
+                      <Text c="dimmed" fw={500}>
+                        No interviews scheduled for today.
+                      </Text>
                     </Center>
                   )}
                 </Stack>
@@ -266,13 +340,62 @@ export default function DashboardPage() {
                         </Text>
                       </Group>
                       <Progress
-                        value={stage.total > 0 ? (stage.value / stage.total) * 100 : 0}
+                        value={
+                          stage.total > 0
+                            ? (stage.value / stage.total) * 100
+                            : 0
+                        }
                         color={stage.color}
                         size="lg"
                         radius="xl"
                       />
                     </Box>
                   ))}
+                </Stack>
+              </Card>
+
+              <Card p="xl" radius="xl" shadow="sm">
+                <Group justify="space-between" mb="xl">
+                  <Title order={4} fw={800}>
+                    Open Roles
+                  </Title>
+                  <Button
+                    component={Link}
+                    href="/roles"
+                    variant="subtle"
+                    color="blue"
+                    size="xs"
+                    fw={700}
+                  >
+                    VIEW ALL
+                  </Button>
+                </Group>
+                <Stack gap="md">
+                  {roles.slice(0, 3).map((role) => (
+                    <Group key={role.role_id} justify="space-between">
+                      <Box>
+                        <Text size="sm" fw={800}>
+                          {role.role_title}
+                        </Text>
+                        <Text size="xs" c="dimmed" fw={600}>
+                          {role.role_department}
+                        </Text>
+                      </Box>
+                      <Badge variant="light" color="blue" size="sm">
+                        Active
+                      </Badge>
+                    </Group>
+                  ))}
+                  {roles.length === 0 && !rolesLoading && (
+                    <Text size="xs" c="dimmed" ta="center" py="md">
+                      No active roles found.
+                    </Text>
+                  )}
+                  {rolesLoading && (
+                    <Center py="md">
+                      <Loader size="sm" />
+                    </Center>
+                  )}
                 </Stack>
               </Card>
             </Stack>
@@ -286,7 +409,7 @@ export default function DashboardPage() {
                   WEEKLY EFFICIENCY
                 </Title>
                 <Text size="xs" c="blue.1" fw={500} mb="xl">
-                    Performance summary based on {events.length} system entries.
+                  Performance summary based on {events.length} system entries.
                 </Text>
                 <Stack gap="xl">
                   <Box
@@ -299,7 +422,13 @@ export default function DashboardPage() {
                       Completed This Month
                     </Text>
                     <Text size="24px" fw={900}>
-                      {events.filter(e => dayjs(e.start).isSame(dayjs(), 'month') && e.extendedProps.status === 'COMPLETED').length}
+                      {
+                        events.filter(
+                          (e) =>
+                            dayjs(e.start).isSame(dayjs(), "month") &&
+                            e.extendedProps.status === "COMPLETED",
+                        ).length
+                      }
                     </Text>
                   </Box>
                   <Box
@@ -323,17 +452,17 @@ export default function DashboardPage() {
                   ACTIVE RECRUITERS
                 </Title>
                 <Stack gap="md">
-                  {["Sarah Miller", "David Chen", "Mark Thompson"].map(
-                    (name, i) => (
+                  {activeRecruiters.slice(0, 3).map(
+                    (recruiter, i) => (
                       <Group key={i} justify="space-between">
                         <Group gap="sm">
                           <Avatar
-                            src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${i + 20}`}
+                            src={recruiter.avatar}
                             size="sm"
                             radius="xl"
                           />
                           <Text size="xs" fw={800}>
-                            {name}
+                            {recruiter.name}
                           </Text>
                         </Group>
                         <Badge size="xs" radius="sm" color="blue.1" c="blue.9">
@@ -342,26 +471,34 @@ export default function DashboardPage() {
                       </Group>
                     ),
                   )}
+                  {activeRecruiters.length === 0 && (
+                    <Center py="sm">
+                        <Text size="xs" c="dimmed" fw={600}>No active recruiters found.</Text>
+                    </Center>
+                  )}
                 </Stack>
-                <Box
-                  mt="xl"
-                  pt="md"
-                  style={{ borderTop: "1px solid var(--mantine-color-gray-1)" }}
-                >
-                  <AvatarGroup spacing="sm">
-                    <Avatar size="sm" radius="xl">
-                      +4
-                    </Avatar>
-                    <Text size="xs" fw={700} c="dimmed" ml="xs">
-                      Team members active
-                    </Text>
-                  </AvatarGroup>
-                </Box>
+                {activeRecruiters.length > 3 && (
+                  <Box
+                    mt="xl"
+                    pt="md"
+                    style={{ borderTop: "1px solid var(--mantine-color-gray-1)" }}
+                  >
+                    <AvatarGroup spacing="sm">
+                      <Avatar size="sm" radius="xl">
+                        +{activeRecruiters.length - 3}
+                      </Avatar>
+                      <Text size="xs" fw={700} c="dimmed" ml="xs">
+                        Team members active
+                      </Text>
+                    </AvatarGroup>
+                  </Box>
+                )}
               </Card>
             </Stack>
           </Grid.Col>
         </Grid>
       </Stack>
+      <RoleModal opened={roleModalOpened} onClose={closeRoleModal} />
     </Container>
   );
 }

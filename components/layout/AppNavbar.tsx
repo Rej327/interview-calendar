@@ -54,6 +54,11 @@ const navItems: NavItem[] = [
     icon: <IconUsers size={20} stroke={1.5} />,
   },
   {
+    label: "Roles",
+    href: "/roles",
+    icon: <IconSettings size={20} stroke={1.5} />,
+  },
+  {
     label: "Reports",
     href: "/reports",
     icon: <IconChartBar size={20} stroke={1.5} />,
