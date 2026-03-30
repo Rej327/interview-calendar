@@ -16,3 +16,18 @@ export async function deleteInterview(interview_id: string) {
     return { success: false, message: error.message };
   }
 }
+
+export async function deleteRole(role_id: string) {
+  try {
+    const { error } = await supabaseAdmin
+      .from("roles_table")
+      .delete()
+      .eq("role_id", role_id);
+
+    if (error) throw error;
+    return { success: true };
+  } catch (error: any) {
+    console.error("deleteRole Action Error:", error);
+    return { success: false, message: error.message };
+  }
+}

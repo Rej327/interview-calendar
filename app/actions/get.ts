@@ -29,3 +29,17 @@ export async function fetchCandidates() {
     return { success: false, message: error.message };
   }
 }
+
+export async function fetchRoles() {
+  try {
+    const { data, error } = await supabaseAdmin.rpc("get_all_roles", {
+      input_data: {},
+    });
+
+    if (error) throw error;
+    return { success: true, data };
+  } catch (error: any) {
+    console.error("fetchRoles Action Error:", error);
+    return { success: false, message: error.message };
+  }
+}
