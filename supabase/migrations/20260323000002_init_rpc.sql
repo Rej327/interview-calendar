@@ -169,11 +169,18 @@ BEGIN
             'extendedProps', jsonb_build_object(
                 'candidate_name', candidates_table.candidate_full_name,
                 'interviewer_name', interviewers_table.interviewer_full_name,
+                'interviewer_role', interviewer_roles.role_title,
                 'avatar', candidates_table.candidate_avatar_url,
                 'role', roles_table.role_title,
-                'type', interview_steps_table.interview_step_type
+                'type', interview_steps_table.interview_step_type,
+                'recording_link', interviews_table.interview_recorded_link,
+                'meeting_link', interviews_table.interview_meeting_link,
+                'notes', interviews_table.interview_notes
             )
         )
+
+
+
     ) INTO return_data
     FROM public.interviews_table AS interviews_table
     JOIN public.interview_steps_table AS interview_steps_table ON interviews_table.interview_step_id = interview_steps_table.interview_step_id
@@ -181,7 +188,9 @@ BEGIN
     JOIN public.candidates_table AS candidates_table ON hiring_processes_table.hiring_process_candidate_id = candidates_table.candidate_id
     JOIN public.roles_table AS roles_table ON hiring_processes_table.hiring_process_role_id = roles_table.role_id
     LEFT JOIN public.interviewers_table AS interviewers_table ON interviews_table.interview_interviewer_id = interviewers_table.interviewer_id
+    LEFT JOIN public.roles_table AS interviewer_roles ON interviewers_table.interviewer_role_id = interviewer_roles.role_id
     WHERE (input_start_date IS NULL OR interviews_table.interview_start_at >= input_start_date)
+
       AND (input_end_date IS NULL OR interviews_table.interview_end_at <= input_end_date);
 
     RETURN COALESCE(return_data, '[]'::JSONB);
@@ -214,3 +223,62 @@ BEGIN
     RETURN COALESCE(return_data, '[]'::JSONB);
 END;
 $$ LANGUAGE plpgsql;
+
+-- Function to fetch all interviewers with their role titles
+CREATE OR REPLACE FUNCTION public.get_all_interviewers(input_data JSONB)
+RETURNS JSONB
+SET search_path TO ''
+AS $$
+DECLARE
+    -- Return variable
+    return_data JSONB;
+BEGIN
+    SELECT jsonb_agg(
+        jsonb_build_object(
+            'interviewer_id', interviewers_table.interviewer_id,
+            'full_name', interviewers_table.interviewer_full_name,
+            'role_title', roles_table.role_title
+        )
+    ) INTO return_data
+    FROM public.interviewers_table AS interviewers_table
+    LEFT JOIN public.roles_table AS roles_table ON interviewers_table.interviewer_role_id = roles_table.role_id;
+
+    RETURN COALESCE(return_data, '[]'::JSONB);
+END;
+$$ LANGUAGE plpgsql;
+
+-- Function to update an existing interview (Reschedule, Cancel, notes)
+CREATE OR REPLACE FUNCTION public.update_interview(input_data JSONB)
+RETURNS JSONB
+SET search_path TO ''
+AS $$
+DECLARE
+    -- Input variables
+    input_interview_id UUID := (input_data->>'interview_id')::UUID;
+    input_start_at TIMESTAMPTZ := (input_data->>'interview_start_at')::TIMESTAMPTZ;
+    input_end_at TIMESTAMPTZ := (input_data->>'interview_end_at')::TIMESTAMPTZ;
+    input_status public.INTERVIEW_STATUS := (input_data->>'interview_status')::public.INTERVIEW_STATUS;
+    input_notes TEXT := (input_data->>'interview_notes')::TEXT;
+    input_recorded_link TEXT := (input_data->>'interview_recorded_link')::TEXT;
+
+    -- Return variable
+    return_data JSONB;
+BEGIN
+    UPDATE public.interviews_table
+    SET 
+        interview_start_at = COALESCE(input_start_at, interview_start_at),
+        interview_end_at = COALESCE(input_end_at, interview_end_at),
+        interview_status = CASE 
+            WHEN input_recorded_link IS NOT NULL THEN 'COMPLETED'::public.INTERVIEW_STATUS
+            ELSE COALESCE(input_status, interview_status)
+        END,
+        interview_notes = COALESCE(input_notes, interview_notes),
+        interview_recorded_link = COALESCE(input_recorded_link, interview_recorded_link)
+    WHERE interview_id = input_interview_id
+    RETURNING to_jsonb(public.interviews_table.*) INTO return_data;
+
+    RETURN return_data;
+END;
+$$ LANGUAGE plpgsql;
+
+

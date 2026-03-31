@@ -22,8 +22,8 @@ export const InterviewType: Record<string, INTERVIEW_TYPE> = {
   BEHAVIORAL: "BEHAVIORAL",
   SCREENING: "SCREENING",
   LEADERSHIP: "LEADERSHIP",
-  CULTURE: "CULTURE",
 };
+
 
 export const HiringProcessStatus: Record<string, HIRING_PROCESS_STATUS> = {
   ACTIVE: "ACTIVE",

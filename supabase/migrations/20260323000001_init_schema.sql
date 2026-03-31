@@ -19,9 +19,10 @@ BEGIN
 
     IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'INTERVIEW_TYPE') THEN
         CREATE TYPE public.INTERVIEW_TYPE AS ENUM (
-            'TECHNICAL', 'BEHAVIORAL', 'SCREENING', 'LEADERSHIP', 'CULTURE'
+            'TECHNICAL', 'BEHAVIORAL', 'SCREENING', 'LEADERSHIP'
         );
     END IF;
+
 
     IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'HIRING_PROCESS_STATUS') THEN
         CREATE TYPE public.HIRING_PROCESS_STATUS AS ENUM (
@@ -48,20 +49,22 @@ CREATE TABLE IF NOT EXISTS public.candidates_table (
     candidate_created_at TIMESTAMPTZ DEFAULT now()
 );
 
-CREATE TABLE IF NOT EXISTS public.interviewers_table (
-    interviewer_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    interviewer_full_name TEXT NOT NULL,
-    interviewer_email TEXT UNIQUE NOT NULL,
-    interviewer_avatar_url TEXT,
-    interviewer_created_at TIMESTAMPTZ DEFAULT now()
-);
-
 CREATE TABLE IF NOT EXISTS public.roles_table (
     role_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     role_title TEXT UNIQUE NOT NULL,
     role_department TEXT,
     role_created_at TIMESTAMPTZ DEFAULT now()
 );
+
+CREATE TABLE IF NOT EXISTS public.interviewers_table (
+    interviewer_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    interviewer_full_name TEXT NOT NULL,
+    interviewer_email TEXT UNIQUE NOT NULL,
+    interviewer_avatar_url TEXT,
+    interviewer_role_id UUID REFERENCES public.roles_table(role_id) ON DELETE SET NULL,
+    interviewer_created_at TIMESTAMPTZ DEFAULT now()
+);
+
 
 -- Hiring Process links a candidate to a role and tracks the overall journey
 CREATE TABLE IF NOT EXISTS public.hiring_processes_table (
@@ -94,7 +97,9 @@ CREATE TABLE IF NOT EXISTS public.interviews_table (
     interview_status public.interview_status DEFAULT 'PENDING',
     interview_notes TEXT,
     interview_meeting_link TEXT,
+    interview_recorded_link TEXT,
     interview_created_at TIMESTAMPTZ DEFAULT now()
 );
+
 
 

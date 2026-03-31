@@ -43,3 +43,18 @@ export async function fetchRoles() {
     return { success: false, message: error.message };
   }
 }
+
+export async function fetchInterviewers() {
+    try {
+      const { data, error } = await supabaseAdmin.rpc("get_all_interviewers", {
+        input_data: {},
+      });
+  
+      if (error) throw error;
+      return { success: true, data };
+    } catch (error: any) {
+      console.error("fetchInterviewers Action Error:", error);
+      return { success: false, message: error.message };
+    }
+  }
+

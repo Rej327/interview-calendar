@@ -32,12 +32,16 @@ FROM (VALUES
 ) AS r(role_name, dept);
 
 -- 2. Seed Interviewers (40 experts)
-INSERT INTO public.interviewers_table (interviewer_full_name, interviewer_email, interviewer_avatar_url)
+INSERT INTO public.interviewers_table (interviewer_full_name, interviewer_email, interviewer_avatar_url, interviewer_role_id)
 SELECT 
     'Expert ' || i,
     'expert' || i || '@construction-corp.com',
-    'https://api.dicebear.com/7.x/avataaars/svg?seed=Expert' || i
-FROM generate_series(1, 40) i;
+    'https://api.dicebear.com/7.x/avataaars/svg?seed=Expert' || i,
+    r.role_id
+FROM generate_series(1, 40) i
+CROSS JOIN LATERAL (SELECT role_id FROM public.roles_table ORDER BY random() LIMIT 1) r;
+
+
 
 -- 3. Seed Candidates (300 candidates)
 INSERT INTO public.candidates_table (candidate_full_name, candidate_email, candidate_avatar_url)

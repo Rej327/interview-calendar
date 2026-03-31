@@ -32,7 +32,11 @@ export function mapSupabaseToCalendarEvent(supabaseEvent: any): CalendarEvent {
       type: supabaseEvent.extendedProps?.type as INTERVIEW_TYPE || "TECHNICAL", 
       avatar: supabaseEvent.extendedProps?.avatar,
       color: supabaseEvent.color || 'blue',
+      notes: supabaseEvent.extendedProps?.notes,
+      recording_link: supabaseEvent.extendedProps?.recording_link,
+      meeting_link: supabaseEvent.extendedProps?.meeting_link,
     },
+
     borderColor: 'transparent',
     textColor: 'white',
   };

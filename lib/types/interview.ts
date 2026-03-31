@@ -36,6 +36,9 @@ export interface CalendarEvent {
       type: INTERVIEW_TYPE;
       avatar?: string;
       color?: string; // Mantine color token (e.g., 'teal', 'blue')
+      notes?: string;
+      recording_link?: string;
+      meeting_link?: string;
     };
   backgroundColor?: string;
   borderColor?: string;

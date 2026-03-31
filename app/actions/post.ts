@@ -29,3 +29,33 @@ export async function createRole(input_data: { role_title: string; role_departme
     return { success: false, message: error.message };
   }
 }
+
+export async function updateInterview(input_data: any) {
+  try {
+    const { data, error } = await supabaseAdmin.rpc("update_interview", {
+      input_data,
+    });
+
+    if (error) throw error;
+    return { success: true, data };
+  } catch (error: any) {
+    console.error("updateInterview Action Error:", error);
+    return { success: false, message: error.message };
+  }
+}
+
+export async function quickAddInterview(input_data: any) {
+  try {
+    const { data, error } = await supabaseAdmin.rpc("quick_add_interview", {
+      input_data,
+    });
+
+    if (error) throw error;
+    return { success: true, data };
+  } catch (error: any) {
+    console.error("quickAddInterview Action Error:", error);
+    return { success: false, message: error.message };
+  }
+}
+
+

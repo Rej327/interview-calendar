@@ -25,6 +25,8 @@ import WeekView from "@/components/calendar/WeekView";
 import MonthView from "@/components/calendar/MonthView";
 import MonthOverview from "@/components/calendar/MonthOverview";
 import WeekSidebar from "@/components/calendar/WeekSidebar";
+import NewSlotModal from "@/components/calendar/NewSlotModal";
+
 
 import dayjs from "dayjs";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
@@ -39,7 +41,9 @@ export default function CalendarPage() {
   const [mounted, setMounted] = useState(false);
   const [view, setView] = useState<"day" | "week" | "month">("day");
   const [modalOpened, { open, close }] = useDisclosure(false);
+  const [newSlotModalOpened, { open: openNewSlot, close: closeNewSlot }] = useDisclosure(false);
   const [selectedCandidate, setSelectedCandidate] = useState<any>(null);
+
 
   useEffect(() => {
     setMounted(true);
@@ -79,6 +83,13 @@ export default function CalendarPage() {
         candidateName: e.extendedProps.candidate,
         role: e.extendedProps.role,
         type: e.extendedProps.type,
+        notes: e.extendedProps.notes,
+        recordingLink: e.extendedProps.recording_link,
+        meetingLink: e.extendedProps.meeting_link,
+        startDate: dayjs(e.start).toDate(),
+
+
+        endDate: dayjs(e.end).toDate(),
         fullDate: dayjs(e.start).toDate(),
       });
     });
@@ -87,6 +98,7 @@ export default function CalendarPage() {
 
   const handleEventClick = (event: any) => {
     setSelectedCandidate({
+      id: event.id,
       name: event.candidateName,
       role: event.role,
       avatar: event.avatars?.[0],
@@ -94,10 +106,18 @@ export default function CalendarPage() {
       time: event.time,
       type: event.type,
       assignedHR: event.assigned,
-      notes: "Candidate evaluation and technical progression track.",
+      notes: event.notes || "Candidate evaluation and technical progression track.",
+      recordingLink: event.recordingLink,
+      meetingLink: event.meetingLink,
+      startDate: event.startDate,
+      endDate: event.endDate,
     });
+
+
     open();
   };
+
+
 
   const dayEvents = useMemo(() => {
     if (!selectedDate) return groupedEvents;
@@ -137,9 +157,10 @@ export default function CalendarPage() {
                 label: { fontWeight: 700 },
               }}
             />
-            <Button leftSection={<IconPlus size={16} />} radius="md" color="blue.9" px="xl">
+            <Button leftSection={<IconPlus size={16} />} radius="md" color="blue.9" px="xl" onClick={openNewSlot}>
               New Slot
             </Button>
+
           </Group>
         </Group>
 
@@ -279,6 +300,8 @@ export default function CalendarPage() {
       </Stack>
 
       <InterviewReviewModal opened={modalOpened} onClose={close} candidate={selectedCandidate} />
+      <NewSlotModal opened={newSlotModalOpened} onClose={closeNewSlot} />
+
     </Container>
   );
 }
