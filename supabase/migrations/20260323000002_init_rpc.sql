@@ -161,11 +161,13 @@ BEGIN
             'end', interviews_table.interview_end_at,
             'status', interviews_table.interview_status,
             'color', CASE 
-                WHEN interviews_table.interview_status = 'COMPLETED' THEN 'teal'
-                WHEN interviews_table.interview_status = 'CANCELLED' THEN 'red'
-                WHEN interviews_table.interview_status = 'RESCHEDULED' THEN 'indigo'
-                ELSE 'blue'
+                WHEN interview_steps_table.interview_step_type = 'DEPARTMENT' THEN 'violet'
+                WHEN interview_steps_table.interview_step_type = 'REQUESTOR' THEN 'teal'
+                WHEN interview_steps_table.interview_step_type = 'HR' THEN 'blue'
+                ELSE 'gray'
             END,
+
+
             'extendedProps', jsonb_build_object(
                 'candidate_name', candidates_table.candidate_full_name,
                 'interviewer_name', interviewers_table.interviewer_full_name,

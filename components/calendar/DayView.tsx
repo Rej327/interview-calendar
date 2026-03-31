@@ -1,6 +1,7 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { fetchRecentChanges } from "@/app/actions/get";
 import {
   Badge,
   Box,
@@ -18,6 +19,7 @@ import {
   IconCalendar,
 } from "@tabler/icons-react";
 
+
 interface DayEvent {
   id: string;
   title: string;
@@ -26,7 +28,16 @@ interface DayEvent {
   status: string;
   color: string;
   avatars: string[];
+  candidateName: string;
+  role: string;
+  type: string;
+  notes?: string;
+  recordingLink?: string;
+  meetingLink?: string;
+  startDate: Date;
+  endDate: Date;
 }
+
 
 interface DayData {
   date: string;
@@ -41,6 +52,18 @@ interface DayViewProps {
 }
 
 export default function DayView({ scheduleData, onEventClick }: DayViewProps) {
+  const [recentChanges, setRecentChanges] = useState<any[]>([]);
+
+  useEffect(() => {
+    const getChanges = async () => {
+      const result = await fetchRecentChanges();
+      if (result.success && result.data) {
+        setRecentChanges(result.data);
+      }
+    };
+    getChanges();
+  }, [scheduleData]);
+
   return (
     <Stack gap="xl">
         {scheduleData.length > 0 ? (
@@ -115,15 +138,52 @@ export default function DayView({ scheduleData, onEventClick }: DayViewProps) {
             <Card radius="lg" p={0} withBorder>
                 <Box p="md" bg="var(--mantine-color-blue-light)" style={{ borderTopLeftRadius: "12px", borderTopRightRadius: "12px" }}>
                     <Grid>
-                        <Grid.Col span={3}><Text size="xs" fw={800} c="blue.9" tt="uppercase">Candidate</Text></Grid.Col>
-                        <Grid.Col span={3}><Text size="xs" fw={800} c="blue.9" tt="uppercase">Update Type</Text></Grid.Col>
-                        <Grid.Col span={3}><Text size="xs" fw={800} c="blue.9" tt="uppercase">Modified By</Text></Grid.Col>
-                        <Grid.Col span={3} ta="right"><Text size="xs" fw={800} c="blue.9" tt="uppercase">Time</Text></Grid.Col>
+                        <Grid.Col span={5}><Text size="xs" fw={800} c="blue.9" tt="uppercase">Details</Text></Grid.Col>
+                        <Grid.Col span={3}><Text size="xs" fw={800} c="blue.9" tt="uppercase">Type</Text></Grid.Col>
+                        <Grid.Col span={2}><Text size="xs" fw={800} c="blue.9" tt="uppercase">By</Text></Grid.Col>
+                        <Grid.Col span={2} ta="right"><Text size="xs" fw={800} c="blue.9" tt="uppercase">Time</Text></Grid.Col>
                     </Grid>
                 </Box>
-                <Box p="xl" ta="center">
-                    <Text size="sm" c="dimmed" fw={500}>No recent changes to display.</Text>
-                </Box>
+                {recentChanges.length > 0 ? (
+                    recentChanges.map((log) => (
+                        <Box key={log.id} p="md" style={{ borderBottom: "1px solid var(--mantine-color-gray-1)" }}>
+                            <Grid align="center">
+                                <Grid.Col span={5}>
+                                    <Stack gap={2}>
+                                        <Text size="sm" fw={700}>{log.candidate}</Text>
+                                        <Text size="10px" c="dimmed" fw={500}>{log.description}</Text>
+                                    </Stack>
+                                </Grid.Col>
+                                <Grid.Col span={3}>
+                                    <Badge 
+                                        size="xs" 
+                                        variant="dot" 
+                                        color={
+                                            log.type === 'CREATED' ? 'teal' : 
+                                            log.type === 'RESCHEDULED' ? 'orange' : 
+                                            log.type === 'CANCELLED' ? 'red' : 
+                                            'blue'
+                                        }
+
+                                    >
+                                        {log.type}
+                                    </Badge>
+                                </Grid.Col>
+                                <Grid.Col span={2}>
+                                    <Text size="xs" c="dimmed" fw={600}>{log.user}</Text>
+                                </Grid.Col>
+                                <Grid.Col span={2} ta="right">
+                                    <Text size="xs" fw={700}>{log.time}</Text>
+                                </Grid.Col>
+                            </Grid>
+                        </Box>
+                    ))
+                ) : (
+
+                    <Box p="xl" ta="center">
+                        <Text size="sm" c="dimmed" fw={500}>No recent changes to display.</Text>
+                    </Box>
+                )}
             </Card>
         </Box>
     </Stack>

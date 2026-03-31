@@ -200,8 +200,9 @@ export default function CalendarPage() {
               {view === "month" ? (
                 <MonthOverview events={events} selectedDate={selectedDate} />
               ) : view === "week" ? (
-                <WeekSidebar events={events} selectedDate={selectedDate} />
+                <WeekSidebar events={events} selectedDate={selectedDate} onEventClick={handleEventClick} />
               ) : (
+
                 <>
                   <Card p="xl" radius="xl" shadow="sm">
                     <Title order={5} fw={800} mb="xl">
@@ -281,16 +282,11 @@ export default function CalendarPage() {
                       <Group gap="sm">
                         <Box w={10} h={10} bg="teal.4" style={{ borderRadius: "50%" }} />
                         <Text size="xs" fw={600} c="blue.0">
-                          Practical Test
-                        </Text>
-                      </Group>
-                      <Group gap="sm">
-                        <Box w={10} h={10} bg="orange.4" style={{ borderRadius: "50%" }} />
-                        <Text size="xs" fw={600} c="blue.0">
-                          Background Check
+                          Requestor Interview
                         </Text>
                       </Group>
                     </Stack>
+
                   </Card>
                 </>
               )}

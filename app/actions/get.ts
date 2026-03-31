@@ -55,6 +55,19 @@ export async function fetchInterviewers() {
     } catch (error: any) {
       console.error("fetchInterviewers Action Error:", error);
       return { success: false, message: error.message };
-    }
   }
+}
+
+export async function fetchRecentChanges() {
+  try {
+    const { data, error } = await supabaseAdmin.rpc("get_recent_changes");
+
+    if (error) throw error;
+    return { success: true, data };
+  } catch (error: any) {
+    console.error("fetchRecentChanges Action Error:", error);
+    return { success: false, message: error.message };
+  }
+}
+
 

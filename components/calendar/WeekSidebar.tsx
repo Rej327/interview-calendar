@@ -22,15 +22,38 @@ import { CalendarEvent } from "@/lib/types/interview";
 interface WeekSidebarProps {
   events: CalendarEvent[];
   selectedDate: Date;
+  onEventClick: (event: any) => void;
 }
 
-export default function WeekSidebar({ events, selectedDate }: WeekSidebarProps) {
+export default function WeekSidebar({ events, selectedDate, onEventClick }: WeekSidebarProps) {
   const isSelectedToday = dayjs(selectedDate).isSame(dayjs(), 'day');
   const targetEvents = events.filter(e => dayjs(e.start).isSame(selectedDate, 'day'));
   const upcomingPriority = events
     .filter(e => dayjs(e.start).isAfter(dayjs(selectedDate).subtract(1, 'hour')))
     .sort((a, b) => dayjs(a.start).diff(dayjs(b.start)))
     .slice(0, 3);
+
+  const handlePriorityClick = (event: CalendarEvent) => {
+    onEventClick({
+        id: event.id,
+        title: event.title,
+        candidateName: event.extendedProps.candidate,
+        role: event.extendedProps.role,
+        avatar: event.extendedProps.avatar,
+        status: event.extendedProps.status === "COMPLETED" ? "DONE" : event.extendedProps.status,
+        time: `${dayjs(event.start).format("hh:mm A")} - ${dayjs(event.end).format("hh:mm A")}`,
+        assigned: event.extendedProps.interviewer,
+        type: event.extendedProps.type,
+        color: event.extendedProps.color || 'blue',
+        avatars: [event.extendedProps.avatar].filter(Boolean),
+        notes: event.extendedProps.notes,
+        recordingLink: event.extendedProps.recording_link,
+        meetingLink: event.extendedProps.meeting_link,
+        startDate: dayjs(event.start).toDate(),
+        endDate: dayjs(event.end).toDate(),
+    });
+  };
+
 
   return (
     <Stack gap="xl">
@@ -65,7 +88,7 @@ export default function WeekSidebar({ events, selectedDate }: WeekSidebarProps) 
             </Group>
             <Stack gap="md">
                 {upcomingPriority.length > 0 ? upcomingPriority.map((item, i) => (
-                    <Group key={i} justify="space-between" style={{ cursor: 'pointer' }}>
+                    <Group key={i} justify="space-between" style={{ cursor: 'pointer' }} onClick={() => handlePriorityClick(item)}>
                         <Group gap="md">
                             <ThemeIcon variant="light" color={item.extendedProps.color || 'blue'} size="md" radius="md">
                                 <IconPlus size={16}/>
@@ -80,6 +103,7 @@ export default function WeekSidebar({ events, selectedDate }: WeekSidebarProps) 
                         <IconChevronRight size={14} color="gray" />
                     </Group>
                 )) : (
+
                     <Text size="xs" c="dimmed" ta="center">No upcoming interviews</Text>
                 )}
             </Stack>

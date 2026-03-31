@@ -15,6 +15,10 @@ import {
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
 import dayjs from "dayjs";
 import { CalendarEvent } from "@/lib/types/interview";
+import { updateInterview } from "@/app/actions/post";
+import { useAppDispatch } from "@/lib/store/hooks";
+import { fetchEvents } from "@/lib/store/calendarSlice";
+import { notifications } from "@mantine/notifications";
 
 interface WeekViewProps {
   events: CalendarEvent[];
@@ -29,6 +33,8 @@ export default function WeekView({
   selectedDate,
   onDateChange,
 }: WeekViewProps) {
+  const dispatch = useAppDispatch();
+
   const hours = [
     "08 AM",
     "09 AM",
@@ -51,6 +57,42 @@ export default function WeekView({
 
     onDateChange(newDate.toDate());
   };
+
+  const handleDragStart = (e: React.DragEvent, eventId: string) => {
+    e.dataTransfer.setData("eventId", eventId);
+  };
+
+  const handleDrop = async (e: React.DragEvent, dayDate: dayjs.Dayjs, hour: string) => {
+    e.preventDefault();
+    const eventId = e.dataTransfer.getData("eventId");
+    const event = events.find((ev) => ev.id === eventId);
+    if (!event) return;
+
+    const [hourVal, ampm] = hour.split(" ");
+    let finalHour = parseInt(hourVal);
+    if (ampm === "PM" && finalHour !== 12) finalHour += 12;
+    if (ampm === "AM" && finalHour === 12) finalHour = 0;
+
+    const newStart = dayDate.hour(finalHour).minute(0).second(0);
+    const newEnd = newStart.add(30, "minute");
+
+
+    const result = await updateInterview({
+      interview_id: eventId,
+      interview_start_at: newStart.toISOString(),
+      interview_end_at: newEnd.toISOString(),
+    });
+
+    if (result.success) {
+      notifications.show({
+        title: "Interview Rescheduled",
+        message: `Updated to ${newStart.format("MMM DD, hh:mm A")}`,
+        color: "blue",
+      });
+      dispatch(fetchEvents());
+    }
+  };
+
 
   // Generate dates for the week containing selectedDate
   const startOfWeek = dayjs(selectedDate).startOf("week");
@@ -214,6 +256,8 @@ export default function WeekView({
                     <Grid.Col
                       key={i}
                       span={2}
+                      onDragOver={(e) => e.preventDefault()}
+                      onDrop={(e) => handleDrop(e, day.fullDate, hour)}
                       style={{
                         borderLeft: "1px solid var(--mantine-color-default-border)",
                         position: "relative",
@@ -221,13 +265,17 @@ export default function WeekView({
                         flexWrap: "wrap",
                         alignContent: "flex-start",
                         padding: 2,
+                        minHeight: "100px"
                       }}
                     >
                       {dayEvents.map((event) => (
                         <Box
                           key={event.id}
+                          draggable
+                          onDragStart={(e) => handleDragStart(e, event.id)}
                           m={2}
                           p={6}
+
                           style={{
                             borderRadius: "10px",
                             cursor: "pointer",
@@ -259,8 +307,14 @@ export default function WeekView({
                               avatars: [event.extendedProps.avatar].filter(
                                 Boolean,
                               ),
+                              notes: event.extendedProps.notes,
+                              recordingLink: event.extendedProps.recording_link,
+                              meetingLink: event.extendedProps.meeting_link,
+                              startDate: dayjs(event.start).toDate(),
+                              endDate: dayjs(event.end).toDate(),
                             })
                           }
+
                         >
                           <Stack gap={2}>
                             <Text

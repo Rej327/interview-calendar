@@ -89,11 +89,16 @@ BEGIN
     -- Prepare return data (similar to get_calendar_events structure)
     SELECT jsonb_build_object(
         'interview_id', var_interview_id,
-        'title', initcap(input_type::text) || ' Round: ' || input_candidate_name,
+        'title', initcap(replace(input_type::text, '_', ' ')) || ' Interview: ' || input_candidate_name,
         'start', input_start_at,
         'end', input_end_at,
         'status', 'CONFIRMED',
-        'color', 'blue',
+        'color', CASE 
+            WHEN input_type = 'DEPARTMENT' THEN 'violet'
+            WHEN input_type = 'REQUESTOR' THEN 'teal'
+            WHEN input_type = 'HR' THEN 'blue'
+            ELSE 'gray'
+        END,
         'extendedProps', jsonb_build_object(
             'candidate_name', input_candidate_name,
             'interviewer_name', input_interviewer_name,
@@ -102,6 +107,7 @@ BEGIN
             'type', input_type,
             'meeting_link', input_meeting_link
         )
+
     ) INTO return_data;
 
     RETURN return_data;

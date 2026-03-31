@@ -29,7 +29,7 @@ export function mapSupabaseToCalendarEvent(supabaseEvent: any): CalendarEvent {
       interviewer: supabaseEvent.extendedProps?.interviewer_name || "Unassigned",
       role: supabaseEvent.extendedProps?.role || "Position TBD",
       status: supabaseEvent.status as INTERVIEW_STATUS,
-      type: supabaseEvent.extendedProps?.type as INTERVIEW_TYPE || "TECHNICAL", 
+      type: supabaseEvent.extendedProps?.type as INTERVIEW_TYPE || "HR", 
       avatar: supabaseEvent.extendedProps?.avatar,
       color: supabaseEvent.color || 'blue',
       notes: supabaseEvent.extendedProps?.notes,

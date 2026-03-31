@@ -18,11 +18,11 @@ export const InterviewStatus: Record<string, INTERVIEW_STATUS> = {
 };
 
 export const InterviewType: Record<string, INTERVIEW_TYPE> = {
-  TECHNICAL: "TECHNICAL",
-  BEHAVIORAL: "BEHAVIORAL",
-  SCREENING: "SCREENING",
-  LEADERSHIP: "LEADERSHIP",
+  DEPARTMENT: "DEPARTMENT",
+  REQUESTOR: "REQUESTOR",
+  HR: "HR",
 };
+
 
 
 export const HiringProcessStatus: Record<string, HIRING_PROCESS_STATUS> = {

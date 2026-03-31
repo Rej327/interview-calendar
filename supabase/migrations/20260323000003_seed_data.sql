@@ -82,10 +82,11 @@ SELECT
     END)
 FROM public.hiring_processes_table hp
 CROSS JOIN LATERAL (VALUES 
-    (1, 'HR Screening', 'SCREENING'),
-    (2, 'Technical Assessment', 'TECHNICAL'),
-    (3, 'Field Expert Review', 'TECHNICAL')
+    (1, 'HR Interview', 'HR'),
+    (2, 'Department Interview', 'DEPARTMENT'),
+    (3, 'Requestor Interview', 'REQUESTOR')
 ) AS step(idx, step_name, step_type)
+
 -- Only skip steps for Withdrawals/Pooling, but ensure at least some steps exist for everyone
 WHERE hp.hiring_process_status NOT IN ('WITHDRAWN', 'POOLING') OR random() > 0.4;
 

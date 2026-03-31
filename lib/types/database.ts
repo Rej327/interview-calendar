@@ -34,6 +34,44 @@ export type Database = {
   };
   public: {
     Tables: {
+      audit_logs_table: {
+        Row: {
+          log_action_type: string | null;
+          log_candidate_name: string | null;
+          log_description: string | null;
+          log_id: string;
+          log_interview_id: string | null;
+          log_modified_by: string | null;
+          log_timestamp: string | null;
+        };
+        Insert: {
+          log_action_type?: string | null;
+          log_candidate_name?: string | null;
+          log_description?: string | null;
+          log_id?: string;
+          log_interview_id?: string | null;
+          log_modified_by?: string | null;
+          log_timestamp?: string | null;
+        };
+        Update: {
+          log_action_type?: string | null;
+          log_candidate_name?: string | null;
+          log_description?: string | null;
+          log_id?: string;
+          log_interview_id?: string | null;
+          log_modified_by?: string | null;
+          log_timestamp?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "audit_logs_table_log_interview_id_fkey";
+            columns: ["log_interview_id"];
+            isOneToOne: false;
+            referencedRelation: "interviews_table";
+            referencedColumns: ["interview_id"];
+          },
+        ];
+      };
       candidates_table: {
         Row: {
           candidate_avatar_url: string | null;
@@ -154,6 +192,7 @@ export type Database = {
           interviewer_email: string;
           interviewer_full_name: string;
           interviewer_id: string;
+          interviewer_role_id: string | null;
         };
         Insert: {
           interviewer_avatar_url?: string | null;
@@ -161,6 +200,7 @@ export type Database = {
           interviewer_email: string;
           interviewer_full_name: string;
           interviewer_id?: string;
+          interviewer_role_id?: string | null;
         };
         Update: {
           interviewer_avatar_url?: string | null;
@@ -168,8 +208,17 @@ export type Database = {
           interviewer_email?: string;
           interviewer_full_name?: string;
           interviewer_id?: string;
+          interviewer_role_id?: string | null;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "interviewers_table_interviewer_role_id_fkey";
+            columns: ["interviewer_role_id"];
+            isOneToOne: false;
+            referencedRelation: "roles_table";
+            referencedColumns: ["role_id"];
+          },
+        ];
       };
       interviews_table: {
         Row: {
@@ -179,6 +228,7 @@ export type Database = {
           interview_interviewer_id: string | null;
           interview_meeting_link: string | null;
           interview_notes: string | null;
+          interview_recorded_link: string | null;
           interview_start_at: string;
           interview_status:
             | Database["public"]["Enums"]["interview_status"]
@@ -192,6 +242,7 @@ export type Database = {
           interview_interviewer_id?: string | null;
           interview_meeting_link?: string | null;
           interview_notes?: string | null;
+          interview_recorded_link?: string | null;
           interview_start_at: string;
           interview_status?:
             | Database["public"]["Enums"]["interview_status"]
@@ -205,6 +256,7 @@ export type Database = {
           interview_interviewer_id?: string | null;
           interview_meeting_link?: string | null;
           interview_notes?: string | null;
+          interview_recorded_link?: string | null;
           interview_start_at?: string;
           interview_status?:
             | Database["public"]["Enums"]["interview_status"]
@@ -255,10 +307,16 @@ export type Database = {
     };
     Functions: {
       create_hiring_process: { Args: { input_data: Json }; Returns: Json };
+      create_role: { Args: { input_data: Json }; Returns: Json };
+      get_all_interviewers: { Args: { input_data: Json }; Returns: Json };
+      get_all_roles: { Args: { input_data?: Json }; Returns: Json };
       get_calendar_events: { Args: { input_data: Json }; Returns: Json };
       get_candidates_portfolio: { Args: { input_data: Json }; Returns: Json };
       get_hiring_process_details: { Args: { input_data: Json }; Returns: Json };
+      get_recent_changes: { Args: never; Returns: Json };
+      quick_add_interview: { Args: { input_data: Json }; Returns: Json };
       schedule_step_interview: { Args: { input_data: Json }; Returns: Json };
+      update_interview: { Args: { input_data: Json }; Returns: Json };
     };
     Enums: {
       hiring_process_status:
@@ -274,12 +332,7 @@ export type Database = {
         | "CANCELLED"
         | "PENDING"
         | "RESCHEDULED";
-      interview_type:
-        | "TECHNICAL"
-        | "BEHAVIORAL"
-        | "SCREENING"
-        | "LEADERSHIP"
-        | "CULTURE";
+      interview_type: "DEPARTMENT" | "REQUESTOR" | "HR";
       step_status:
         | "PENDING"
         | "IN_PROGRESS"
@@ -434,13 +487,7 @@ export const Constants = {
         "PENDING",
         "RESCHEDULED",
       ],
-      interview_type: [
-        "TECHNICAL",
-        "BEHAVIORAL",
-        "SCREENING",
-        "LEADERSHIP",
-        "CULTURE",
-      ],
+      interview_type: ["DEPARTMENT", "REQUESTOR", "HR"],
       step_status: ["PENDING", "IN_PROGRESS", "COMPLETED", "SKIPPED", "FAILED"],
     },
   },

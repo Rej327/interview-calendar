@@ -11,8 +11,11 @@ import {
   TextInput,
   Select,
   ActionIcon,
+  Grid,
 } from "@mantine/core";
-import { DateTimePicker } from "@mantine/dates";
+
+import { DateTimePicker, TimeInput } from "@mantine/dates";
+
 import { IconX, IconPlus } from "@tabler/icons-react";
 import { useAppDispatch } from "@/lib/store/hooks";
 import { addEvent, fetchEvents } from "@/lib/store/calendarSlice";
@@ -42,7 +45,7 @@ export default function NewSlotModal({ opened, onClose }: NewSlotModalProps) {
     { id: string; name: string; role: string }[]
   >([]);
   const [role, setRole] = useState("");
-  const [type, setType] = useState<INTERVIEW_TYPE>("SCREENING");
+  const [type, setType] = useState<INTERVIEW_TYPE>("HR");
   const [startTime, setStartTime] = useState<Date | null>(new Date());
   const [endTime, setEndTime] = useState<Date | null>(
     dayjs().add(1, "hour").toDate(),
@@ -101,7 +104,7 @@ export default function NewSlotModal({ opened, onClose }: NewSlotModalProps) {
       setInterviewer(null);
       setRole("");
       setMeetingLink("");
-      setType("SCREENING");
+      setType("HR");
     }
   };
 
@@ -170,43 +173,62 @@ export default function NewSlotModal({ opened, onClose }: NewSlotModalProps) {
           <Select
             label="Interview Type"
             placeholder="Select type"
-            data={["SCREENING", "TECHNICAL", "BEHAVIORAL", "LEADERSHIP"]}
+            data={["HR", "DEPARTMENT", "REQUESTOR"]}
             value={type}
             onChange={(value) => setType(value as INTERVIEW_TYPE)}
             required
             radius="md"
           />
 
-          <Group grow>
-            <DateTimePicker
-              label="Start Time"
-              placeholder="Pick date and time"
-              value={startTime}
-              onChange={(value) => {
-                if (typeof value === "string") {
-                  setStartTime(new Date(value));
-                } else {
-                  setStartTime(value);
-                }
-              }}
-              required
-              radius="md"
-            />
-            <DateTimePicker
-              label="End Time"
-              placeholder="Pick date and time"
-              value={endTime}
-              onChange={(value) => {
-                if (typeof value === "string") {
-                  setEndTime(new Date(value));
-                } else {
-                  setEndTime(value);
-                }
-              }}
-              required
-              radius="md"
-            />
-          </Group>
+          <Grid gutter="md">
+            <Grid.Col span={6}>
+              <DateTimePicker
+                label="Start Date & Time"
+                placeholder="Pick date and time"
+                value={startTime}
+                onChange={(val) => {
+                  if (typeof val === "string") {
+                    const date = new Date(val);
+                    setStartTime(date);
+                  } else {
+                    setStartTime(val);
+                  }
+
+                  if (val && endTime) {
+                    const startVal =
+                      typeof val === "string" ? new Date(val) : val;
+                    const newEnd = dayjs(startVal)
+                      .hour(endTime.getHours())
+                      .minute(endTime.getMinutes())
+                      .toDate();
+                    setEndTime(newEnd);
+                  }
+                }}
+                required
+                radius="md"
+              />
+            </Grid.Col>
+
+            <Grid.Col span={6}>
+              <TimeInput
+                label="End Time"
+                placeholder="Pick time"
+                value={endTime ? dayjs(endTime).format("HH:mm") : ""}
+                onChange={(e) => {
+                  const [h, m] = e.target.value.split(":");
+                  if (startTime) {
+                    const newEnd = dayjs(startTime)
+                      .hour(parseInt(h))
+                      .minute(parseInt(m))
+                      .toDate();
+                    setEndTime(newEnd);
+                  }
+                }}
+                required
+                radius="md"
+              />
+            </Grid.Col>
+          </Grid>
         </Stack>
 
         <Group justify="flex-end" mt="xl">
