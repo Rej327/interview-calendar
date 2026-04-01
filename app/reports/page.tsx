@@ -18,6 +18,8 @@ import {
   Center,
   Loader,
   Modal,
+  Menu,
+  rem,
 } from "@mantine/core";
 
 import {
@@ -42,12 +44,14 @@ import isoWeek from "dayjs/plugin/isoWeek";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { fetchEvents } from "@/lib/store/calendarSlice";
 import { fetchCandidates } from "@/lib/store/candidatesSlice";
+import { notifications } from "@mantine/notifications";
 
 dayjs.extend(isoWeek);
 
 export default function ReportsPage() {
   const [opened, { open, close }] = useDisclosure(false);
   const [selectedReport, setSelectedReport] = useState<any>(null);
+  const [timeRange, setTimeRange] = useState<"year" | "month" | "week" | "all">("year");
 
   const dispatch = useAppDispatch();
   const { events, loading: eventsLoading } = useAppSelector((state) => state.calendar);
@@ -58,10 +62,30 @@ export default function ReportsPage() {
     if (candidates.length === 0) dispatch(fetchCandidates());
   }, [dispatch, events.length, candidates.length]);
 
+  const filteredEvents = useMemo(() => {
+    if (timeRange === "all") return events;
+    const amount = timeRange === "week" ? 7 : timeRange === "month" ? 30 : 365;
+    return events.filter((e: any) => dayjs(e.start).isAfter(dayjs().subtract(amount, "day")));
+  }, [events, timeRange]);
+
+  const filteredCandidates = useMemo(() => {
+    if (timeRange === "all") return candidates;
+    const amount = timeRange === "week" ? 7 : timeRange === "month" ? 30 : 365;
+    const threshold = dayjs().subtract(amount, "day");
+    
+    // Candidates who had an interview in the period
+    const candidateNamesWithActivity = new Set(filteredEvents.map((e: any) => e.extendedProps.candidate_name));
+    
+    return candidates.filter((c: any) => 
+        dayjs(c.applied_date).isAfter(threshold) || 
+        candidateNamesWithActivity.has(c.name)
+    );
+  }, [candidates, filteredEvents, timeRange]);
+
   const kpiData = useMemo(() => {
-    const totalInterviews = events.length;
-    const completed = events.filter(e => e.extendedProps.status === 'COMPLETED').length;
-    const hired = candidates.filter((c: any) => c.status === 'HIRED').length;
+    const totalInterviews = filteredEvents.length;
+    const completed = filteredEvents.filter(e => e.extendedProps.status === 'COMPLETED').length;
+    const hired = filteredCandidates.filter((c: any) => c.status === 'HIRED').length;
     const conversionRate = totalInterviews > 0 ? ((hired / totalInterviews) * 100).toFixed(1) : "0";
 
     return [
@@ -77,42 +101,99 @@ export default function ReportsPage() {
     ];
   }, [events, candidates]);
 
-  const weeklyData = useMemo(() => {
-    const weeks: Record<string, { scheduled: number; completed: number }> = {};
-    
-    for (let i = 4; i >= 0; i--) {
-        const w = dayjs().subtract(i, 'week').format("WK DD");
-        weeks[w] = { scheduled: 0, completed: 0 };
+  const chartData = useMemo(() => {
+    const data: Record<string, { scheduled: number; completed: number }> = {};
+    let unit: "day" | "week" | "month" = "week";
+    let count = 5;
+    let format = "WK DD";
+
+    if (timeRange === "week") {
+      unit = "day";
+      count = 6; // last 7 days
+      format = "ddd DD";
+    } else if (timeRange === "all" || timeRange === "year") {
+      unit = "month";
+      count = 5; // last 6 months
+      format = "MMM YYYY";
+    } else {
+      unit = "week";
+      count = 4; // last 5 weeks
+      format = "WK DD";
+    }
+
+    for (let i = count; i >= 0; i--) {
+        const key = dayjs().subtract(i, unit).startOf(unit).format(format);
+        data[key] = { scheduled: 0, completed: 0 };
     }
 
     events.forEach(e => {
-        const w = dayjs(e.start).format("WK DD");
-        if (weeks[w]) {
-            weeks[w].scheduled++;
-            if (e.extendedProps.status === 'COMPLETED') weeks[w].completed++;
+        const key = dayjs(e.start).startOf(unit).format(format);
+        if (data[key]) {
+            data[key].scheduled++;
+            if (e.extendedProps.status === "COMPLETED") data[key].completed++;
         }
     });
 
-    return Object.entries(weeks).map(([name, data]) => ({ name, ...data }));
-  }, [events]);
+    return Object.entries(data).map(([name, d]) => ({ name, ...d }));
+  }, [events, timeRange]);
 
   const funnelData = useMemo(() => {
-    const total = candidates.length;
-    const active = candidates.filter((c: any) => c.status === 'ACTIVE').length;
-    const hired = candidates.filter((c: any) => c.status === 'HIRED').length;
-    const rejected = candidates.filter((c: any) => c.status === 'REJECTED').length;
+    const total = filteredCandidates.length;
+    const active = filteredCandidates.filter((c: any) => c.status === "ACTIVE").length;
+    const hired = filteredCandidates.filter((c: any) => c.status === "HIRED").length;
+    const maxVal = total || 1;
 
     return [
       { label: "TOTAL PIPELINE", value: total.toString(), width: "100%", color: "blue.9" },
-      { label: "ACTIVE SCREENING", value: active.toString(), width: "80%", color: "blue.8" },
-      { label: "QUALIFIED", value: (active + hired).toString(), width: "60%", color: "blue.7" },
-      { label: "HIRED", value: hired.toString(), width: "40%", color: "gray.7" },
+      { label: "ACTIVE SCREENING", value: active.toString(), width: `${Math.max((active / maxVal) * 100, 10)}%`, color: "blue.8" },
+      { label: "QUALIFIED", value: (active + hired).toString(), width: `${Math.max(((active + hired) / maxVal) * 100, 10)}%`, color: "blue.7" },
+      { label: "HIRED", value: hired.toString(), width: `${Math.max((hired / maxVal) * 100, 10)}%`, color: "gray.7" },
     ];
-  }, [candidates]);
+  }, [filteredCandidates]);
 
   const handleKpiClick = (kpi: any) => {
     setSelectedReport(kpi);
     open();
+  };
+
+  const handleExportReport = () => {
+    const sections = [];
+
+    // KPI Section
+    sections.push("KPI OVERVIEW");
+    sections.push("Label,Value,Change");
+    kpiData.forEach(kpi => sections.push(`${kpi.label},${kpi.value},${kpi.change}`));
+    sections.push("");
+
+    // Weekly Section
+    sections.push("DYNAMIC TRENDS");
+    sections.push("Period,Scheduled,Completed");
+    chartData.forEach(cd => sections.push(`${cd.name},${cd.scheduled},${cd.completed}`));
+    sections.push("");
+
+    // Funnel Section
+    sections.push("PIPELINE FUNNEL");
+    sections.push("Stage,Candidates");
+    funnelData.forEach(fd => sections.push(`${fd.label},${fd.value}`));
+
+    const csvContent = sections.join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute("href", url);
+    link.setAttribute("download", `hiring_report_${dayjs().format("YYYY-MM-DD")}.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    notifications.show({
+        title: "Report Exported",
+        message: "Your hiring performance report has been downloaded successfully.",
+        color: "teal",
+        icon: <IconCheck size={16} />,
+    });
   };
 
   if (eventsLoading || candidatesLoading) {
@@ -137,18 +218,33 @@ export default function ReportsPage() {
             </Title>
           </Box>
           <Group gap="md">
-            <Button
-              variant="default"
-              leftSection={<IconCalendar size={16} />}
-              radius="md"
-            >
-              Current Year
-            </Button>
+            <Menu shadow="md" width={200} radius="md">
+              <Menu.Target>
+                <Button
+                  variant="default"
+                  leftSection={<IconCalendar size={16} />}
+                  radius="md"
+                >
+                  {timeRange === "all" ? "All Time" : 
+                   timeRange === "year" ? "Rolling Year" : 
+                   timeRange === "month" ? "Rolling 30 Days" : "Rolling 7 Days"}
+                </Button>
+              </Menu.Target>
+
+              <Menu.Dropdown>
+                <Menu.Label>Aggregation Period</Menu.Label>
+                <Menu.Item onClick={() => setTimeRange("all")}>All Time Records</Menu.Item>
+                <Menu.Item onClick={() => setTimeRange("year")}>Rolling Year Metrics</Menu.Item>
+                <Menu.Item onClick={() => setTimeRange("month")}>Rolling 30 Days</Menu.Item>
+                <Menu.Item onClick={() => setTimeRange("week")}>Rolling 7 Days</Menu.Item>
+              </Menu.Dropdown>
+            </Menu>
             <Button
               leftSection={<IconDownload size={16} />}
               radius="md"
               color="blue.9"
               px="xl"
+              onClick={handleExportReport}
             >
               Export Report
             </Button>
@@ -208,10 +304,10 @@ export default function ReportsPage() {
               <Group justify="space-between" mb="xl">
                 <Box>
                   <Title order={5} fw={800}>
-                    Interviews per Week
+                    {timeRange === 'week' ? 'Daily Performance' : timeRange === 'month' ? 'Weekly Trends' : 'Monthly Overview'}
                   </Title>
                   <Text size="xs" c="dimmed" fw={600}>
-                    Scheduled vs. Completed sessions
+                    {timeRange === 'week' ? 'Last 7 days breakdown' : timeRange === 'month' ? 'Sessions over last month' : 'Hiring velocity trends'}
                   </Text>
                 </Box>
                 <Group gap="lg">
@@ -242,7 +338,7 @@ export default function ReportsPage() {
 
               <Box h={300}>
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={weeklyData}>
+                  <BarChart data={chartData}>
                     <CartesianGrid
                       strokeDasharray="3 3"
                       vertical={false}
@@ -287,15 +383,15 @@ export default function ReportsPage() {
                 Pipeline Distribution
               </Title>
               <Text size="xs" c="dimmed" fw={600} mb="xl">
-                Candidate status breakdown
+                {timeRange === 'all' ? 'Snapshot of overall system activity.' : `Showing breakdown for ${timeRange === 'year' ? 'the past 365 days' : timeRange === 'month' ? 'the rolling 30 day period' : 'the rolling 7 day period'}.`}
               </Text>
 
               <Stack gap="xl">
                 {[
-                  { label: "ACTIVE", color: "blue.9", count: candidates.filter((c: any) => c.status === 'ACTIVE').length },
-                  { label: "HIRED", color: "teal.6", count: candidates.filter((c: any) => c.status === 'HIRED').length },
-                  { label: "REJECTED", color: "red.4", count: candidates.filter((c: any) => c.status === 'REJECTED').length },
-                  { label: "WITHDRAWN", color: "gray.4", count: candidates.filter((c: any) => c.status === 'WITHDRAWN').length },
+                  { label: "ACTIVE", color: "blue.9", count: filteredCandidates.filter((c: any) => c.status === 'ACTIVE').length },
+                  { label: "HIRED", color: "teal.6", count: filteredCandidates.filter((c: any) => c.status === 'HIRED').length },
+                  { label: "REJECTED", color: "red.4", count: filteredCandidates.filter((c: any) => c.status === 'REJECTED').length },
+                  { label: "WITHDRAWN", color: "gray.4", count: filteredCandidates.filter((c: any) => c.status === 'WITHDRAWN').length },
                 ].map((item) => (
                   <Box key={item.label}>
                     <Group justify="space-between" mb={6}>
@@ -307,7 +403,7 @@ export default function ReportsPage() {
                       </Text>
                     </Group>
                     <Progress
-                      value={candidates.length > 0 ? (item.count / candidates.length) * 100 : 0}
+                      value={filteredCandidates.length > 0 ? (item.count / filteredCandidates.length) * 100 : 0}
                       color={item.color}
                       size="lg"
                       radius="xl"
@@ -321,10 +417,10 @@ export default function ReportsPage() {
                 >
                   <Group justify="space-between">
                     <Text size="xs" fw={800} c="gray.6">
-                      Total Portfolio
+                      Filtered Portfolio
                     </Text>
                     <Text size="xs" fw={900}>
-                      {candidates.length} Profiles
+                      {filteredCandidates.length} Profiles
                     </Text>
                   </Group>
                 </Box>
