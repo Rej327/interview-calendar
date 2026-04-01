@@ -211,6 +211,7 @@ BEGIN
     SELECT jsonb_agg(
         jsonb_build_object(
             'candidate_id', candidates_table.candidate_id,
+            'hiring_process_id', hiring_processes_table.hiring_process_id,
             'name', candidates_table.candidate_full_name,
             'role', roles_table.role_title,
             'status', hiring_processes_table.hiring_process_status,

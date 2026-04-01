@@ -29,7 +29,6 @@ import {
   IconUsers,
   IconArrowUpRight,
   IconArrowDownRight,
-  IconDotsVertical,
   IconPlus,
   IconSettings,
 } from "@tabler/icons-react";

@@ -58,4 +58,16 @@ export async function quickAddInterview(input_data: any) {
   }
 }
 
+export async function createCandidate(input_data: { full_name: string; email: string; avatar_url: string; role_id: string }) {
+  try {
+    const { data, error } = await supabaseAdmin.rpc("create_candidate", {
+      input_data,
+    });
 
+    if (error) throw error;
+    return { success: true, data };
+  } catch (error: any) {
+    console.error("createCandidate Action Error:", error);
+    return { success: false, message: error.message };
+  }
+}

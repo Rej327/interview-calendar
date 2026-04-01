@@ -8,10 +8,11 @@ import {
   Menu,
   Text,
   Tooltip,
+  Box,
   useMantineColorScheme,
   TextInput,
-  Box,
 } from "@mantine/core";
+import React, { useState, useEffect } from "react";
 import {
   IconBell,
   IconCalendarEvent,
@@ -32,7 +33,12 @@ interface AppHeaderProps {
 
 export default function AppHeader({ opened, toggle }: AppHeaderProps) {
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
+  const [mounted, setMounted] = useState(false);
   const isDark = colorScheme === "dark";
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <Group h="100%" px="md" justify="space-between" className={classes.header}>
@@ -57,8 +63,6 @@ export default function AppHeader({ opened, toggle }: AppHeaderProps) {
           },
         }}
       />
-
-
 
       {/* Right: Actions + User */}
       <Group gap="md">
@@ -88,7 +92,7 @@ export default function AppHeader({ opened, toggle }: AppHeaderProps) {
           </Tooltip>
 
           <Tooltip
-            label={isDark ? "Light mode" : "Dark mode"}
+            label={!mounted ? "Theme" : isDark ? "Light mode" : "Dark mode"}
             withArrow
             position="bottom"
           >
@@ -100,7 +104,9 @@ export default function AppHeader({ opened, toggle }: AppHeaderProps) {
               onClick={() => toggleColorScheme()}
               aria-label="Toggle color scheme"
             >
-              {isDark ? (
+              {!mounted ? (
+                <IconMoon size={20} stroke={1.5} />
+              ) : isDark ? (
                 <IconSun size={20} stroke={1.5} />
               ) : (
                 <IconMoon size={20} stroke={1.5} />
@@ -115,7 +121,10 @@ export default function AppHeader({ opened, toggle }: AppHeaderProps) {
               size={36}
               radius="md"
               src="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-1.png"
-              style={{ cursor: "pointer", border: "2px solid var(--mantine-color-default-border)" }}
+              style={{
+                cursor: "pointer",
+                border: "2px solid var(--mantine-color-default-border)",
+              }}
             />
           </Menu.Target>
           <Menu.Dropdown>

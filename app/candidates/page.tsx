@@ -20,8 +20,11 @@ import {
   ThemeIcon,
   Loader,
   Center,
+  Drawer,
+  Checkbox,
+  MultiSelect,
 } from "@mantine/core";
-import { DataTable } from "mantine-datatable";
+import { DataTable, DataTableSortStatus } from "mantine-datatable";
 import {
   IconSearch,
   IconDotsVertical,
@@ -34,13 +37,24 @@ import {
 } from "@tabler/icons-react";
 import { useDisclosure } from "@mantine/hooks";
 import InterviewReviewModal from "@/components/calendar/InterviewReviewModal";
+import AddCandidateModal from "@/components/candidates/AddCandidateModal";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { fetchCandidates } from "@/lib/store/candidatesSlice";
+import { notifications } from "@mantine/notifications";
 
 export default function CandidatesPage() {
   const [query, setQuery] = useState("");
-  const [opened, { open, close }] = useDisclosure(false);
+  const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({ columnAccessor: "applied_date", direction: "desc" });
+  const [detailOpened, { open: detailOpen, close: detailClose }] = useDisclosure(false);
+  const [addOpened, { open: addOpen, close: addClose }] = useDisclosure(false);
+  const [filterOpened, { open: filterOpen, close: filterClose }] = useDisclosure(false);
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 10;
   const [selectedCandidate, setSelectedCandidate] = useState<any>(null);
+
+  // Filter states
+  const [statusFilters, setStatusFilters] = useState<string[]>([]);
+  const [rolesFilter, setRolesFilter] = useState<string[]>([]);
 
   const dispatch = useAppDispatch();
   const { candidates, loading } = useAppSelector((state) => state.candidates);
@@ -60,15 +74,85 @@ export default function CandidatesPage() {
         assignedHR: "Recruitment Team",
         notes: `Candidate is currently in ${candidate.status} state. Applied on ${new Date(candidate.applied_date).toLocaleDateString()}.`
     });
-    open();
+    detailOpen();
   };
 
+  const handleExport = () => {
+    const csvContent = [
+      ["ID", "Name", "Role", "Status", "Applied Date"],
+      ...filteredData.map((c: any) => [
+        c.candidate_id,
+        c.name,
+        c.role,
+        c.status,
+        new Date(c.applied_date).toISOString(),
+      ]),
+    ]
+      .map((e) => e.join(","))
+      .join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `candidates_pool_${new Date().toLocaleDateString()}.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    notifications.show({ title: "Export Success", message: "Candidate pool exported to CSV", color: "teal" });
+  };
+
+  const handleInvite = (platform: string) => {
+    notifications.show({
+      title: "Invite Sent",
+      message: `Scanning for top talent on ${platform}... Initial invitation request dispatched.`,
+      color: "blue",
+    });
+  };
+
+  const roles = useMemo(() => {
+    return Array.from(new Set(candidates.map((c: any) => c.role)));
+  }, [candidates]);
+
+  const sortedData = useMemo(() => {
+    const data = [...candidates];
+    data.sort((a, b) => {
+      const aValue = a[sortStatus.columnAccessor];
+      const bValue = b[sortStatus.columnAccessor];
+      
+      if (aValue === bValue) return 0;
+      
+      const multiplier = sortStatus.direction === "asc" ? 1 : -1;
+      
+      if (typeof aValue === 'string') {
+        return aValue.localeCompare(bValue) * multiplier;
+      }
+      return (aValue > bValue ? 1 : -1) * multiplier;
+    });
+    return data;
+  }, [candidates, sortStatus]);
+
   const filteredData = useMemo(() => {
-    return candidates.filter((c: any) => 
-      c.name.toLowerCase().includes(query.toLowerCase()) || 
-      c.role.toLowerCase().includes(query.toLowerCase())
-    );
-  }, [candidates, query]);
+    return sortedData.filter((c: any) => {
+      const matchesSearch = 
+        c.name.toLowerCase().includes(query.toLowerCase()) || 
+        c.role.toLowerCase().includes(query.toLowerCase());
+      
+      const matchesStatus = statusFilters.length === 0 || statusFilters.includes(c.status);
+      const matchesRole = rolesFilter.length === 0 || rolesFilter.includes(c.role);
+      
+      return matchesSearch && matchesStatus && matchesRole;
+    });
+  }, [sortedData, query, statusFilters, rolesFilter]);
+
+  const pagedData = useMemo(() => {
+    return filteredData.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  }, [filteredData, page]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [query, statusFilters, rolesFilter]);
 
   const stats = useMemo(() => {
     return {
@@ -87,10 +171,10 @@ export default function CandidatesPage() {
             <Text c="dimmed" size="sm" fw={500}>Track and manage your talent pool pipeline.</Text>
           </Box>
           <Group gap="md">
-            <Button variant="default" leftSection={<IconDownload size={16} />} radius="md">
+            <Button variant="default" leftSection={<IconDownload size={16} />} radius="md" onClick={handleExport}>
                 Export Pool
             </Button>
-            <Button leftSection={<IconUserPlus size={16} />} radius="md" color="blue.9" px="xl">
+            <Button leftSection={<IconUserPlus size={16} />} radius="md" color="blue.9" px="xl" onClick={addOpen}>
                 Add Candidate
             </Button>
           </Group>
@@ -110,7 +194,7 @@ export default function CandidatesPage() {
                         onChange={(e) => setQuery(e.currentTarget.value)}
                         styles={{ input: { border: "none" } }}
                     />
-                    <ActionIcon variant="default" size="lg" radius="md">
+                    <ActionIcon variant={statusFilters.length > 0 || rolesFilter.length > 0 ? "light" : "default"} size="lg" radius="md" onClick={filterOpen}>
                         <IconFilter size={18} />
                     </ActionIcon>
                 </Group>
@@ -121,13 +205,20 @@ export default function CandidatesPage() {
               ) : (
                 <DataTable
                   height={500}
-                  records={filteredData}
-                  idAccessor="candidate_id"
+                  records={pagedData}
+                  idAccessor={(record: any) => `${record.candidate_id}-${record.hiring_process_id || record.role}`}
+                  totalRecords={filteredData.length}
+                  recordsPerPage={PAGE_SIZE}
+                  page={page}
+                  onPageChange={(p) => setPage(p)}
+                  sortStatus={sortStatus}
+                  onSortStatusChange={setSortStatus}
                   columns={[
                     { 
                       accessor: "name", 
                       title: "CANDIDATE",
                       width: 280,
+                      sortable: true,
                       render: ({ name, role, avatar }: any) => (
                         <Group gap="sm">
                           <Avatar src={avatar} radius="xl" size="sm" />
@@ -140,16 +231,17 @@ export default function CandidatesPage() {
                     },
                     { 
                       accessor: "status",
-                      render: ({ status }) => (
+                      sortable: true,
+                      render: ({ status }: any) => (
                         <Badge 
                           variant="filled" 
                           size="xs"
                           radius="sm"
                           color={
-                              status === "HIRED" ? "teal.6" : 
-                              status === "ACTIVE" ? "blue.6" : 
-                              status === "REJECTED" ? "red.6" : 
-                              status === "WITHDRAWN" ? "indigo.6" : "gray.6"
+                               status === "HIRED" ? "teal.6" : 
+                               status === "ACTIVE" ? "blue.6" : 
+                               status === "REJECTED" ? "red.6" : 
+                               status === "WITHDRAWN" ? "indigo.6" : "gray.6"
                           }
                         >
                           {status}
@@ -159,22 +251,23 @@ export default function CandidatesPage() {
                     { 
                       accessor: "applied_date", 
                       title: "APPLIED DATE", 
-                      render: (c) => <Text size="xs" fw={700} c="dimmed">{new Date(c.applied_date).toLocaleDateString()}</Text> 
+                      sortable: true,
+                      render: (c: any) => <Text size="xs" fw={700} c="dimmed">{new Date(c.applied_date).toLocaleDateString()}</Text> 
                     },
                     { 
                       accessor: "actions", 
                       title: "", 
                       textAlign: "right",
-                      render: () => (
+                      render: (record: any) => (
                         <Group gap={4} justify="flex-end">
-                          <ActionIcon variant="subtle" color="gray"><IconMail size={16}/></ActionIcon>
+                          <ActionIcon variant="subtle" color="gray" onClick={(e) => { e.stopPropagation(); handleInvite("Direct Email"); }}><IconMail size={16}/></ActionIcon>
                           <Menu position="bottom-end">
                               <Menu.Target>
-                                  <ActionIcon variant="subtle" color="gray"><IconDotsVertical size={16}/></ActionIcon>
+                                  <ActionIcon variant="subtle" color="gray" onClick={(e) => e.stopPropagation()}><IconDotsVertical size={16}/></ActionIcon>
                               </Menu.Target>
                               <Menu.Dropdown>
                                   <Menu.Item leftSection={<IconPhone style={{ width: rem(14), height: rem(14) }} />}>Call Candidate</Menu.Item>
-                                  <Menu.Item leftSection={<IconMail style={{ width: rem(14), height: rem(14) }} />}>Send Email</Menu.Item>
+                                  <Menu.Item leftSection={<IconMail style={{ width: rem(14), height: rem(14) }} />} onClick={() => handleInvite("Direct Email")}>Send Email</Menu.Item>
                               </Menu.Dropdown>
                           </Menu>
                         </Group>
@@ -219,7 +312,7 @@ export default function CandidatesPage() {
                     </Text>
                     <Stack gap="xs">
                         {["LinkedIn", "Indeed", "Glassdoor"].map(board => (
-                            <Group key={board} justify="space-between" bg="blue.8" p="xs" style={{ borderRadius: "8px", cursor: "pointer" }}>
+                            <Group key={board} justify="space-between" bg="blue.8" p="xs" style={{ borderRadius: "8px", cursor: "pointer" }} onClick={() => handleInvite(board)}>
                                 <Text size="xs" fw={800}>{board}</Text>
                                 <IconChevronRight size={14} />
                             </Group>
@@ -232,10 +325,60 @@ export default function CandidatesPage() {
       </Stack>
 
       <InterviewReviewModal 
-        opened={opened} 
-        onClose={close} 
+        opened={detailOpened} 
+        onClose={detailClose} 
         candidate={selectedCandidate} 
       />
+
+      <AddCandidateModal 
+        opened={addOpened} 
+        onClose={addClose} 
+      />
+
+      <Drawer
+        opened={filterOpened}
+        onClose={filterClose}
+        title={<Text fw={800}>Filter Candidates</Text>}
+        position="right"
+        padding="xl"
+      >
+        <Stack gap="xl">
+            <Box>
+                <Text fw={700} mb="sm" size="sm">Status</Text>
+                <Stack gap="xs">
+                    {["ACTIVE", "HIRED", "REJECTED", "WITHDRAWN"].map(status => (
+                        <Checkbox 
+                            key={status}
+                            label={status}
+                            checked={statusFilters.includes(status)}
+                            onChange={(e) => {
+                                if (e.currentTarget.checked) setStatusFilters([...statusFilters, status]);
+                                else setStatusFilters(statusFilters.filter(s => s !== status));
+                            }}
+                        />
+                    ))}
+                </Stack>
+            </Box>
+
+            <Box>
+                <Text fw={700} mb="sm" size="sm">Roles</Text>
+                <MultiSelect 
+                    placeholder="Select roles"
+                    data={roles}
+                    value={rolesFilter}
+                    onChange={setRolesFilter}
+                    radius="md"
+                />
+            </Box>
+
+            <Button variant="light" color="red" fullWidth onClick={() => { setStatusFilters([]); setRolesFilter([]); }} radius="md">
+                Reset Filters
+            </Button>
+            <Button fullWidth onClick={filterClose} radius="md" color="blue.9">
+                Apply Filters
+            </Button>
+        </Stack>
+      </Drawer>
     </Container>
   );
 }

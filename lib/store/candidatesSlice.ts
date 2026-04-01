@@ -26,6 +26,20 @@ export const fetchCandidates = createAsyncThunk(
   }
 );
 
+export const addCandidate = createAsyncThunk(
+  "candidates/addCandidate",
+  async (input_data: { full_name: string; email: string; avatar_url: string; role_id: string }, { rejectWithValue }) => {
+    try {
+      const { createCandidate } = await import("@/app/actions/post");
+      const result = await createCandidate(input_data);
+      if (!result.success) throw new Error(result.message || "Failed to add candidate");
+      return result.data;
+    } catch (error: any) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 const candidatesSlice = createSlice({
   name: "candidates",
   initialState,
@@ -41,6 +55,17 @@ const candidatesSlice = createSlice({
         state.candidates = action.payload;
       })
       .addCase(fetchCandidates.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(addCandidate.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(addCandidate.fulfilled, (state, action: PayloadAction<any>) => {
+        state.loading = false;
+        state.candidates.push(action.payload);
+      })
+      .addCase(addCandidate.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });
