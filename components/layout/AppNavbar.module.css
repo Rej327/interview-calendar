@@ -1,0 +1,18 @@
+.navbar {
+  border-right: none;
+  background: var(--mantine-color-body);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.link {
+  border-radius: var(--mantine-radius-sm);
+  font-size: var(--mantine-font-size-sm);
+  font-weight: 500;
+  transition: background 100ms ease;
+}
+
+.link[data-active] {
+  font-weight: 600;
+}

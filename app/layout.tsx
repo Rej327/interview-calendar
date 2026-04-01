@@ -1,29 +1,29 @@
+import React from "react";
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Poppins } from "next/font/google";
 import "@mantine/core/styles.css";
 import "@mantine/notifications/styles.css";
 import "mantine-datatable/styles.css";
+import MantineProviders from "@/components/MantineProviders";
 import "./globals.css";
-import Providers from "@/components/Providers";
+import MainLayout from "@/components/layout/MainLayout";
 
-const inter = Inter({
+
+
+
+const poppins = Poppins({
   subsets: ["latin"],
-  variable: "--font-inter",
-  display: "swap",
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
+  variable: "--font-poppins",
 });
 
 export const metadata: Metadata = {
-  title: "Interview Calendar",
+  title: {
+    default: "Interview Calendar",
+    template: "%s | Interview Calendar",
+  },
   description: "Schedule and manage interview sessions with ease",
-  manifest: "/manifest.json",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "default",
-    title: "Interview Calendar",
-  },
-  formatDetection: {
-    telephone: false,
-  },
+  formatDetection: { telephone: false },
 };
 
 export const viewport: Viewport = {
@@ -32,14 +32,17 @@ export const viewport: Viewport = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={inter.variable}>
-        <Providers>{children}</Providers>
+    <html lang="en" suppressHydrationWarning className={poppins.variable}>
+      <body className={poppins.className}>
+        <MantineProviders>
+          <MainLayout>{children}</MainLayout>
+        </MantineProviders>
+
       </body>
     </html>
   );
 }
+
+

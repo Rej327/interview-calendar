@@ -1,9 +1,15 @@
 import { configureStore } from "@reduxjs/toolkit";
+import calendarReducer from "./calendarSlice";
+import candidatesReducer from "./candidatesSlice";
+import interviewReducer from "./interviewSlice";
+import rolesReducer from "./rolesSlice";
 
 export const store = configureStore({
   reducer: {
-    // Add your slice reducers here
-    // e.g.  calendar: calendarReducer,
+    calendar: calendarReducer,
+    candidates: candidatesReducer,
+    interviews: interviewReducer,
+    roles: rolesReducer,
   },
 });
 
