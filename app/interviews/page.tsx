@@ -27,6 +27,7 @@ import {
   IconCalendarEvent,
   IconDotsVertical,
 } from "@tabler/icons-react";
+import { useDisclosure } from "@mantine/hooks";
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
 import isToday from "dayjs/plugin/isToday";
@@ -37,6 +38,8 @@ import InterviewReviewModal from "@/components/calendar/InterviewReviewModal";
 import { CalendarEvent } from "@/lib/types/interview";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { fetchInterviews, setActiveTab, setSelectedInterview } from "@/lib/store/interviewSlice";
+import ScheduleSessionModal from "@/components/interviews/ScheduleSessionModal";
+import { useRouter } from "next/navigation";
 
 // Register dayjs plugins
 dayjs.extend(isBetween);
@@ -45,8 +48,10 @@ dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
 
 export default function InterviewsPage() {
+  const router = useRouter();
   const dispatch = useAppDispatch();
   const { items: events, loading, activeTab, selectedInterview } = useAppSelector((state) => state.interviews);
+  const [scheduleOpened, { open: openSchedule, close: closeSchedule }] = useDisclosure(false);
 
   useEffect(() => {
     if (events.length === 0) dispatch(fetchInterviews());
@@ -90,6 +95,7 @@ export default function InterviewsPage() {
   const modalCandidate = useMemo(() => {
       if (!selectedInterview) return null;
       return {
+        id: selectedInterview.id,
         name: selectedInterview.extendedProps.candidate,
         role: selectedInterview.extendedProps.role,
         avatar: selectedInterview.extendedProps.avatar,
@@ -111,7 +117,7 @@ export default function InterviewsPage() {
             <Text c="dimmed" size="sm" fw={500}>Monitor and manage all candidate interview sessions.</Text>
           </Box>
           <Group gap="md">
-            <Button leftSection={<IconCalendarEvent size={16} />} radius="md" color="var(--mantine-color-blue-filled)" px="xl">
+            <Button leftSection={<IconCalendarEvent size={16} />} radius="md" color="var(--mantine-color-blue-filled)" px="xl" onClick={openSchedule}>
               Schedule New Session
             </Button>
           </Group>
@@ -242,7 +248,7 @@ export default function InterviewsPage() {
                         <Avatar src="https://api.dicebear.com/7.x/avataaars/svg?seed=HR" size="sm" radius="xl" />
                         <Avatar size="sm" radius="xl">+5</Avatar>
                     </AvatarGroup>
-                    <Button fullWidth mt="xl" radius="md" color="teal.8" fw={700}>Check Full Schedule</Button>
+                    <Button fullWidth mt="xl" radius="md" color="teal.8" fw={700} onClick={() => router.push("/calendar")}>Check Full Schedule</Button>
                 </Card>
             </Stack>
           </Grid.Col>
@@ -254,6 +260,7 @@ export default function InterviewsPage() {
         onClose={handleCloseModal} 
         candidate={modalCandidate} 
       />
+      <ScheduleSessionModal opened={scheduleOpened} onClose={closeSchedule} />
     </Container>
   );
 }
