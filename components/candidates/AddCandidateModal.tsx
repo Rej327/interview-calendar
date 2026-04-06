@@ -58,18 +58,29 @@ export default function AddCandidateModal({ opened, onClose }: AddCandidateModal
   const handleSubmit = async (values: typeof form.values) => {
     setLoading(true);
     try {
-      await dispatch(addCandidate(values)).unwrap();
+      const result = await dispatch(addCandidate(values)).unwrap();
       notifications.show({
-        title: "Success",
-        message: `${values.full_name} has been added to the pool.`,
+        title: "Candidate Added",
+        message: `We've added ${values.full_name} to the recruitment pipeline and sent an introductory invitation.`,
         color: "teal",
       });
+
+      // Automated invitation trigger
+      try {
+        const { sendCandidateInvite } = await import("@/app/actions/post");
+        if (result.candidate_id) {
+            await sendCandidateInvite({ candidate_ids: [result.candidate_id], platform: "System Email" });
+        }
+      } catch (inviteError) {
+          console.error("Automated invite failed:", inviteError);
+      }
+
       form.reset();
       onClose();
     } catch (error: any) {
       notifications.show({
-        title: "Error",
-        message: error.message || "Failed to add candidate",
+        title: "Could not add candidate",
+        message: "Something went wrong while saving the candidate's details. Please try again.",
         color: "red",
       });
     } finally {

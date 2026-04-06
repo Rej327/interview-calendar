@@ -94,15 +94,15 @@ export default function UpdateCandidateModal({ opened, onClose, candidate }: Upd
       })).unwrap();
       
       notifications.show({
-        title: "Updated",
-        message: `${values.full_name}'s profile has been updated.`,
+        title: "Profile Updated",
+        message: `We've successfully updated ${values.full_name}'s details.`,
         color: "teal",
       });
       onClose();
     } catch (error: any) {
       notifications.show({
-        title: "Error",
-        message: error.message || "Failed to update candidate",
+        title: "Update failed",
+        message: "We couldn't save the changes. Please try again.",
         color: "red",
       });
     } finally {
@@ -126,15 +126,15 @@ export default function UpdateCandidateModal({ opened, onClose, candidate }: Upd
         try {
           await dispatch(deleteCandidate(candidate.candidate_id)).unwrap();
           notifications.show({
-            title: "Deleted",
-            message: "Candidate has been removed from the pool.",
+            title: "Candidate Removed",
+            message: "The candidate has been successfully removed from your pipeline.",
             color: "gray",
           });
           onClose();
         } catch (error: any) {
           notifications.show({
-            title: "Error",
-            message: error.message || "Failed to delete candidate",
+            title: "Couldn't remove candidate",
+            message: "We encountered an issue while trying to remove the candidate. Please try again.",
             color: "red",
           });
         }
