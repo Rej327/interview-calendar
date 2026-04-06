@@ -63,6 +63,7 @@ export default function CandidatesPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [selectedCandidate, setSelectedCandidate] = useState<any>(null);
+  const [selectedRecords, setSelectedRecords] = useState<any[]>([]);
 
   // Filter states
   const [statusFilters, setStatusFilters] = useState<string[]>([]);
@@ -154,8 +155,8 @@ export default function CandidatesPage() {
     link.click();
     document.body.removeChild(link);
     notifications.show({
-      title: "Export Success",
-      message: "Current page of candidates exported to CSV",
+      title: "Export Complete",
+      message: "Your candidate list has been saved to your computer.",
       color: "teal",
     });
   };
@@ -175,12 +176,36 @@ export default function CandidatesPage() {
     }
   };
 
-  const handleInvite = (platform: string) => {
-    notifications.show({
-      title: "Invite Sent",
-      message: `Scanning for top talent on ${platform}... Initial invitation request dispatched.`,
-      color: "blue",
-    });
+  const handleInvite = async (platform: string, candidateIds?: string[]) => {
+    const ids = candidateIds || (selectedCandidate ? [selectedCandidate.candidate_id] : []);
+    if (ids.length === 0) return;
+
+    try {
+      const { sendCandidateInvite } = await import("@/app/actions/post");
+      const result = await sendCandidateInvite({ candidate_ids: ids, platform });
+      
+      if (result.success) {
+        notifications.show({
+          title: "Invitations Sent",
+          message: result.message,
+          color: "teal",
+        });
+        if (!candidateIds) setSelectedRecords([]); // Clear if bulk
+      } else {
+        throw new Error(result.message);
+      }
+    } catch (error: any) {
+      notifications.show({
+        title: "Something went wrong",
+        message: "We couldn't send the invitations. Please check your connection and try again.",
+        color: "red",
+      });
+    }
+  };
+
+  const handleBulkInvite = () => {
+    const ids = selectedRecords.map(r => r.candidate_id);
+    handleInvite("Bulk Automation", ids);
   };
 
   // Reset page when filters change
@@ -210,6 +235,17 @@ export default function CandidatesPage() {
             </Text>
           </Box>
           <Group gap="md">
+            {selectedRecords.length > 0 && (
+                <Button
+                    variant="light"
+                    color="blue"
+                    leftSection={<IconMail size={16} />}
+                    radius="md"
+                    onClick={handleBulkInvite}
+                >
+                    Invite ({selectedRecords.length}) Selected
+                </Button>
+            )}
             <Button
               variant="default"
               leftSection={<IconDownload size={16} />}
@@ -298,6 +334,8 @@ export default function CandidatesPage() {
                 height={500}
                 records={candidates}
                 fetching={loading}
+                selectedRecords={selectedRecords}
+                onSelectedRecordsChange={setSelectedRecords}
                 noRecordsText="No candidates found matching your criteria."
                 noRecordsIcon={
                   <Box p="xl" style={{ opacity: 0.5 }}>
