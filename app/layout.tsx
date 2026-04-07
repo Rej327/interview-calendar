@@ -6,7 +6,6 @@ import "@mantine/notifications/styles.css";
 import "mantine-datatable/styles.css";
 import MantineProviders from "@/components/MantineProviders";
 import "./globals.css";
-import MainLayout from "@/components/layout/MainLayout";
 
 
 
@@ -37,9 +36,8 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning className={poppins.variable}>
       <body className={poppins.className}>
         <MantineProviders>
-          <MainLayout>{children}</MainLayout>
+          {children}
         </MantineProviders>
-
       </body>
     </html>
   );

@@ -40,6 +40,8 @@ export default function ApplyPage({ params }: { params: Promise<{ id: string }> 
     const [submitted, setSubmitted] = useState(false);
     const [mounted, setMounted] = useState(false);
 
+    const [confirmLoading, setConfirmLoading] = useState(false);
+
     useEffect(() => {
         setMounted(true);
         const load = async () => {
@@ -52,8 +54,24 @@ export default function ApplyPage({ params }: { params: Promise<{ id: string }> 
         load();
     }, [id]);
 
-    const handleApply = () => {
-        setSubmitted(true);
+    const handleApply = async () => {
+        setConfirmLoading(true);
+        try {
+            const { updateCandidate } = await import("@/app/actions/update");
+            const result = await updateCandidate({ 
+                candidate_id: id, 
+                status: 'ACTIVE' 
+            });
+            if (result.success) {
+                setSubmitted(true);
+            } else {
+              throw new Error(result.message);
+            }
+        } catch (error) {
+            console.error("Confirmation Error:", error);
+        } finally {
+            setConfirmLoading(false);
+        }
     };
 
     if (loading) {
@@ -158,6 +176,7 @@ export default function ApplyPage({ params }: { params: Promise<{ id: string }> 
                           color="blue.9" 
                           rightSection={<IconArrowRight size={20} />}
                           onClick={handleApply}
+                          loading={confirmLoading}
                           className={classes.confirmButton}
                         >
                           Confirm & Join Pipeline
