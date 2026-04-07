@@ -26,9 +26,14 @@ import {
   IconCircleCheck,
   IconAlertCircle,
   IconRefresh,
+  IconPlus,
+  IconTrash,
 } from "@tabler/icons-react";
 import { useAppDispatch } from "@/lib/store/hooks";
-import { addCandidate } from "@/lib/store/candidatesSlice";
+import {
+  addCandidate,
+  deleteCandidate as deleteCandidateThunk,
+} from "@/lib/store/candidatesSlice";
 import { fetchRoles } from "@/app/actions/get";
 import { notifications } from "@mantine/notifications";
 
@@ -65,73 +70,84 @@ export default function InviteSpecificCandidateModal({
     if (opened) loadRoles();
   }, [opened]);
 
-  // Reset status when modal opens
   useEffect(() => {
     if (opened) {
       setStatus("idle");
       setErrorMessage("");
+      form.setValues({
+        candidates: [
+          { full_name: "", email: "", role_id: "", profile_link: "" },
+        ],
+      });
     }
   }, [opened]);
 
   const form = useForm({
     initialValues: {
-      full_name: "",
-      email: "",
-      role_id: "",
-      profile_link: "",
+      candidates: [{ full_name: "", email: "", role_id: "", profile_link: "" }],
     },
     validate: {
-      full_name: (value) =>
-        value.length < 2 ? "Name must have at least 2 letters" : null,
-      email: (value) => (/^\S+@\S+$/.test(value) ? null : "Invalid email"),
-      role_id: (value) => (value ? null : "Please select a role"),
+      candidates: {
+        full_name: (value: any) => (value.length < 2 ? "Name too short" : null),
+        email: (value: any) =>
+          /^\S+@\S+$/.test(value) ? null : "Invalid email",
+        role_id: (value: any) => (value ? null : "Select role"),
+      },
     },
   });
 
   const handleSubmit = async (values: typeof form.values) => {
     setStatus("sending");
-    let createdCandidateId = "";
+    const createdIds: string[] = [];
+
     try {
-      // 1. Create the candidate in the database
-      const result = await dispatch(
-        addCandidate({
-          full_name: values.full_name,
-          email: values.email,
-          role_id: values.role_id,
-          avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${values.full_name.replace(/\s+/g, "")}`,
-        }),
-      ).unwrap();
+      // 1. Create all candidates sequentially
+      for (const candidate of values.candidates) {
+        const result = await dispatch(
+          addCandidate({
+            full_name: candidate.full_name,
+            email: candidate.email,
+            role_id: candidate.role_id,
+            avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${candidate.full_name.replace(/\s+/g, "")}`,
+          }),
+        ).unwrap();
+        createdIds.push(result.candidate_id);
+      }
 
-      createdCandidateId = result.candidate_id;
-
-      // 2. Trigger the invitation with platform context
+      // 2. Trigger bulk invitation
       const { sendCandidateInvite } = await import("@/app/actions/post");
       const inviteResult = await sendCandidateInvite({
-        candidate_ids: [result.candidate_id],
+        candidate_ids: createdIds,
         platform: platform,
       });
 
       if (!inviteResult.success) {
-          // If email fails, rollback candidate creation in both DB and Store
-          const { deleteCandidate: deleteCandidateThunk } = await import("@/lib/store/candidatesSlice");
-          await dispatch(deleteCandidateThunk(createdCandidateId)).unwrap();
-          throw new Error(inviteResult.message);
+        // Bulk rollback
+        for (const id of createdIds) {
+          await dispatch(deleteCandidateThunk(id)).unwrap();
+        }
+        throw new Error(inviteResult.message);
       }
 
       setStatus("success");
       form.reset();
 
-      // Auto-close after 2 seconds
       setTimeout(() => {
         if (status === "success") onClose();
       }, 3000);
     } catch (error: any) {
-      console.error("Invite Error:", error);
+      console.error("Bulk Invite Error:", error);
       setStatus("error");
-      setErrorMessage(
-        error.message ||
-          "Failed to send invitation. Please check your connection.",
-      );
+      setErrorMessage(error.message || "Failed to batch process invitations.");
+
+      // Cleanup any that were created if we crashed before bulk send
+      if (createdIds.length > 0 && status !== "success") {
+        for (const id of createdIds) {
+          try {
+            await dispatch(deleteCandidateThunk(id)).unwrap();
+          } catch (e) {}
+        }
+      }
     }
   };
 
@@ -148,6 +164,65 @@ export default function InviteSpecificCandidateModal({
     }
   };
 
+  const fields = form.values.candidates.map((_, index) => (
+    <Box
+      key={index}
+      p="md"
+      style={{
+        border: "1px solid #eee",
+        borderRadius: "12px",
+        position: "relative",
+      }}
+    >
+      {form.values.candidates.length > 1 && (
+        <Button
+          variant="subtle"
+          color="red"
+          size="xs"
+          style={{ position: "absolute", top: 5, right: 10, zIndex: 10 }}
+          onClick={() => form.removeListItem("candidates", index)}
+        >
+          <IconTrash size={14} />
+        </Button>
+      )}
+
+      <Group grow align="flex-start">
+        <TextInput
+          label="Full Name"
+          placeholder="John Doe"
+          required
+          {...form.getInputProps(`candidates.${index}.full_name`)}
+          radius="md"
+        />
+        <TextInput
+          label="Email Address"
+          placeholder="john@example.com"
+          required
+          {...form.getInputProps(`candidates.${index}.email`)}
+          radius="md"
+        />
+      </Group>
+
+      <Group grow mt="sm">
+        <Select
+          label="Target Role"
+          placeholder="Select role"
+          data={roles}
+          required
+          {...form.getInputProps(`candidates.${index}.role_id`)}
+          radius="md"
+          searchable
+        />
+        <TextInput
+          label={`${platform} Link`}
+          placeholder="Profile URL"
+          {...form.getInputProps(`candidates.${index}.profile_link`)}
+          radius="md"
+        />
+      </Group>
+    </Box>
+  ));
+
   return (
     <Modal
       opened={opened}
@@ -159,17 +234,17 @@ export default function InviteSpecificCandidateModal({
           </ThemeIcon>
           <Box>
             <Text fw={800} size="lg">
-              Invite via {platform}
+              Bulk Invite via {platform}
             </Text>
             <Text size="xs" c="dimmed" fw={600}>
-              RECRUITMENT PIPELINE AUTOMATION
+              BATCH RECRUITMENT AUTOMATION
             </Text>
           </Box>
         </Group>
       }
       radius="lg"
       padding="xl"
-      size="md"
+      size="lg"
       withCloseButton={status !== "sending"}
       closeOnClickOutside={status !== "sending"}
     >
@@ -178,50 +253,32 @@ export default function InviteSpecificCandidateModal({
           <Stack gap="md">
             <Box bg="blue.0" p="md" style={{ borderRadius: "12px" }}>
               <Text size="xs" fw={700} c="blue.9" mb={4}>
-                AUTOMATED MESSAGE PREVIEW
+                MESSAGE CONTEXT
               </Text>
               <Text size="xs" c="blue.8" fs="italic">
-                "Hello ${form.values.full_name || "[Name]"}, we found your
-                profile on {platform} and would love to invite you to join our
-                team..."
+                "We recently came across your professional profile on {platform}{" "}
+                and were incredibly impressed..."
               </Text>
             </Box>
 
-            <TextInput
-              label="Candidate Full Name"
-              placeholder="John Doe"
-              required
-              leftSection={<IconUser size={16} />}
-              {...form.getInputProps("full_name")}
-              radius="md"
-            />
+            {fields}
 
-            <TextInput
-              label="Candidate Email Address"
-              placeholder="john@example.com"
-              required
-              leftSection={<IconMail size={16} />}
-              {...form.getInputProps("email")}
+            <Button
+              variant="light"
+              leftSection={<IconPlus size={16} />}
+              onClick={() =>
+                form.insertListItem("candidates", {
+                  full_name: "",
+                  email: "",
+                  role_id: "",
+                  profile_link: "",
+                })
+              }
+              fullWidth
               radius="md"
-            />
-
-            <Select
-              label="Target Position"
-              placeholder="Select role for candidate"
-              data={roles}
-              required
-              {...form.getInputProps("role_id")}
-              radius="md"
-              searchable
-            />
-
-            <TextInput
-              label={`${platform} Profile Link (Optional)`}
-              placeholder={`https://www.${platform.toLowerCase()}.com/in/...`}
-              leftSection={<IconLink size={16} />}
-              {...form.getInputProps("profile_link")}
-              radius="md"
-            />
+            >
+              Add Another Candidate
+            </Button>
 
             <Group justify="flex-end" mt="xl">
               <Button variant="subtle" onClick={onClose} radius="md">
@@ -234,7 +291,7 @@ export default function InviteSpecificCandidateModal({
                 px="xl"
                 rightSection={<IconRocket size={16} />}
               >
-                Send Invitation
+                Send All Invitations ({form.values.candidates.length})
               </Button>
             </Group>
           </Stack>
@@ -261,10 +318,11 @@ export default function InviteSpecificCandidateModal({
             </Box>
             <Box>
               <Text fw={800} size="lg">
-                Sending Invitation...
+                Processing Batch...
               </Text>
               <Text size="sm" c="dimmed">
-                Establishing secure connection with {platform} relays
+                Seeding database and dispatching {form.values.candidates.length}{" "}
+                emails via {platform} relays
               </Text>
             </Box>
             <Loader size="sm" color="blue" variant="dots" />
@@ -286,11 +344,11 @@ export default function InviteSpecificCandidateModal({
             </ThemeIcon>
             <Box>
               <Text fw={800} size="xl">
-                Invitation Sent!
+                Batch Success!
               </Text>
               <Text size="sm" c="dimmed">
-                We've added <strong>{form.values.full_name}</strong> to the
-                pipeline and dispatched the email.
+                All {form.values.candidates.length} invitations have been
+                successfully dispatched.
               </Text>
             </Box>
             <Button
@@ -300,7 +358,7 @@ export default function InviteSpecificCandidateModal({
               mt="xl"
               onClick={onClose}
             >
-              Close
+              Finish
             </Button>
           </Stack>
         </Box>
@@ -314,7 +372,7 @@ export default function InviteSpecificCandidateModal({
             </ThemeIcon>
             <Box>
               <Text fw={800} size="xl">
-                Failed to Send
+                Batch Process Failed
               </Text>
               <Text size="sm" c="red.7" fw={500}>
                 {errorMessage}
@@ -329,7 +387,7 @@ export default function InviteSpecificCandidateModal({
                 leftSection={<IconRefresh size={16} />}
                 onClick={() => handleSubmit(form.values)}
               >
-                Try Again
+                Retry All
               </Button>
             </Group>
           </Stack>

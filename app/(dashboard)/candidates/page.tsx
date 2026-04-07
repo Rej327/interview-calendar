@@ -61,8 +61,10 @@ export default function CandidatesPage() {
     useDisclosure(false);
   const [filterOpened, { open: filterOpen, close: filterClose }] =
     useDisclosure(false);
-  const [inviteModalOpened, { open: inviteModalOpen, close: inviteModalClose }] =
-    useDisclosure(false);
+  const [
+    inviteModalOpened,
+    { open: inviteModalOpen, close: inviteModalClose },
+  ] = useDisclosure(false);
   const [selectedPlatform, setSelectedPlatform] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -182,11 +184,11 @@ export default function CandidatesPage() {
 
   const handleInvite = async (platform: string, candidateIds?: string[]) => {
     let ids = candidateIds;
-    
+
     // If no specific IDs provided, try to use selected records
     if (!ids || ids.length === 0) {
       if (selectedRecords.length > 0) {
-        ids = selectedRecords.map(r => r.candidate_id);
+        ids = selectedRecords.map((r) => r.candidate_id);
       } else if (selectedCandidate) {
         ids = [selectedCandidate.candidate_id];
       }
@@ -195,7 +197,8 @@ export default function CandidatesPage() {
     if (!ids || ids.length === 0) {
       notifications.show({
         title: "No candidates selected",
-        message: "Please select one or more candidates from the list to send invitations.",
+        message:
+          "Please select one or more candidates from the list to send invitations.",
         color: "orange",
       });
       return;
@@ -203,8 +206,11 @@ export default function CandidatesPage() {
 
     try {
       const { sendCandidateInvite } = await import("@/app/actions/post");
-      const result = await sendCandidateInvite({ candidate_ids: ids, platform });
-      
+      const result = await sendCandidateInvite({
+        candidate_ids: ids,
+        platform,
+      });
+
       if (result.success) {
         notifications.show({
           title: "Invitations Sent",
@@ -218,14 +224,16 @@ export default function CandidatesPage() {
     } catch (error: any) {
       notifications.show({
         title: "Something went wrong",
-        message: error.message || "We couldn't send the invitations. Please check your connection and try again.",
+        message:
+          error.message ||
+          "We couldn't send the invitations. Please check your connection and try again.",
         color: "red",
       });
     }
   };
 
   const handleBulkInvite = () => {
-    const ids = selectedRecords.map(r => r.candidate_id);
+    const ids = selectedRecords.map((r) => r.candidate_id);
     handleInvite("Internal Bulk Automation", ids);
   };
 
@@ -266,15 +274,15 @@ export default function CandidatesPage() {
           </Box>
           <Group gap="md">
             {selectedRecords.length > 0 && (
-                <Button
-                    variant="light"
-                    color="blue"
-                    leftSection={<IconMail size={16} />}
-                    radius="md"
-                    onClick={handleBulkInvite}
-                >
-                    Invite ({selectedRecords.length}) Selected
-                </Button>
+              <Button
+                variant="light"
+                color="blue"
+                leftSection={<IconMail size={16} />}
+                radius="md"
+                onClick={handleBulkInvite}
+              >
+                Invite ({selectedRecords.length}) Selected
+              </Button>
             )}
             <Button
               variant="default"
@@ -439,7 +447,7 @@ export default function CandidatesPage() {
                   },
                   {
                     accessor: "actions",
-                    title: "",
+                    title: "ACTIONS",
                     textAlign: "right",
                     render: (record: any) => (
                       <Group gap={4} justify="flex-end">
@@ -472,7 +480,9 @@ export default function CandidatesPage() {
                               }
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleInvite("Direct Email", [record.candidate_id]);
+                                handleInvite("Direct Email", [
+                                  record.candidate_id,
+                                ]);
                               }}
                             >
                               Send Email
@@ -610,10 +620,10 @@ export default function CandidatesPage() {
         candidate={selectedCandidate}
       />
 
-      <InviteSpecificCandidateModal 
-        opened={inviteModalOpened} 
-        onClose={inviteModalClose} 
-        platform={selectedPlatform} 
+      <InviteSpecificCandidateModal
+        opened={inviteModalOpened}
+        onClose={inviteModalClose}
+        platform={selectedPlatform}
       />
 
       <Drawer

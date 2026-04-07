@@ -27,7 +27,11 @@ interface UpdateCandidateModalProps {
   candidate: any;
 }
 
-export default function UpdateCandidateModal({ opened, onClose, candidate }: UpdateCandidateModalProps) {
+export default function UpdateCandidateModal({
+  opened,
+  onClose,
+  candidate,
+}: UpdateCandidateModalProps) {
   const dispatch = useAppDispatch();
   const [roles, setRoles] = useState<{ value: string; label: string }[]>([]);
   const [loading, setLoading] = useState(false);
@@ -36,7 +40,12 @@ export default function UpdateCandidateModal({ opened, onClose, candidate }: Upd
     const loadRoles = async () => {
       const result = await fetchRoles();
       if (result.success) {
-        setRoles(result.data.map((r: any) => ({ value: r.role_id, label: r.role_title })));
+        setRoles(
+          result.data.map((r: any) => ({
+            value: r.role_id,
+            label: r.role_title,
+          })),
+        );
       }
     };
     if (opened) loadRoles();
@@ -51,7 +60,8 @@ export default function UpdateCandidateModal({ opened, onClose, candidate }: Upd
       avatar_url: "",
     },
     validate: {
-      full_name: (value) => (value.length < 2 ? "Name must have at least 2 letters" : null),
+      full_name: (value) =>
+        value.length < 2 ? "Name must have at least 2 letters" : null,
       email: (value) => (/^\S+@\S+$/.test(value) ? null : "Invalid email"),
     },
   });
@@ -60,39 +70,41 @@ export default function UpdateCandidateModal({ opened, onClose, candidate }: Upd
     if (candidate && opened && roles.length > 0) {
       // The candidate object from get_candidates_portfolio_paginated has a 'role' field (title)
       // We need to find the corresponding role_id from our roles list
-      const roleObj = roles.find(r => r.label === candidate.role);
-      
+      const roleObj = roles.find((r) => r.label === candidate.role);
+
       form.setValues({
         full_name: candidate.name || "",
         email: candidate.email || "",
-        role_id: roleObj?.value || candidate.role_id || "", 
+        role_id: roleObj?.value || candidate.role_id || "",
         status: candidate.status || "",
         avatar_url: candidate.avatar || "",
       });
     } else if (candidate && opened) {
-        // Fallback if roles aren't loaded yet - set what we have
-        form.setValues({
-            full_name: candidate.name || "",
-            email: candidate.email || "",
-            role_id: candidate.role_id || "",
-            status: candidate.status || "",
-            avatar_url: candidate.avatar || "",
-        });
+      // Fallback if roles aren't loaded yet - set what we have
+      form.setValues({
+        full_name: candidate.name || "",
+        email: candidate.email || "",
+        role_id: candidate.role_id || "",
+        status: candidate.status || "",
+        avatar_url: candidate.avatar || "",
+      });
     }
   }, [candidate, opened, roles]);
 
   const handleSubmit = async (values: typeof form.values) => {
     setLoading(true);
     try {
-      await dispatch(updateCandidate({
-        candidate_id: candidate.candidate_id,
-        full_name: values.full_name,
-        email: values.email,
-        avatar_url: values.avatar_url,
-        status: values.status,
-        role_id: values.role_id,
-      })).unwrap();
-      
+      await dispatch(
+        updateCandidate({
+          candidate_id: candidate.candidate_id,
+          full_name: values.full_name,
+          email: values.email,
+          avatar_url: values.avatar_url,
+          status: values.status,
+          role_id: values.role_id,
+        }),
+      ).unwrap();
+
       notifications.show({
         title: "Profile Updated",
         message: `We've successfully updated ${values.full_name}'s details.`,
@@ -112,29 +124,32 @@ export default function UpdateCandidateModal({ opened, onClose, candidate }: Upd
 
   const handleDelete = () => {
     modals.openConfirmModal({
-      title: 'Delete Candidate',
+      title: "Delete Candidate",
       centered: true,
       children: (
         <Text size="sm">
-          Are you sure you want to delete <b>{candidate.name}</b>? This action cannot be undone and will remove all related hiring data.
+          Are you sure you want to delete <b>{candidate.name}</b>? This action
+          cannot be undone and will remove all related hiring data.
         </Text>
       ),
-      labels: { confirm: 'Delete', cancel: "Cancel" },
-      confirmProps: { color: 'red', radius: 'md' },
-      cancelProps: { radius: 'md' },
+      labels: { confirm: "Delete", cancel: "Cancel" },
+      confirmProps: { color: "red", radius: "md" },
+      cancelProps: { radius: "md" },
       onConfirm: async () => {
         try {
           await dispatch(deleteCandidate(candidate.candidate_id)).unwrap();
           notifications.show({
             title: "Candidate Removed",
-            message: "The candidate has been successfully removed from your pipeline.",
+            message:
+              "The candidate has been successfully removed from your pipeline.",
             color: "gray",
           });
           onClose();
         } catch (error: any) {
           notifications.show({
             title: "Couldn't remove candidate",
-            message: "We encountered an issue while trying to remove the candidate. Please try again.",
+            message:
+              "We encountered an issue while trying to remove the candidate. Please try again.",
             color: "red",
           });
         }
@@ -160,7 +175,9 @@ export default function UpdateCandidateModal({ opened, onClose, candidate }: Upd
           <Center mb="md">
             <Stack align="center" gap={4}>
               <Avatar src={form.values.avatar_url} size={80} radius={80} />
-              <Text size="xs" c="dimmed" fw={600}>Profile Preview</Text>
+              <Text size="xs" c="dimmed" fw={600}>
+                Profile Preview
+              </Text>
             </Stack>
           </Center>
 
@@ -206,24 +223,31 @@ export default function UpdateCandidateModal({ opened, onClose, candidate }: Upd
             radius="md"
           />
 
-          <Group justify="space-between" mt="xl">
-            <Button 
-                variant="subtle" 
-                color="red" 
-                leftSection={<IconTrash size={16} />} 
-                onClick={handleDelete}
+          <Group justify="space-between">
+            <Group gap="sm" w="100%" grow>
+              <Button variant="default" onClick={onClose} radius="md">
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                loading={loading}
                 radius="md"
+                color="blue.9"
+              >
+                Save Changes
+              </Button>
+            </Group>
+            <Button
+              variant="subtle"
+              color="red"
+              w={"100%"}
+              leftSection={<IconTrash size={16} />}
+              onClick={handleDelete}
+              radius="md"
+              style={{ border: "1px solid red" }}
             >
               Delete
             </Button>
-            <Group gap="sm">
-                <Button variant="default" onClick={onClose} radius="md">
-                Cancel
-                </Button>
-                <Button type="submit" loading={loading} radius="md" color="blue.9" px="xl">
-                Save Changes
-                </Button>
-            </Group>
           </Group>
         </Stack>
       </form>
