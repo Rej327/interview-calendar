@@ -36,6 +36,7 @@ import {
   deleteCandidate as deleteCandidateThunk,
 } from "@/lib/store/candidatesSlice";
 import { fetchRoles } from "@/app/actions/get";
+import { sendCandidateInvite } from "@/app/actions/post";
 import { notifications } from "@mantine/notifications";
 
 interface InviteSpecificCandidateModalProps {
@@ -116,7 +117,6 @@ export default function InviteSpecificCandidateModal({
       }
 
       // 2. Trigger bulk invitation
-      const { sendCandidateInvite } = await import("@/app/actions/post");
       const inviteResult = await sendCandidateInvite({
         candidate_ids: createdIds,
         platform: platform,
