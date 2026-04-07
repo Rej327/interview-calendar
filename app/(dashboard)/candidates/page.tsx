@@ -29,7 +29,6 @@ import {
   IconSearch,
   IconDotsVertical,
   IconMail,
-  IconPhone,
   IconDownload,
   IconFilter,
   IconUserPlus,
@@ -70,6 +69,7 @@ export default function CandidatesPage() {
   const [pageSize, setPageSize] = useState(10);
   const [selectedCandidate, setSelectedCandidate] = useState<any>(null);
   const [selectedRecords, setSelectedRecords] = useState<any[]>([]);
+  const [sendingInvite, setSendingInvite] = useState(false);
 
   // Filter states
   const [statusFilters, setStatusFilters] = useState<string[]>([]);
@@ -133,8 +133,6 @@ export default function CandidatesPage() {
   };
 
   const handleExport = () => {
-    // Note: For a real app, export should probably call a separate "fetch all" endpoint.
-    // For now, we'll just export what's on the current page to avoid long-running fetches.
     const csvContent = [
       ["ID", "Name", "Role", "Status", "Applied Date"],
       ...candidates.map((c: any) => [
@@ -184,8 +182,6 @@ export default function CandidatesPage() {
 
   const handleInvite = async (platform: string, candidateIds?: string[]) => {
     let ids = candidateIds;
-
-    // If no specific IDs provided, try to use selected records
     if (!ids || ids.length === 0) {
       if (selectedRecords.length > 0) {
         ids = selectedRecords.map((r) => r.candidate_id);
@@ -197,13 +193,13 @@ export default function CandidatesPage() {
     if (!ids || ids.length === 0) {
       notifications.show({
         title: "No candidates selected",
-        message:
-          "Please select one or more candidates from the list to send invitations.",
+        message: "Please select one or more candidates from the list to send invitations.",
         color: "orange",
       });
       return;
     }
 
+    setSendingInvite(true);
     try {
       const { sendCandidateInvite } = await import("@/app/actions/post");
       const result = await sendCandidateInvite({
@@ -217,18 +213,18 @@ export default function CandidatesPage() {
           message: result.message,
           color: "teal",
         });
-        setSelectedRecords([]); // Clear selection after successful invite
+        setSelectedRecords([]);
       } else {
         throw new Error(result.message);
       }
     } catch (error: any) {
       notifications.show({
         title: "Something went wrong",
-        message:
-          error.message ||
-          "We couldn't send the invitations. Please check your connection and try again.",
+        message: error.message || "We couldn't send the invitations.",
         color: "red",
       });
+    } finally {
+      setSendingInvite(false);
     }
   };
 
@@ -246,143 +242,111 @@ export default function CandidatesPage() {
     }
   };
 
-  // Reset page when filters change
   useEffect(() => {
     setPage(1);
   }, [query, statusFilters, rolesFilter]);
 
-  const stats = useMemo(() => {
-    return {
-      total: totalCount,
-      interviewing: candidates.filter((c: any) => c.status === "ACTIVE").length, // This is only for the page, but fine for now
-    };
-  }, [totalCount, candidates]);
-
   return (
-    <Container fluid p="xl" bg="transparent" style={{ minHeight: "100vh" }}>
+    <Container fluid p="xl" bg="transparent" style={{ minHeight: "100vh" }} className="animate-in">
       <Stack gap="xl">
-        {/* Header */}
         <Group justify="space-between" align="flex-end">
           <Box>
-            <Title order={1} fw={800} size="h2">
+            <Badge color="blue.4" variant="light" size="sm" mb={4} radius="sm">
+               TALENT PIPELINE
+            </Badge>
+            <Title order={1} fw={900} size="h1" style={{ letterSpacing: '-0.5px' }}>
               Candidates Portfolio
             </Title>
-            <Text c="dimmed" size="sm" fw={500}>
-              Showing {candidates.length} of {totalCount} candidates in
-              pipeline.
+            <Text c="dimmed" size="sm" fw={600}>
+              Managing {totalCount} profiles across active organizational pipelines.
             </Text>
           </Box>
           <Group gap="md">
             {selectedRecords.length > 0 && (
               <Button
-                variant="light"
-                color="blue"
-                leftSection={<IconMail size={16} />}
-                radius="md"
+                variant="filled"
+                color="blue.9"
+                leftSection={<IconMail size={18} />}
+                radius="md" h={48}
                 onClick={handleBulkInvite}
+                loading={sendingInvite}
+                style={{ boxShadow: '0 4px 12px rgba(34, 139, 230, 0.25)' }}
               >
-                Invite ({selectedRecords.length}) Selected
+                Dispatch Invite ({selectedRecords.length})
               </Button>
             )}
             <Button
               variant="default"
-              leftSection={<IconDownload size={16} />}
-              radius="md"
+              leftSection={<IconDownload size={18} />}
+              radius="md" h={48}
               onClick={handleExport}
+              style={{ border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}
             >
-              Export Page
+              Export Global Registry
             </Button>
             <Button
-              leftSection={<IconUserPlus size={16} />}
-              radius="md"
-              color="blue.9"
-              px="xl"
+              leftSection={<IconUserPlus size={18} />}
+              radius="md" color="blue.9"
+              px="xl" h={48}
               onClick={addOpen}
+              style={{ boxShadow: '0 4px 12px rgba(34, 139, 230, 0.25)' }}
             >
-              Add Candidate
+              New Candidate
             </Button>
           </Group>
         </Group>
 
         <Grid gutter={40}>
           <Grid.Col span={{ base: 12, lg: 9 }}>
-            <Card
-              p={0}
-              radius="xl"
-              shadow="sm"
-              withBorder={false}
-              style={{ overflow: "hidden" }}
-            >
-              <Box
-                p="md"
-                style={{
-                  borderBottom: "1px solid var(--mantine-color-default-border)",
-                }}
-              >
+            <Card p={0} radius="xl" className="glass-card" style={{ border: 'none' }}>
+              <Box p="md" style={{ borderBottom: "1px solid rgba(0,0,0,0.05)" }}>
                 <Group wrap="nowrap" gap="md">
                   <TextInput
-                    placeholder="Search candidates, roles, skills..."
-                    leftSection={<IconSearch size={16} />}
-                    radius="md"
-                    flex={1}
+                    placeholder="Search candidate registry by name, role, or unique attributes..."
+                    leftSection={<IconSearch size={18} color="var(--mantine-color-blue-6)" />}
+                    radius="md" size="md" flex={1}
                     value={searchInput}
                     onChange={(e) => setSearchInput(e.currentTarget.value)}
                     onKeyDown={handleKeyDown}
                     rightSection={
                       <Group gap={4} px={4}>
                         {searchInput && (
-                          <ActionIcon
-                            variant="subtle"
-                            color="gray"
-                            onClick={handleClearSearch}
-                            size="sm"
-                          >
-                            <IconX size={14} />
+                          <ActionIcon variant="subtle" color="gray" onClick={handleClearSearch} size="md">
+                            <IconX size={16} />
                           </ActionIcon>
                         )}
-                        <ActionIcon
-                          variant="subtle"
-                          color="blue.9"
-                          onClick={handleSearch}
-                          radius="md"
-                        >
-                          <IconArrowRight size={16} />
+                        <ActionIcon variant="light" color="blue.9" onClick={handleSearch} radius="md" size="md">
+                          <IconArrowRight size={18} />
                         </ActionIcon>
                       </Group>
                     }
-                    rightSectionWidth={70}
-                    styles={{ input: { border: "none" } }}
+                    rightSectionWidth={80}
+                    styles={{ input: { border: "none", backgroundColor: 'transparent', fontWeight: 600 } }}
                   />
-                  <ActionIcon
-                    variant={
-                      statusFilters.length > 0 || rolesFilter.length > 0
-                        ? "light"
-                        : "default"
-                    }
-                    size="lg"
-                    radius="md"
-                    onClick={filterOpen}
-                  >
-                    <IconFilter size={18} />
+                  <ActionIcon variant={statusFilters.length > 0 || rolesFilter.length > 0 ? "filled" : "light"} size={42} radius="md" color="blue" onClick={filterOpen}>
+                    <IconFilter size={20} />
                   </ActionIcon>
                 </Group>
               </Box>
 
               <DataTable
-                height={500}
+                height={550}
                 records={candidates}
                 fetching={loading}
                 selectedRecords={selectedRecords}
                 onSelectedRecordsChange={setSelectedRecords}
-                noRecordsText="No candidates found matching your criteria."
+                noRecordsText="Candidate database search yielded no tactical results."
                 noRecordsIcon={
-                  <Box p="xl" style={{ opacity: 0.5 }}>
-                    <IconPackageOff size={48} stroke={1.5} />
-                  </Box>
+                  <div style={{ padding: '80px', opacity: 0.4, textAlign: 'center' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                        <IconPackageOff size={60} stroke={1.5} color="var(--mantine-color-blue-9)" />
+                        <span style={{ fontWeight: 900, fontSize: 'var(--mantine-font-size-sm)', color: 'var(--mantine-color-dimmed)', textTransform: 'uppercase', letterSpacing: '1px', display: 'block' }}>
+                           Registry currently offline or empty
+                        </span>
+                      </div>
+                  </div>
                 }
-                idAccessor={(record: any) =>
-                  `${record.candidate_id}-${record.hiring_process_id || record.role}`
-                }
+                idAccessor={(record: any) => `${record.candidate_id}-${record.hiring_process_id || record.role}`}
                 totalRecords={totalCount}
                 recordsPerPage={pageSize}
                 page={page}
@@ -393,128 +357,56 @@ export default function CandidatesPage() {
                 onSortStatusChange={setSortStatus}
                 columns={[
                   {
-                    accessor: "name",
-                    title: "CANDIDATE",
-                    width: 280,
-                    sortable: true,
+                    accessor: "name", title: "CANDIDATE IDENTITY", width: 320, sortable: true,
                     render: ({ name, role, avatar }: any) => (
                       <Group gap="sm">
-                        <Avatar src={avatar} radius="xl" size="sm" />
+                        <Avatar src={avatar} radius="xl" size="md" style={{ border: '2px solid white', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }} />
                         <Box>
-                          <Text size="sm" fw={800}>
-                            {name}
-                          </Text>
-                          <Text size="10px" c="dimmed" fw={600}>
-                            {role}
-                          </Text>
+                          <Text size="sm" fw={900}>{name}</Text>
+                          <Text size="10px" c="dimmed" fw={800} tt="uppercase" style={{ letterSpacing: '0.5px' }}>{role}</Text>
                         </Box>
                       </Group>
                     ),
                   },
                   {
-                    accessor: "status",
-                    sortable: true,
+                    accessor: "status", title: "PIPELINE STATUS", sortable: true,
                     render: ({ status }: any) => (
-                      <Badge
-                        variant="filled"
-                        size="xs"
-                        radius="sm"
-                        color={
-                          status === "HIRED"
-                            ? "teal.6"
-                            : status === "ACTIVE"
-                              ? "blue.6"
-                              : status === "REJECTED"
-                                ? "red.6"
-                                : status === "WITHDRAWN"
-                                  ? "indigo.6"
-                                  : "gray.6"
-                        }
-                      >
+                      <Badge variant="dot" size="sm" radius="md" fw={800} color={status === "HIRED" ? "teal.6" : status === "ACTIVE" ? "blue.6" : status === "REJECTED" ? "red.6" : status === "WITHDRAWN" ? "indigo.6" : "gray.6"}>
                         {status}
                       </Badge>
                     ),
                   },
                   {
-                    accessor: "applied_date",
-                    title: "APPLIED DATE",
-                    sortable: true,
+                    accessor: "applied_date", title: "REGISTRATION DATE", sortable: true,
                     render: (c: any) => (
-                      <Text size="xs" fw={700} c="dimmed">
-                        {new Date(c.applied_date).toLocaleDateString()}
-                      </Text>
+                      <Text size="xs" fw={800} c="dimmed">{new Date(c.applied_date).toLocaleDateString()}</Text>
                     ),
                   },
                   {
-                    accessor: "actions",
-                    title: "ACTIONS",
-                    textAlign: "right",
+                    accessor: "actions", title: "", textAlign: "right",
                     render: (record: any) => (
                       <Group gap={4} justify="flex-end">
-                        <ActionIcon
-                          variant="subtle"
-                          color="gray"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleInvite("Direct Email", [record.candidate_id]);
-                          }}
-                        >
-                          <IconMail size={16} />
+                        <ActionIcon variant="subtle" color="blue.6" radius="md" loading={sendingInvite} onClick={(e) => { e.stopPropagation(); handleInvite("Direct Email", [record.candidate_id]); }}>
+                          <IconMail size={18} />
                         </ActionIcon>
-                        <Menu position="bottom-end">
+                        <Menu position="bottom-end" shadow="lg" radius="md">
                           <Menu.Target>
-                            <ActionIcon
-                              variant="subtle"
-                              color="gray"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <IconDotsVertical size={16} />
+                            <ActionIcon variant="subtle" color="gray" radius="md" onClick={(e) => e.stopPropagation()}>
+                              <IconDotsVertical size={18} />
                             </ActionIcon>
                           </Menu.Target>
                           <Menu.Dropdown>
-                            <Menu.Item
-                              leftSection={
-                                <IconMail
-                                  style={{ width: rem(14), height: rem(14) }}
-                                />
-                              }
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleInvite("Direct Email", [
-                                  record.candidate_id,
-                                ]);
-                              }}
-                            >
-                              Send Email
+                            <Menu.Label fw={800}>Communications</Menu.Label>
+                            <Menu.Item leftSection={<IconMail style={{ width: rem(14), height: rem(14) }} />} onClick={(e) => { e.stopPropagation(); handleInvite("Direct Email", [record.candidate_id]); }} fw={700}>
+                              Dispatch Invite
                             </Menu.Item>
                             <Menu.Divider />
-                            <Menu.Item
-                              leftSection={
-                                <IconSearch
-                                  style={{ width: rem(14), height: rem(14) }}
-                                />
-                              }
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleRowClick(record);
-                              }}
-                            >
-                              View Journey
+                            <Menu.Label fw={800}>Management</Menu.Label>
+                            <Menu.Item leftSection={<IconSearch style={{ width: rem(14), height: rem(14) }} />} onClick={(e) => { e.stopPropagation(); handleRowClick(record); }} fw={700}>
+                              Operational Journey
                             </Menu.Item>
-                            <Menu.Item
-                              color="blue"
-                              leftSection={
-                                <IconSearch
-                                  style={{ width: rem(14), height: rem(14) }}
-                                />
-                              }
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedCandidate(record);
-                                updateOpen();
-                              }}
-                            >
-                              Update Profile
+                            <Menu.Item color="blue" leftSection={<IconUserPlus style={{ width: rem(14), height: rem(14) }} />} onClick={(e) => { e.stopPropagation(); setSelectedCandidate(record); updateOpen(); }} fw={700}>
+                              Modify Configuration
                             </Menu.Item>
                           </Menu.Dropdown>
                         </Menu>
@@ -528,8 +420,8 @@ export default function CandidatesPage() {
                 styles={{
                   root: { border: "none" },
                   header: {
-                    borderBottom:
-                      "1px solid var(--mantine-color-default-border)",
+                    borderBottom: "1px solid rgba(0,0,0,0.05)",
+                    fontWeight: 900, fontSize: '10px', color: 'var(--mantine-color-dimmed)', textTransform: 'uppercase', letterSpacing: '1px'
                   },
                 }}
               />
@@ -538,153 +430,71 @@ export default function CandidatesPage() {
 
           <Grid.Col span={{ base: 12, lg: 3 }}>
             <Stack gap="xl">
-              <Card p="xl" radius="xl" shadow="sm">
-                <Title order={5} fw={800} mb="xl">
-                  POOL SUMMARY
-                </Title>
+              <Card p="xl" radius="xl" className="glass-card">
+                <Title order={5} fw={900} mb="xl">POOL SUMMARY</Title>
                 <Stack gap="xl">
-                  <Box
-                    style={{
-                      borderLeft: "4px solid var(--mantine-color-blue-9)",
-                      paddingLeft: "16px",
-                    }}
-                  >
-                    <Text size="xs" fw={700} c="dimmed" tt="uppercase" mb={4}>
-                      Total Candidates
-                    </Text>
-                    <Text size="24px" fw={900}>
-                      {totalCount}
-                    </Text>
+                  <Box style={{ borderLeft: "4px solid var(--mantine-color-blue-9)", paddingLeft: "16px" }}>
+                    <Text size="xs" fw={800} c="dimmed" tt="uppercase" mb={4}>Global Index</Text>
+                    <Text size="32px" fw={900}>{totalCount}</Text>
                   </Box>
-                  <Box
-                    style={{
-                      borderLeft: "4px solid var(--mantine-color-indigo-6)",
-                      paddingLeft: "16px",
-                    }}
-                  >
-                    <Text size="xs" fw={700} c="dimmed" tt="uppercase" mb={4}>
-                      Current View Count
-                    </Text>
-                    <Text size="24px" fw={900}>
-                      {candidates.length}
-                    </Text>
+                  <Box style={{ borderLeft: "4px solid var(--mantine-color-teal-6)", paddingLeft: "16px" }}>
+                    <Text size="xs" fw={800} c="dimmed" tt="uppercase" mb={4}>Active Registry</Text>
+                    <Text size="32px" fw={900}>{candidates.length}</Text>
                   </Box>
                 </Stack>
               </Card>
 
-              <Card p="xl" radius="xl" shadow="sm" bg="blue.9" c="white">
+              <Card p="xl" radius="xl" bg="blue.9" c="white" style={{ position: 'relative', overflow: 'hidden' }}>
+                 <Box style={{ position: 'absolute', top: -40, left: -40, width: 120, height: 120, background: 'rgba(255,255,255,0.05)', borderRadius: '100px' }} />
                 <Group gap="sm" mb="md">
-                  <ThemeIcon size="lg" radius="md" color="blue.6">
-                    <IconUserPlus size={20} />
-                  </ThemeIcon>
-                  <Text fw={800}>Invite Candidates</Text>
+                  <ThemeIcon size="lg" radius="md" color="blue.6"><IconUserPlus size={20} /></ThemeIcon>
+                  <Text fw={900}>Platform Integration</Text>
                 </Group>
-                <Text size="xs" c="blue.1" fw={500} mb="xl">
-                  Quickly invite people from your favorite job boards or social
-                  platforms.
-                </Text>
+                <Text size="xs" c="blue.1" fw={600} mb="xl" style={{ lineHeight: 1.6 }}>Orchestrate candidate invites across social registries and high-traffic job boards.</Text>
                 <Stack gap="xs">
                   {["LinkedIn", "Indeed", "Glassdoor"].map((board) => (
-                    <Group
-                      key={board}
-                      justify="space-between"
-                      bg="blue.8"
-                      p="xs"
-                      style={{ borderRadius: "8px", cursor: "pointer" }}
-                      onClick={() => handleSidebarInvite(board)}
-                    >
-                      <Text size="xs" fw={800}>
-                        {board}
-                      </Text>
-                      <IconChevronRight size={14} />
+                    <Group key={board} justify="space-between" bg="blue.8" p="xs" style={{ borderRadius: "10px", cursor: sendingInvite ? "not-allowed" : "pointer", opacity: sendingInvite ? 0.6 : 1, transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)' }} onClick={() => !sendingInvite && handleSidebarInvite(board)} className="invite-board-item">
+                      <Group gap="sm" ml={4}>
+                        {sendingInvite && selectedPlatform === board ? <Loader size="xs" color="blue.2" /> : <div style={{width: 6, height: 6, borderRadius: '50%', background: 'rgba(255,255,255,0.4)'}} />}
+                        <Text size="xs" fw={900}>{board}</Text>
+                      </Group>
+                      <IconChevronRight size={16} />
                     </Group>
                   ))}
                 </Stack>
+                <style>{`
+                  .invite-board-item:hover { background-color: var(--mantine-color-blue-7) !important; transform: translateX(6px); box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+                `}</style>
               </Card>
             </Stack>
           </Grid.Col>
         </Grid>
       </Stack>
 
-      <CandidateJourneyDrawer
-        opened={detailOpened}
-        onClose={detailClose}
-        candidate={selectedCandidate}
-      />
+      <CandidateJourneyDrawer opened={detailOpened} onClose={detailClose} candidate={selectedCandidate} />
 
       <AddCandidateModal opened={addOpened} onClose={addClose} />
 
-      <UpdateCandidateModal
-        opened={updateOpened}
-        onClose={updateClose}
-        candidate={selectedCandidate}
-      />
+      <UpdateCandidateModal opened={updateOpened} onClose={updateClose} candidate={selectedCandidate} />
 
-      <InviteSpecificCandidateModal
-        opened={inviteModalOpened}
-        onClose={inviteModalClose}
-        platform={selectedPlatform}
-      />
+      <InviteSpecificCandidateModal opened={inviteModalOpened} onClose={inviteModalClose} platform={selectedPlatform} />
 
-      <Drawer
-        opened={filterOpened}
-        onClose={filterClose}
-        title={<Text fw={800}>Filter Candidates</Text>}
-        position="right"
-        padding="xl"
-      >
+      <Drawer opened={filterOpened} onClose={filterClose} title={<Title order={4} fw={900} size="lg">Pipeline Logic Configuration</Title>} position="right" padding="xl" radius="lg">
         <Stack gap="xl">
           <Box>
-            <Text fw={700} mb="sm" size="sm">
-              Status
-            </Text>
-            <Stack gap="xs">
+            <Text fw={900} mb="md" size="xs" c="dimmed" tt="uppercase" style={{ letterSpacing: '1px' }}>PIPELINE STATUS</Text>
+            <Stack gap="sm">
               {["ACTIVE", "HIRED", "REJECTED", "WITHDRAWN"].map((status) => (
-                <Checkbox
-                  key={status}
-                  label={status}
-                  checked={statusFilters.includes(status)}
-                  onChange={(e) => {
-                    if (e.currentTarget.checked)
-                      setStatusFilters([...statusFilters, status]);
-                    else
-                      setStatusFilters(
-                        statusFilters.filter((s) => s !== status),
-                      );
-                  }}
-                />
+                <Checkbox key={status} label={<Text size="sm" fw={700}>{status}</Text>} checked={statusFilters.includes(status)} radius="md" onChange={(e) => { if (e.currentTarget.checked) setStatusFilters([...statusFilters, status]); else setStatusFilters(statusFilters.filter((s) => s !== status)); }} />
               ))}
             </Stack>
           </Box>
-
           <Box>
-            <Text fw={700} mb="sm" size="sm">
-              Roles
-            </Text>
-            <MultiSelect
-              placeholder="Select roles"
-              data={allRoles}
-              value={rolesFilter}
-              onChange={setRolesFilter}
-              radius="md"
-            />
+            <Text fw={900} mb="md" size="xs" c="dimmed" tt="uppercase" style={{ letterSpacing: '1px' }}>POSITION ARCHITECTURE</Text>
+            <MultiSelect placeholder="Filter by organizational roles" data={allRoles} value={rolesFilter} onChange={setRolesFilter} radius="md" styles={{ input: { fontWeight: 600 } }} />
           </Box>
-
-          <Button
-            variant="light"
-            color="red"
-            fullWidth
-            onClick={() => {
-              setStatusFilters([]);
-              setRolesFilter([]);
-            }}
-            radius="md"
-          >
-            Reset Filters
-          </Button>
-          <Button fullWidth onClick={filterClose} radius="md" color="blue.9">
-            Apply Filters
-          </Button>
+          <Button variant="light" color="red" fullWidth onClick={() => { setStatusFilters([]); setRolesFilter([]); }} radius="md" fw={800} h={45}>Reset Intelligence</Button>
+          <Button fullWidth onClick={filterClose} radius="md" color="blue.9" h={45} fw={900}>Enforce Global Logic</Button>
         </Stack>
       </Drawer>
     </Container>

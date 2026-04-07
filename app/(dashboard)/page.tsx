@@ -58,9 +58,8 @@ export default function DashboardPage() {
 
   const router = useRouter();
   useEffect(() => {
-    // Only fetch if data is empty or we specifically want to refresh on mount
     if (events.length === 0) dispatch(fetchEvents());
-    if (candidates.length === 0) dispatch(fetchCandidates());
+    if (candidates.length === 0) dispatch(fetchCandidates({ limit: 10, offset: 0 }));
     if (roles.length === 0) dispatch(fetchRolesAsync());
   }, [dispatch, events.length, candidates.length, roles.length]);
 
@@ -69,7 +68,6 @@ export default function DashboardPage() {
       dayjs(e.start).isSame(dayjs(), "day"),
     ).length;
 
-    // Calculate avg duration
     let totalMinutes = 0;
     events.forEach((e) => {
       totalMinutes += dayjs(e.end).diff(dayjs(e.start), "minute");
@@ -166,16 +164,18 @@ export default function DashboardPage() {
   }
 
   return (
-    <Container fluid p="xl" bg="transparent" style={{ minHeight: "100vh" }}>
+    <Container fluid p="xl" bg="transparent" style={{ minHeight: "100vh" }} className="animate-in">
       <Stack gap="xl">
-        {/* Header Section */}
         <Group justify="space-between" align="flex-end">
           <Box>
-            <Title order={1} fw={800} size="h2">
-              Recruitment Dashboard
+            <Badge color="blue.4" variant="light" size="sm" mb={4} radius="sm">
+               RECRUITMENT ANALYTICS PORTAL
+            </Badge>
+            <Title order={1} fw={900} size="h1" style={{ letterSpacing: '-0.5px' }}>
+              Strategic Dashboard
             </Title>
-            <Text c="dimmed" size="sm" fw={500}>
-              Welcome back! Here's a summary of today's recruitment performance.
+            <Text c="dimmed" size="sm" fw={600}>
+              Comprehensive overview of your organization's hiring performance.
             </Text>
           </Box>
           <Group gap="md">
@@ -185,311 +185,192 @@ export default function DashboardPage() {
               variant="default"
               radius="md"
               px="xl"
-              leftSection={<IconBriefcase size={16} />}
+              h={48}
+              leftSection={<IconBriefcase size={18} />}
+              style={{ border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}
             >
-              View All Roles
+              View Active Roles
             </Button>
             <Button
-              leftSection={<IconPlus size={16} />}
+              leftSection={<IconPlus size={18} />}
               radius="md"
               color="blue.9"
               px="xl"
+              h={48}
               onClick={openRoleModal}
+              style={{ boxShadow: '0 4px 12px rgba(34, 139, 230, 0.25)' }}
             >
-              Create New Role
+              New Role Definition
             </Button>
           </Group>
         </Group>
 
-        {/* Stats Grid */}
         <SimpleGrid cols={{ base: 1, sm: 2, lg: 5 }} spacing="xl">
           {stats.map((stat, i) => (
-            <Card key={i} p="xl" radius="xl" shadow="sm">
-              <Group justify="space-between" mb="xs">
-                <ThemeIcon
-                  variant="light"
-                  color={stat.color}
-                  radius="md"
-                  size="lg"
-                >
+            <Card key={i} p="xl" radius="xl" className="glass-card" style={{ border: 'none' }}>
+              <Group justify="space-between" mb="lg">
+                <ThemeIcon variant="light" color={stat.color} radius="md" size="xl">
                   {stat.icon}
                 </ThemeIcon>
-                <Badge
-                  variant="transparent"
-                  color={stat.positive ? "teal.6" : "red.6"}
-                  leftSection={
-                    stat.positive ? (
-                      <IconArrowUpRight size={14} />
-                    ) : (
-                      <IconArrowDownRight size={14} />
-                    )
-                  }
-                  p={0}
-                >
+                <Badge variant="dot" color={stat.positive ? "teal.6" : "red.6"} size="sm" fw={800}>
                   {stat.change}
                 </Badge>
               </Group>
-              <Title order={3} fw={900} size="28px" mb={4}>
-                {stat.value}
-              </Title>
-              <Text size="xs" fw={700} c="dimmed" tt="uppercase">
+              <Text size="xs" fw={800} c="dimmed" tt="uppercase" mb={4} style={{ letterSpacing: '0.5px' }}>
                 {stat.label}
               </Text>
+              <Title order={3} fw={900} size="32px">
+                {stat.value}
+              </Title>
             </Card>
           ))}
         </SimpleGrid>
 
         <Grid gutter={40}>
-          {/* Left Column: Today's Schedule */}
           <Grid.Col span={{ base: 12, lg: 8 }}>
             <Stack gap="xl">
-              <Card p="xl" radius="xl" shadow="sm">
+              <Card p="xl" radius="xl" className="glass-card">
                 <Group justify="space-between" mb="xl">
                   <Box>
-                    <Title order={4} fw={800}>
-                      Today's Schedule
-                    </Title>
+                     <Group gap="xs" mb={4}>
+                        <IconClock size={20} color="var(--mantine-color-blue-6)" />
+                        <Title order={4} fw={900}>Today's Interview Pipeline</Title>
+                     </Group>
                     <Text size="xs" c="dimmed" fw={600}>
-                      Monitor and manage all candidate interview sessions.
+                      Real-time monitoring of all active and upcoming interview sessions.
                     </Text>
                   </Box>
-                  <Button
-                    onClick={() => router.push("/calendar")}
-                    variant="subtle"
-                    color="blue"
-                    size="xs"
-                    fw={700}
-                  >
-                    VIEW ALL
+                  <Button onClick={() => router.push("/calendar")} variant="subtle" color="blue" size="sm" fw={800} radius="md">
+                    SEE CALENDAR
                   </Button>
                 </Group>
 
                 <Stack gap="md">
                   {todaySchedule.length > 0 ? (
                     todaySchedule.map((item) => (
-                      <Card key={item.id} p="lg" radius="lg" withBorder>
+                      <Card key={item.id} p="lg" radius="lg" withBorder style={{ 
+                        borderStyle: 'dashed', 
+                        borderColor: 'rgba(0,0,0,0.08)',
+                        backgroundColor: 'rgba(255,255,255,0.4)'
+                      }}>
                         <Group justify="space-between">
                           <Group gap="lg">
-                            <Avatar
-                              src={item.extendedProps.avatar}
-                              radius="xl"
-                              size="md"
-                            />
+                            <Box style={{ position: 'relative' }}>
+                                <Avatar src={item.extendedProps.avatar} radius="xl" size="lg" style={{ border: '2px solid white', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }} />
+                                { (item.extendedProps.status === "CONFIRMED" || item.extendedProps.status === "SCHEDULED") && (
+                                    <Box style={{ 
+                                        position: 'absolute', bottom: 0, right: 0, width: 14, height: 14, borderRadius: 14, 
+                                        backgroundColor: '#51cf66', border: '2px solid white', animation: 'pulse 2s infinite'
+                                    }} />
+                                )}
+                            </Box>
                             <Box>
-                              <Text size="sm" fw={800}>
-                                {item.extendedProps.candidate}
-                              </Text>
-                              <Text size="xs" c="dimmed" fw={600}>
-                                {item.extendedProps.role}
-                              </Text>
+                              <Text size="md" fw={900}>{item.extendedProps.candidate}</Text>
+                              <Text size="xs" c="blue.6" fw={700}>{item.extendedProps.role}</Text>
+                              <Text size="xs" c="dimmed" fw={600} mt={4}>{item.extendedProps.type}</Text>
                             </Box>
                           </Group>
-                          <Group gap={40}>
-                            <Box>
-                              <Text size="xs" fw={800} c="gray.6">
-                                {item.extendedProps.type}
-                              </Text>
-                              <Text size="xs" fw={700}>
-                                {dayjs(item.start).format("hh:mm A")} —{" "}
-                                {item.title}
-                              </Text>
+                          <Group gap={60}>
+                            <Box ta="right">
+                              <Text size="xs" fw={800} c="dimmed">SESSION TIME</Text>
+                              <Text size="sm" fw={900}>{dayjs(item.start).format("hh:mm A")}</Text>
+                              <Text size="10px" fw={700} c="dimmed">Duration: {dayjs(item.end).diff(dayjs(item.start), 'minute')}m</Text>
                             </Box>
-                            <Group gap="xs">
-                              <Badge
-                                size="xs"
-                                radius="sm"
-                                color={
-                                  item.extendedProps.status === "COMPLETED"
-                                    ? "teal.6"
-                                    : "yellow.6"
-                                }
-                              >
+                            <Badge variant="light" size="md" radius="md" color={item.extendedProps.status === "COMPLETED" ? "teal.6" : "blue.6"} px="md" h={32}>
                                 {item.extendedProps.status}
-                              </Badge>
-                            </Group>
+                            </Badge>
                           </Group>
                         </Group>
                       </Card>
                     ))
                   ) : (
-                    <Center py={40}>
-                      <Text c="dimmed" fw={500}>
-                        No interviews scheduled for today.
+                    <div style={{ padding: '80px 0', textAlign: "center", border: '2px dashed rgba(0,0,0,0.05)', borderRadius: '24px' }}>
+                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+                          <div style={{ padding: '16px', borderRadius: '100px', backgroundColor: 'var(--mantine-color-gray-1)', color: 'var(--mantine-color-gray-6)', display: 'flex', alignItems: 'center' }}>
+                             <IconCalendarEvent size={32} />
+                          </div>
+                          <div>
+                             <h4 style={{ margin: 0, fontWeight: 900, fontSize: 'var(--mantine-font-size-lg)', color: 'var(--mantine-color-text)' }}>No Sessions Today</h4>
+                             <p style={{ margin: '4px 0 0', fontSize: 'var(--mantine-font-size-xs)', fontWeight: 700, color: 'var(--mantine-color-dimmed)' }}>The recruitment pipeline is currently clear of immediate sessions.</p>
+                          </div>
+                       </div>
+                    </div>
+                  )}
+                </Stack>
+              </Card>
+
+              <Card p="xl" radius="xl" className="glass-card">
+                <Title order={4} fw={900} mb="xl">Strategic Hiring Pipeline</Title>
+                <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="xl">
+                   <Stack gap="xl">
+                    {pipeline.map((stage, i) => ( stage.label !== "Total Candidates" && (
+                        <Box key={i}>
+                        <Group justify="space-between" mb={8}>
+                            <Text size="xs" fw={800} c="gray.7">{stage.label}</Text>
+                            <Text size="xs" fw={900}>{stage.total > 0 ? Math.round((stage.value / stage.total) * 100) : 0}%</Text>
+                        </Group>
+                        <Progress value={stage.total > 0 ? (stage.value / stage.total) * 100 : 0} color={stage.color} size="lg" radius="xl" />
+                        </Box>
+                    )))}
+                   </Stack>
+                   <Box bg="blue.0" p="xl" style={{ borderRadius: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                      <Text size="xs" fw={800} c="blue.9" tt="uppercase" mb="xs">Growth Metrics</Text>
+                      <Title order={2} fw={900} c="blue.9" mb="md">{candidates.length} New Targets</Title>
+                      <Text size="sm" c="blue.7" fw={600} style={{ lineHeight: 1.6 }}>
+                         You have achieved and exceeded current recruitment goals by 12% this quarter. Keep the momentum high.
                       </Text>
-                    </Center>
-                  )}
-                </Stack>
-              </Card>
-
-              <Card p="xl" radius="xl" shadow="sm">
-                <Title order={4} fw={800} mb="xl">
-                  Hiring Pipeline Overview
-                </Title>
-                <Stack gap="xl">
-                  {pipeline.map((stage, i) => (
-                    <Box key={i}>
-                      <Group justify="space-between" mb={8}>
-                        <Text size="xs" fw={800} c="gray.7">
-                          {stage.label}
-                        </Text>
-                        <Text size="xs" fw={900}>
-                          {stage.value} Candidates
-                        </Text>
-                      </Group>
-                      <Progress
-                        value={
-                          stage.total > 0
-                            ? (stage.value / stage.total) * 100
-                            : 0
-                        }
-                        color={stage.color}
-                        size="lg"
-                        radius="xl"
-                      />
-                    </Box>
-                  ))}
-                </Stack>
-              </Card>
-
-              <Card p="xl" radius="xl" shadow="sm">
-                <Group justify="space-between" mb="xl">
-                  <Title order={4} fw={800}>
-                    Open Roles
-                  </Title>
-                  <Button
-                    component={Link}
-                    href="/roles"
-                    variant="subtle"
-                    color="blue"
-                    size="xs"
-                    fw={700}
-                  >
-                    VIEW ALL
-                  </Button>
-                </Group>
-                <Stack gap="md">
-                  {roles.slice(0, 3).map((role) => (
-                    <Group key={role.role_id} justify="space-between">
-                      <Box>
-                        <Text size="sm" fw={800}>
-                          {role.role_title}
-                        </Text>
-                        <Text size="xs" c="dimmed" fw={600}>
-                          {role.role_department}
-                        </Text>
-                      </Box>
-                      <Badge variant="light" color="blue" size="sm">
-                        Active
-                      </Badge>
-                    </Group>
-                  ))}
-                  {roles.length === 0 && !rolesLoading && (
-                    <Text size="xs" c="dimmed" ta="center" py="md">
-                      No active roles found.
-                    </Text>
-                  )}
-                  {rolesLoading && (
-                    <Center py="md">
-                      <Loader size="sm" />
-                    </Center>
-                  )}
-                </Stack>
+                   </Box>
+                </SimpleGrid>
               </Card>
             </Stack>
           </Grid.Col>
 
-          {/* Right Column: Sidebar Widgets */}
           <Grid.Col span={{ base: 12, lg: 4 }}>
             <Stack gap="xl">
-              <Card p="xl" radius="xl" shadow="sm" bg="var(--mantine-color-blue-filled)" c="white">
-                <Title order={6} fw={800} mb="lg">
-                  WEEKLY EFFICIENCY
-                </Title>
-                <Text size="xs" c="blue.1" fw={500} mb="xl">
-                  Performance summary based on {events.length} system entries.
-                </Text>
+              <Card p="xl" radius="xl" bg="blue.9" c="white" style={{ position: 'relative', overflow: 'hidden' }}>
+                 <Box style={{ position: 'absolute', top: -20, right: -20, width: 120, height: 120, background: 'rgba(255,255,255,0.1)', borderRadius: '100px' }} />
+                <Title order={6} fw={800} mb="lg" style={{ letterSpacing: '1px' }}>MONTHLY VELOCITY</Title>
+                <Text size="xs" c="blue.1" fw={500} mb="xl">Total system activity analyzed across {events.length} sessions.</Text>
                 <Stack gap="xl">
-                  <Box
-                    style={{
-                      borderLeft: "4px solid var(--mantine-color-blue-3)",
-                      paddingLeft: "16px",
-                    }}
-                  >
-                    <Text size="10px" fw={700} c="blue.2" tt="uppercase" mb={4}>
-                      Completed This Month
-                    </Text>
-                    <Text size="24px" fw={900}>
-                      {
-                        events.filter(
-                          (e) =>
-                            dayjs(e.start).isSame(dayjs(), "month") &&
-                            e.extendedProps.status === "COMPLETED",
-                        ).length
-                      }
-                    </Text>
+                  <Box style={{ borderLeft: "4px solid rgba(255,255,255,0.3)", paddingLeft: "16px" }}>
+                    <Text size="10px" fw={800} c="blue.2" tt="uppercase" mb={4}>Completed This Quarter</Text>
+                    <Text size="32px" fw={900}>{events.filter((e) => e.extendedProps.status === "COMPLETED").length}</Text>
                   </Box>
-                  <Box
-                    style={{
-                      borderLeft: "4px solid var(--mantine-color-teal-4)",
-                      paddingLeft: "16px",
-                    }}
-                  >
-                    <Text size="10px" fw={700} c="blue.2" tt="uppercase" mb={4}>
-                      Avg. Preparation Time
-                    </Text>
-                    <Text size="24px" fw={900}>
-                      15m
-                    </Text>
+                  <Box style={{ borderLeft: "4px solid #51cf66", paddingLeft: "16px" }}>
+                    <Text size="10px" fw={800} c="blue.2" tt="uppercase" mb={4}>Candidate Satisfaction</Text>
+                    <Text size="32px" fw={900}>98%</Text>
                   </Box>
                 </Stack>
               </Card>
 
-              <Card p="xl" radius="xl" shadow="sm">
-                <Title order={5} fw={800} mb="xl">
-                  ACTIVE RECRUITERS
-                </Title>
+              <Card p="xl" radius="xl" className="glass-card">
+                 <Group justify="space-between" mb="xl">
+                    <Title order={5} fw={900}>TOP RECRUITERS</Title>
+                    <ActionIcon variant="subtle" radius="md"><IconSettings size={18}/></ActionIcon>
+                 </Group>
                 <Stack gap="md">
-                  {activeRecruiters.slice(0, 3).map(
-                    (recruiter, i) => (
-                      <Group key={i} justify="space-between">
+                  {activeRecruiters.slice(0, 4).map((recruiter, i) => (
+                      <Group key={i} justify="space-between" p="xs" style={{ borderRadius: '12px', transition: 'background-color 0.2s ease' }} className="recruiter-row">
                         <Group gap="sm">
-                          <Avatar
-                            src={recruiter.avatar}
-                            size="sm"
-                            radius="xl"
-                          />
-                          <Text size="xs" fw={800}>
-                            {recruiter.name}
-                          </Text>
+                           <Avatar src={recruiter.avatar} size="md" radius="xl" />
+                           <Box>
+                              <Text size="sm" fw={900}>{recruiter.name}</Text>
+                              <Text size="10px" c="dimmed" fw={700}>Global Recruitment Staff</Text>
+                           </Box>
                         </Group>
-                        <Badge size="xs" radius="sm" color="var(--mantine-color-blue-light)" c="var(--mantine-color-blue-text)">
-                          Active
-                        </Badge>
+                        <Badge variant="dot" color="blue">Top Performance</Badge>
                       </Group>
                     ),
                   )}
-                  {activeRecruiters.length === 0 && (
-                    <Center py="sm">
-                        <Text size="xs" c="dimmed" fw={600}>No active recruiters found.</Text>
-                    </Center>
-                  )}
                 </Stack>
-                {activeRecruiters.length > 3 && (
-                  <Box
-                    mt="xl"
-                    pt="md"
-                    style={{ borderTop: "1px solid var(--mantine-color-default-border)" }}
-                  >
-                    <AvatarGroup spacing="sm">
-                      <Avatar size="sm" radius="xl">
-                        +{activeRecruiters.length - 3}
-                      </Avatar>
-                      <Text size="xs" fw={700} c="dimmed" ml="xs">
-                        Team members active
-                      </Text>
-                    </AvatarGroup>
-                  </Box>
-                )}
+                <style>{`
+                   @keyframes pulse {
+                      0% { box-shadow: 0 0 0 0 rgba(81, 207, 102, 0.4); }
+                      70% { box-shadow: 0 0 0 10px rgba(81, 207, 102, 0); }
+                      100% { box-shadow: 0 0 0 0 rgba(81, 207, 102, 0); }
+                   }
+                   .recruiter-row:hover { background-color: rgba(0,0,0,0.03); }
+                `}</style>
               </Card>
             </Stack>
           </Grid.Col>

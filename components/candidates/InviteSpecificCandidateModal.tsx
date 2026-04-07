@@ -8,6 +8,7 @@ import {
   Select,
   Stack,
   Text,
+  Title,
   Group,
   ThemeIcon,
   Box,
@@ -228,44 +229,58 @@ export default function InviteSpecificCandidateModal({
       opened={opened}
       onClose={onClose}
       title={
-        <Group gap="sm">
-          <ThemeIcon variant="light" size="lg" radius="md" color="blue">
+        <Group gap="sm" wrap="nowrap">
+          <ThemeIcon variant="light" size={48} radius="md" color="blue">
             {getPlatformIcon()}
           </ThemeIcon>
           <Box>
-            <Text fw={800} size="lg">
+            <Badge variant="filled" color="blue.9" size="xs" mb={4}>RECRUITMENT AUTOMATION</Badge>
+            <Title order={3} fw={900} size="h3" style={{ letterSpacing: '-0.5px' }}>
               Bulk Invite via {platform}
-            </Text>
-            <Text size="xs" c="dimmed" fw={600}>
-              BATCH RECRUITMENT AUTOMATION
-            </Text>
+            </Title>
           </Box>
         </Group>
       }
-      radius="lg"
+      radius="xl"
       padding="xl"
       size="lg"
+      centered
       withCloseButton={status !== "sending"}
       closeOnClickOutside={status !== "sending"}
+      transitionProps={{ transition: 'slide-up', duration: 400, timingFunction: 'ease' }}
+      styles={{
+        title: { width: '100%' },
+        content: { 
+          backdropFilter: 'blur(20px)', 
+          backgroundColor: 'rgba(255, 255, 255, 0.9)', 
+          border: '1px solid rgba(255,255,255,0.4)',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15)'
+        }
+      }}
     >
       {status === "idle" && (
-        <form onSubmit={form.onSubmit(handleSubmit)}>
-          <Stack gap="md">
-            <Box bg="blue.0" p="md" style={{ borderRadius: "12px" }}>
-              <Text size="xs" fw={700} c="blue.9" mb={4}>
-                MESSAGE CONTEXT
-              </Text>
-              <Text size="xs" c="blue.8" fs="italic">
-                "We recently came across your professional profile on {platform}{" "}
-                and were incredibly impressed..."
+        <form onSubmit={form.onSubmit(handleSubmit)} className="animate-in">
+          <Stack gap="lg">
+            <Box bg="blue.0" p="md" style={{ borderRadius: "16px", border: '1px solid var(--mantine-color-blue-1)' }}>
+              <Group gap="xs" mb={4}>
+                 <IconRocket size={14} color="var(--mantine-color-blue-9)" />
+                 <Text size="xs" fw={900} c="blue.9" tt="uppercase" style={{ letterSpacing: '0.5px' }}>
+                    OUTREACH CONTEXT
+                 </Text>
+              </Group>
+              <Text size="xs" c="blue.8" fw={600} style={{ lineHeight: 1.5 }}>
+                "We discovered your professional expertise on {platform}{" "}
+                and are highly interested in your background for our current organizational requirements..."
               </Text>
             </Box>
 
-            {fields}
+            <Stack gap="md" style={{ maxHeight: '400px', overflowY: 'auto', paddingRight: '4px' }}>
+                {fields}
+            </Stack>
 
             <Button
               variant="light"
-              leftSection={<IconPlus size={16} />}
+              leftSection={<IconPlus size={18} />}
               onClick={() =>
                 form.insertListItem("candidates", {
                   full_name: "",
@@ -276,12 +291,14 @@ export default function InviteSpecificCandidateModal({
               }
               fullWidth
               radius="md"
+              h={45}
+              fw={800}
             >
-              Add Another Candidate
+              Expand Batch
             </Button>
 
-            <Group justify="flex-end" mt="xl">
-              <Button variant="subtle" onClick={onClose} radius="md">
+            <Group justify="flex-end" mt="xl" pt="xl" style={{ borderTop: '1px solid rgba(0,0,0,0.05)' }}>
+              <Button variant="subtle" onClick={onClose} radius="md" h={45} fw={700} color="gray">
                 Cancel
               </Button>
               <Button
@@ -289,9 +306,12 @@ export default function InviteSpecificCandidateModal({
                 radius="md"
                 color="blue.9"
                 px="xl"
-                rightSection={<IconRocket size={16} />}
+                h={45}
+                fw={900}
+                rightSection={<IconRocket size={18} />}
+                style={{ boxShadow: '0 4px 12px rgba(34, 139, 230, 0.25)' }}
               >
-                Send All Invitations ({form.values.candidates.length})
+                Dispatch Batch ({form.values.candidates.length})
               </Button>
             </Group>
           </Stack>
@@ -299,95 +319,125 @@ export default function InviteSpecificCandidateModal({
       )}
 
       {status === "sending" && (
-        <Box py={40} style={{ textAlign: "center" }}>
-          <Stack align="center" gap="md">
+        <Box py={60} style={{ textAlign: "center" }} className="animate-in">
+          <Stack align="center" gap="xl">
             <Box
               style={{
-                width: 80,
-                height: 80,
-                borderRadius: 80,
+                width: 100,
+                height: 100,
+                borderRadius: 100,
                 backgroundColor: "var(--mantine-color-blue-0)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 border: "2px dashed var(--mantine-color-blue-4)",
-                animation: "spin 4s linear infinite",
+                animation: "pulse-orbit 3s ease-in-out infinite",
               }}
             >
-              <IconRocket size={40} color="var(--mantine-color-blue-9)" />
+              <IconRocket size={48} color="var(--mantine-color-blue-9)" />
             </Box>
             <Box>
-              <Text fw={800} size="lg">
-                Processing Batch...
-              </Text>
-              <Text size="sm" c="dimmed">
-                Seeding database and dispatching {form.values.candidates.length}{" "}
-                emails via {platform} relays
+              <Title order={3} fw={900} mb={4}>
+                Synchronizing Pipeline...
+              </Title>
+              <Text size="sm" c="dimmed" fw={600} px="xl">
+                Registering talent profiles and orchestrating {form.values.candidates.length}{" "}
+                professional invitations via secure {platform} relays.
               </Text>
             </Box>
-            <Loader size="sm" color="blue" variant="dots" />
+            <Loader size="lg" color="blue" variant="dots" />
           </Stack>
           <style>{`
-            @keyframes spin {
-              from { transform: rotate(0deg); }
-              to { transform: rotate(360deg); }
+            @keyframes pulse-orbit {
+              0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(34, 139, 230, 0.2); }
+              50% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(34, 139, 230, 0); }
+              100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(34, 139, 230, 0); }
             }
           `}</style>
         </Box>
       )}
 
       {status === "success" && (
-        <Box py={40} style={{ textAlign: "center" }}>
-          <Stack align="center" gap="md">
-            <ThemeIcon size={80} radius={80} color="teal" variant="light">
-              <IconCircleCheck size={50} />
-            </ThemeIcon>
-            <Box>
-              <Text fw={800} size="xl">
-                Batch Success!
-              </Text>
-              <Text size="sm" c="dimmed">
-                All {form.values.candidates.length} invitations have been
-                successfully dispatched.
+        <Box py={60} style={{ textAlign: "center" }} className="animate-in">
+          <Stack align="center" gap="xl">
+            <Box
+               style={{
+                width: 100,
+                height: 100,
+                borderRadius: 100,
+                backgroundColor: "var(--mantine-color-teal-0)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                border: '2px solid var(--mantine-color-teal-2)'
+               }}
+            >
+              <IconCircleCheck size={56} color="var(--mantine-color-teal-6)" />
+            </Box>
+            <Box px="xl">
+              <Title order={3} fw={900} mb={4}>
+                Operation Successful
+              </Title>
+              <Text size="sm" c="dimmed" fw={600}>
+                Organizational bandwidth updated. All {form.values.candidates.length} talent 
+                invitations have been successfully dispatched to the target registries.
               </Text>
             </Box>
             <Button
-              variant="light"
-              color="blue"
+              variant="filled"
+              color="teal.8"
               fullWidth
+              h={48}
+              radius="md"
+              fw={900}
               mt="xl"
               onClick={onClose}
+              style={{ boxShadow: '0 4px 12px rgba(12, 170, 65, 0.2)' }}
             >
-              Finish
+              Acknowledge & Finalize
             </Button>
           </Stack>
         </Box>
       )}
 
       {status === "error" && (
-        <Box py={40} style={{ textAlign: "center" }}>
-          <Stack align="center" gap="md">
-            <ThemeIcon size={80} radius={80} color="red" variant="light">
-              <IconAlertCircle size={50} />
-            </ThemeIcon>
-            <Box>
-              <Text fw={800} size="xl">
-                Batch Process Failed
-              </Text>
-              <Text size="sm" c="red.7" fw={500}>
+        <Box py={60} style={{ textAlign: "center" }} className="animate-in">
+          <Stack align="center" gap="xl">
+            <Box
+               style={{
+                width: 100,
+                height: 100,
+                borderRadius: 100,
+                backgroundColor: "var(--mantine-color-red-0)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                border: '2px solid var(--mantine-color-red-2)'
+               }}
+            >
+              <IconAlertCircle size={56} color="var(--mantine-color-red-6)" />
+            </Box>
+            <Box px="xl">
+              <Title order={3} fw={900} mb={4} c="red.9">
+                Operational Fault Detected
+              </Title>
+              <Text size="sm" c="red.7" fw={700}>
                 {errorMessage}
               </Text>
             </Box>
             <Group grow w="100%" mt="xl">
-              <Button variant="default" onClick={() => setStatus("idle")}>
+              <Button variant="default" h={48} radius="md" fw={700} onClick={() => setStatus("idle")}>
                 Go Back
               </Button>
               <Button
-                color="blue"
-                leftSection={<IconRefresh size={16} />}
+                color="blue.9"
+                h={48}
+                radius="md"
+                fw={900}
+                leftSection={<IconRefresh size={18} />}
                 onClick={() => handleSubmit(form.values)}
               >
-                Retry All
+                Retry Operation
               </Button>
             </Group>
           </Stack>

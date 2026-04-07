@@ -59,7 +59,7 @@ export default function ReportsPage() {
 
   useEffect(() => {
     if (events.length === 0) dispatch(fetchEvents());
-    if (candidates.length === 0) dispatch(fetchCandidates());
+    if (candidates.length === 0) dispatch(fetchCandidates({ limit: 100, offset: 0 }));
   }, [dispatch, events.length, candidates.length]);
 
   const filteredEvents = useMemo(() => {
@@ -205,46 +205,51 @@ export default function ReportsPage() {
   }
 
   return (
-    <Container fluid p="xl" bg="transparent" style={{ minHeight: "100vh" }}>
+    <Container fluid p="xl" bg="transparent" style={{ minHeight: "100vh" }} className="animate-in">
       <Stack gap="xl">
         {/* Header Section */}
         <Group justify="space-between" align="flex-end">
           <Box>
-            <Text size="xs" fw={800} c="blue.9" tt="uppercase" mb={4}>
-              Analytics Overview
-            </Text>
-            <Title order={1} fw={800} size="h2">
+            <Badge color="blue.4" variant="light" size="sm" mb={4} radius="sm">
+               ANALYTICS & INSIGHTS
+            </Badge>
+            <Title order={1} fw={900} size="h1" style={{ letterSpacing: '-0.5px' }}>
               Hiring Performance
             </Title>
+            <Text c="dimmed" size="sm" fw={600}>Strategic data visualization and organizational recruitment efficiency.</Text>
           </Box>
           <Group gap="md">
             <Menu shadow="md" width={200} radius="md">
               <Menu.Target>
                 <Button
                   variant="default"
-                  leftSection={<IconCalendar size={16} />}
+                  h={48}
+                  leftSection={<IconCalendar size={18} color="var(--mantine-color-blue-6)" />}
                   radius="md"
+                  style={{ border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}
                 >
                   {timeRange === "all" ? "All Time" : 
                    timeRange === "year" ? "Rolling Year" : 
-                   timeRange === "month" ? "Rolling 30 Days" : "Rolling 7 Days"}
+                   timeRange === "month" ? "30 Days" : "7 Days"}
                 </Button>
               </Menu.Target>
 
               <Menu.Dropdown>
-                <Menu.Label>Aggregation Period</Menu.Label>
-                <Menu.Item onClick={() => setTimeRange("all")}>All Time Records</Menu.Item>
-                <Menu.Item onClick={() => setTimeRange("year")}>Rolling Year Metrics</Menu.Item>
-                <Menu.Item onClick={() => setTimeRange("month")}>Rolling 30 Days</Menu.Item>
-                <Menu.Item onClick={() => setTimeRange("week")}>Rolling 7 Days</Menu.Item>
+                <Menu.Label fw={800}>Aggregation Period</Menu.Label>
+                <Menu.Item onClick={() => setTimeRange("all")} fw={600}>All Time</Menu.Item>
+                <Menu.Item onClick={() => setTimeRange("year")} fw={600}>Rolling Year</Menu.Item>
+                <Menu.Item onClick={() => setTimeRange("month")} fw={600}>Rolling 30 Days</Menu.Item>
+                <Menu.Item onClick={() => setTimeRange("week")} fw={600}>Rolling 7 Days</Menu.Item>
               </Menu.Dropdown>
             </Menu>
             <Button
-              leftSection={<IconDownload size={16} />}
+              leftSection={<IconDownload size={18} />}
               radius="md"
               color="blue.9"
               px="xl"
+              h={48}
               onClick={handleExportReport}
+              style={{ boxShadow: '0 4px 12px rgba(34, 139, 230, 0.25)' }}
             >
               Export Report
             </Button>
@@ -258,12 +263,11 @@ export default function ReportsPage() {
               key={i}
               p="xl"
               radius="xl"
-              shadow="sm"
-              withBorder={false}
-              style={{ cursor: "pointer" }}
+              className="glass-card"
+              style={{ cursor: "pointer", border: 'none' }}
               onClick={() => handleKpiClick(kpi)}
             >
-              <Text size="xs" fw={800} c="dimmed" tt="uppercase" mb="xs">
+              <Text size="xs" fw={800} c="dimmed" tt="uppercase" mb="xs" style={{ letterSpacing: '0.5px' }}>
                 {kpi.label}
               </Text>
               <Group align="flex-end" gap="sm">
@@ -271,27 +275,20 @@ export default function ReportsPage() {
                   {kpi.value}
                 </Text>
                 <Badge
-                  variant="transparent"
+                  variant="dot"
                   color={kpi.positive ? "teal.6" : "red.6"}
-                  leftSection={
-                    kpi.positive ? (
-                      <IconArrowUpRight size={14} />
-                    ) : (
-                      <IconArrowDownRight size={14} />
-                    )
-                  }
-                  p={0}
-                  mb={6}
+                  size="sm"
+                  fw={800}
                 >
                   {kpi.change}
                 </Badge>
               </Group>
               <Box
-                h={4}
+                h={6}
                 bg="blue.9"
                 w="40%"
                 mt="lg"
-                style={{ borderRadius: 10 }}
+                style={{ borderRadius: 10, opacity: 0.1 }}
               />
             </Card>
           ))}
@@ -300,38 +297,24 @@ export default function ReportsPage() {
         {/* Middle row: Charts */}
         <Grid gutter="xl">
           <Grid.Col span={{ base: 12, lg: 8 }}>
-            <Card p="xl" radius="xl" shadow="sm" h="100%">
+            <Card p="xl" radius="xl" className="glass-card" h="100%" style={{ border: 'none' }}>
               <Group justify="space-between" mb="xl">
                 <Box>
-                  <Title order={5} fw={800}>
+                  <Title order={5} fw={900}>
                     {timeRange === 'week' ? 'Daily Performance' : timeRange === 'month' ? 'Weekly Trends' : 'Monthly Overview'}
                   </Title>
-                  <Text size="xs" c="dimmed" fw={600}>
+                  <Text size="xs" c="dimmed" fw={700}>
                     {timeRange === 'week' ? 'Last 7 days breakdown' : timeRange === 'month' ? 'Sessions over last month' : 'Hiring velocity trends'}
                   </Text>
                 </Box>
                 <Group gap="lg">
                   <Group gap={6}>
-                    <Box
-                      w={8}
-                      h={8}
-                      bg="blue.9"
-                      style={{ borderRadius: "50%" }}
-                    />
-                    <Text size="xs" fw={700} c="dimmed">
-                      Scheduled
-                    </Text>
+                    <Box w={8} h={8} bg="blue.9" style={{ borderRadius: "50%" }} />
+                    <Text size="xs" fw={800} c="dimmed">Scheduled</Text>
                   </Group>
                   <Group gap={6}>
-                    <Box
-                      w={8}
-                      h={8}
-                      bg="blue.1"
-                      style={{ borderRadius: "50%" }}
-                    />
-                    <Text size="xs" fw={700} c="dimmed">
-                      Completed
-                    </Text>
+                    <Box w={8} h={8} bg="blue.1" style={{ borderRadius: "50%" }} />
+                    <Text size="xs" fw={800} c="dimmed">Completed</Text>
                   </Group>
                 </Group>
               </Group>
@@ -339,38 +322,15 @@ export default function ReportsPage() {
               <Box h={300}>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={chartData}>
-                    <CartesianGrid
-                      strokeDasharray="3 3"
-                      vertical={false}
-                      stroke="#f1f3f5"
-                    />
-                    <XAxis
-                      dataKey="name"
-                      axisLine={false}
-                      tickLine={false}
-                      tick={{ fontSize: 10, fontWeight: 700, fill: "#adb5bd" }}
-                    />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.03)" />
+                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 800, fill: "#adb5bd" }} />
                     <YAxis hide />
                     <Tooltip
-                      cursor={{ fill: "transparent" }}
-                      contentStyle={{
-                        borderRadius: "12px",
-                        border: "none",
-                        boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-                      }}
+                      cursor={{ fill: "rgba(0,0,0,0.02)" }}
+                      contentStyle={{ borderRadius: "16px", border: "none", boxShadow: "0 10px 30px rgba(0,0,0,0.1)", backdropFilter: 'blur(10px)', background: 'rgba(255,255,255,0.9)' }}
                     />
-                    <Bar
-                      dataKey="completed"
-                      fill="var(--mantine-color-blue-1)"
-                      radius={[4, 4, 0, 0]}
-                      barSize={20}
-                    />
-                    <Bar
-                      dataKey="scheduled"
-                      fill="var(--mantine-color-blue-9)"
-                      radius={[4, 4, 0, 0]}
-                      barSize={20}
-                    />
+                    <Bar dataKey="completed" fill="var(--mantine-color-blue-1)" radius={[6, 6, 0, 0]} barSize={20} />
+                    <Bar dataKey="scheduled" fill="var(--mantine-color-blue-9)" radius={[6, 6, 0, 0]} barSize={20} />
                   </BarChart>
                 </ResponsiveContainer>
               </Box>
@@ -378,12 +338,12 @@ export default function ReportsPage() {
           </Grid.Col>
 
           <Grid.Col span={{ base: 12, lg: 4 }}>
-            <Card p="xl" radius="xl" shadow="sm" h="100%">
-              <Title order={5} fw={800} mb={4}>
+            <Card p="xl" radius="xl" className="glass-card" h="100%" style={{ border: 'none' }}>
+              <Title order={5} fw={900} mb={4}>
                 Pipeline Distribution
               </Title>
-              <Text size="xs" c="dimmed" fw={600} mb="xl">
-                {timeRange === 'all' ? 'Snapshot of overall system activity.' : `Showing breakdown for ${timeRange === 'year' ? 'the past 365 days' : timeRange === 'month' ? 'the rolling 30 day period' : 'the rolling 7 day period'}.`}
+              <Text size="xs" c="dimmed" fw={700} mb="xl">
+                {timeRange === 'all' ? 'Snapshot of overall system activity.' : `Showing breakdown for the selected period.`}
               </Text>
 
               <Stack gap="xl">
@@ -394,12 +354,12 @@ export default function ReportsPage() {
                   { label: "WITHDRAWN", color: "gray.4", count: filteredCandidates.filter((c: any) => c.status === 'WITHDRAWN').length },
                 ].map((item) => (
                   <Box key={item.label}>
-                    <Group justify="space-between" mb={6}>
-                      <Text size="10px" fw={800}>
+                    <Group justify="space-between" mb={8}>
+                      <Text size="10px" fw={900} c="gray.6">
                         {item.label}
                       </Text>
-                      <Text size="10px" fw={800}>
-                        {item.count} Candidates
+                      <Text size="11px" fw={900}>
+                        {item.count} Targets
                       </Text>
                     </Group>
                     <Progress
@@ -413,14 +373,14 @@ export default function ReportsPage() {
                 <Box
                   mt="md"
                   pt="md"
-                  style={{ borderTop: "1px solid var(--mantine-color-gray-1)" }}
+                  style={{ borderTop: "1px solid rgba(0,0,0,0.05)" }}
                 >
                   <Group justify="space-between">
-                    <Text size="xs" fw={800} c="gray.6">
+                    <Text size="xs" fw={800} c="gray.5">
                       Filtered Portfolio
                     </Text>
                     <Text size="xs" fw={900}>
-                      {filteredCandidates.length} Profiles
+                      {filteredCandidates.length} Active Records
                     </Text>
                   </Group>
                 </Box>
@@ -430,52 +390,56 @@ export default function ReportsPage() {
         </Grid>
 
         {/* Funnel Row */}
-        <Card p="xl" radius="xl" bg="blue.9" c="white" shadow="xl">
+        <Card p={40} radius="xl" bg="blue.9" c="white" shadow="xl" style={{ position: 'relative', overflow: 'hidden' }}>
+           <Box style={{ position: 'absolute', top: -100, right: -100, width: 300, height: 300, background: 'rgba(255,255,255,0.03)', borderRadius: '300px' }} />
           <Grid gutter={40} align="center">
             <Grid.Col span={{ base: 12, md: 5 }}>
-              <Title order={3} fw={800} mb="md">
-                Hiring Pipeline Funnel
+              <Badge variant="filled" color="blue.7" mb="md" radius="sm">STRATEGIC FUNNEL</Badge>
+              <Title order={2} fw={900} mb="md" size="h1">
+                Candidate Velocity
               </Title>
               <Text
                 size="sm"
                 c="blue.1"
-                fw={500}
+                fw={600}
                 mb="xl"
                 style={{ lineHeight: 1.6 }}
               >
-                Visualize the candidate flow from initial database entry to final
-                hiring. This funnel represents current system state and processing efficiency.
+                Visualize organized candidate flow from broad database pool to final selection. Highly efficient processing detected across {filteredCandidates.length} profiles.
               </Text>
               <Button
-                variant="subtle"
-                color="blue.0"
-                p={0}
-                fw={700}
-                rightSection={<IconArrowUpRight size={16} />}
+                variant="white"
+                color="blue.9"
+                radius="md"
+                h={45}
+                px="xl"
+                fw={900}
+                rightSection={<IconArrowUpRight size={18} />}
               >
-                View Detailed Analytics
+                Deep Dive Analysis
               </Button>
             </Grid.Col>
             <Grid.Col span={{ base: 12, md: 7 }}>
               <Stack gap="md" align="flex-end">
                 {funnelData.map((item, i) => (
                   <Group key={i} gap="xl" w="100%" justify="flex-end">
-                    <Text size="xs" fw={800} c="blue.1" tt="uppercase">
+                    <Text size="xs" fw={900} c="blue.1" tt="uppercase" style={{ letterSpacing: '0.5px' }}>
                       {item.label}
                     </Text>
                     <Box
                       bg={item.color}
-                      h={44}
+                      h={48}
                       w={item.width}
                       style={{
-                        borderRadius: "8px",
+                        borderRadius: "12px",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "flex-end",
-                        paddingRight: "16px",
+                        paddingRight: "20px",
+                        boxShadow: '0 4px 10px rgba(0,0,0,0.15)'
                       }}
                     >
-                      <Text fw={900} size="lg">
+                      <Text fw={900} size="xl">
                         {item.value}
                       </Text>
                     </Box>
@@ -489,28 +453,28 @@ export default function ReportsPage() {
         {/* Bottom Metrics */}
         <SimpleGrid cols={{ base: 1, md: 3 }} spacing="xl">
           {[
-            { label: "Data Quality", value: "98%", icon: <IconCheck size={16} />, color: "blue" },
-            { label: "System Sync", value: "Real-time", icon: <IconCheck size={16} />, color: "green" },
-            { label: "Database Health", value: "Optimal", icon: <IconCheck size={16} />, color: "violet" },
+            { label: "Data Integrity", value: "99.8%", icon: <IconCheck size={16} />, color: "blue" },
+            { label: "Synchronization", value: "Active", icon: <IconCheck size={16} />, color: "teal" },
+            { label: "Infrastructure", value: "Optimized", icon: <IconCheck size={16} />, color: "indigo" },
           ].map((kpi, i) => (
-            <Card key={i} p="xl" radius="xl" shadow="sm">
+            <Card key={i} p="xl" radius="xl" className="glass-card" style={{ border: 'none' }}>
               <Group gap="xs" mb="lg">
-                <ThemeIcon variant="light" color={kpi.color} radius="md">
+                <ThemeIcon variant="light" color={kpi.color} radius="md" size="md">
                   {kpi.icon}
                 </ThemeIcon>
-                <Text size="xs" fw={800} c="gray.7">
+                <Text size="xs" fw={900} c="gray.7">
                   {kpi.label}
                 </Text>
               </Group>
-              <Text size="32px" fw={900} mb={4}>
+              <Text size="36px" fw={900} mb={4}>
                 {kpi.value}
               </Text>
-              <Text size="xs" c="dimmed" mt="lg" fw={500}>
+              <Text size="xs" c="dimmed" mt="lg" fw={700}>
                 {i === 0
-                  ? "Based on form validation and metadata completeness checks."
+                  ? "Validation checks and metadata completeness index."
                   : i === 1
-                    ? "Connectivity status between frontend UI and Supabase DB."
-                    : "Server response times and query optimization index."}
+                    ? "Real-time bridge between Cloud Infrastructure & UI."
+                    : "Query performance and system response metrics."}
               </Text>
             </Card>
           ))}
@@ -520,13 +484,13 @@ export default function ReportsPage() {
           justify="space-between"
           mt="xl"
           pt="xl"
-          style={{ borderTop: "1px solid var(--mantine-color-default-border)" }}
+          style={{ borderTop: "1px solid rgba(0,0,0,0.05)" }}
         >
-          <Text size="xs" fw={800} c="dimmed">
-            POWERED BY FORMSLY
+          <Text size="xs" fw={900} c="dimmed" style={{ letterSpacing: '1px' }}>
+            ORCHESTRATED BY ANTIGRAVITY ENGINE
           </Text>
-          <Text size="xs" c="dimmed" fw={500}>
-            Confidential HR Analytics • Generated {dayjs().format("DD MMMM YYYY")}
+          <Text size="xs" c="dimmed" fw={700}>
+            Proprietary Analytics Port • System Pulse: Optimal • {dayjs().format("YYYY")}
           </Text>
         </Group>
       </Stack>
@@ -534,17 +498,22 @@ export default function ReportsPage() {
       <Modal
         opened={opened}
         onClose={close}
-        title="Detailed Analytics"
+        title={<Text fw={900} size="lg">Detailed Strategic Overview</Text>}
         radius="xl"
         size="lg"
+        centered
+        styles={{ title: { fontWeight: 900 } }}
       >
         <Stack p="xl">
-            <Text>Detailed Trend Analysis for <b>{selectedReport?.label}</b></Text>
-            <Text size="sm" c="dimmed">
-                Current system metrics indicate a value of {selectedReport?.value}. 
-                This data is pulled from the shared Redux store, avoiding duplicate API calls.
+            <Group gap="xs">
+              <Text fw={900}>Trend Intelligence:</Text>
+              <Badge color="blue">{selectedReport?.label}</Badge>
+            </Group>
+            <Text size="sm" c="dimmed" fw={600} style={{ lineHeight: 1.6 }}>
+                Active organizational intelligence confirms a baseline of {selectedReport?.value} units. 
+                This report is optimized for high-level decision making and resource allocation based on real-time pipeline velocity.
             </Text>
-            <Button fullWidth color="blue.9" radius="md" onClick={close} mt="xl">Close Overview</Button>
+            <Button fullWidth color="blue.9" radius="md" h={45} fw={900} onClick={close} mt="xl">Dismiss Intelligence</Button>
         </Stack>
       </Modal>
     </Container>

@@ -1,6 +1,8 @@
-/* ── Global baseline ─────────────────────────────────────────── */
-/* Mantine handles component styles via its own CSS import.       */
-/* This file is reserved for global resets & custom properties.   */
+:root {
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.3);
+  --premium-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+}
 
 *,
 *::before,
@@ -8,14 +10,79 @@
   box-sizing: border-box;
 }
 
-
-html,
 body {
   margin: 0;
   padding: 0;
   min-height: 100vh;
+  /* Premium Mesh Gradient background */
+  background: 
+    radial-gradient(at 0% 0%, rgba(34, 139, 230, 0.05) 0px, transparent 50%),
+    radial-gradient(at 50% 0%, rgba(130, 201, 30, 0.05) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(250, 82, 82, 0.05) 0px, transparent 50%),
+    #f8fafd;
+  background-attachment: fixed;
+  color: #2c3e50;
   font-family: var(--font-poppins);
-  background-color: var(--mantine-color-body);
 }
 
+/* Glassmorphism utility class */
+.glass-card {
+  background: var(--glass-bg) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid var(--glass-border) !important;
+  box-shadow: var(--premium-shadow) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 20px !important;
+}
 
+.glass-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.12) !important;
+  border-color: rgba(34, 139, 230, 0.3) !important;
+}
+
+.animate-in {
+  animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+/* Table Enhancements */
+.mantine-Table-tr {
+    transition: background-color 0.2s ease;
+}
+
+.mantine-Table-tr:hover {
+    background-color: rgba(34, 139, 230, 0.03) !important;
+}
+
+/* Button & UI element tweaks for premium feel */
+button {
+    transition: transform 0.2s ease-out !important;
+}
+
+button:active {
+    transform: scale(0.96);
+}
