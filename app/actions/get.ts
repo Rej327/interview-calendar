@@ -106,4 +106,31 @@ export async function fetchCandidateJourney(hiring_process_id: string) {
   }
 }
 
+export async function fetchCandidateForInvite(candidate_id: string) {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('candidates_table')
+      .select('candidate_id, candidate_full_name, candidate_email, hiring_processes_table!inner(roles_table!inner(role_title, role_department))')
+      .eq('candidate_id', candidate_id)
+      .single();
 
+    if (error) throw error;
+    
+    // Flatten the data for easier use
+    const roleDetails = (data as any).hiring_processes_table?.[0]?.roles_table || {};
+    
+    return { 
+      success: true, 
+      data: {
+        id: data.candidate_id,
+        name: data.candidate_full_name,
+        email: data.candidate_email,
+        role: roleDetails.role_title || "Specialized Position",
+        department: roleDetails.role_department || "Recruitment"
+      } 
+    };
+  } catch (error: any) {
+    console.error("fetchCandidateForInvite Action Error:", error);
+    return { success: false, message: error.message };
+  }
+}

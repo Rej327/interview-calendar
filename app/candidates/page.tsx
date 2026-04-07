@@ -42,6 +42,7 @@ import { useDisclosure } from "@mantine/hooks";
 import CandidateJourneyDrawer from "@/components/candidates/CandidateJourneyDrawer";
 import AddCandidateModal from "@/components/candidates/AddCandidateModal";
 import UpdateCandidateModal from "@/components/candidates/UpdateCandidateModal";
+import InviteSpecificCandidateModal from "@/components/candidates/InviteSpecificCandidateModal";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { fetchCandidates } from "@/lib/store/candidatesSlice";
 import { notifications } from "@mantine/notifications";
@@ -60,6 +61,9 @@ export default function CandidatesPage() {
     useDisclosure(false);
   const [filterOpened, { open: filterOpen, close: filterClose }] =
     useDisclosure(false);
+  const [inviteModalOpened, { open: inviteModalOpen, close: inviteModalClose }] =
+    useDisclosure(false);
+  const [selectedPlatform, setSelectedPlatform] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [selectedCandidate, setSelectedCandidate] = useState<any>(null);
@@ -177,8 +181,25 @@ export default function CandidatesPage() {
   };
 
   const handleInvite = async (platform: string, candidateIds?: string[]) => {
-    const ids = candidateIds || (selectedCandidate ? [selectedCandidate.candidate_id] : []);
-    if (ids.length === 0) return;
+    let ids = candidateIds;
+    
+    // If no specific IDs provided, try to use selected records
+    if (!ids || ids.length === 0) {
+      if (selectedRecords.length > 0) {
+        ids = selectedRecords.map(r => r.candidate_id);
+      } else if (selectedCandidate) {
+        ids = [selectedCandidate.candidate_id];
+      }
+    }
+
+    if (!ids || ids.length === 0) {
+      notifications.show({
+        title: "No candidates selected",
+        message: "Please select one or more candidates from the list to send invitations.",
+        color: "orange",
+      });
+      return;
+    }
 
     try {
       const { sendCandidateInvite } = await import("@/app/actions/post");
@@ -190,14 +211,14 @@ export default function CandidatesPage() {
           message: result.message,
           color: "teal",
         });
-        if (!candidateIds) setSelectedRecords([]); // Clear if bulk
+        setSelectedRecords([]); // Clear selection after successful invite
       } else {
         throw new Error(result.message);
       }
     } catch (error: any) {
       notifications.show({
         title: "Something went wrong",
-        message: "We couldn't send the invitations. Please check your connection and try again.",
+        message: error.message || "We couldn't send the invitations. Please check your connection and try again.",
         color: "red",
       });
     }
@@ -205,7 +226,16 @@ export default function CandidatesPage() {
 
   const handleBulkInvite = () => {
     const ids = selectedRecords.map(r => r.candidate_id);
-    handleInvite("Bulk Automation", ids);
+    handleInvite("Internal Bulk Automation", ids);
+  };
+
+  const handleSidebarInvite = (platform: string) => {
+    if (selectedRecords.length > 0) {
+      handleInvite(platform);
+    } else {
+      setSelectedPlatform(platform);
+      inviteModalOpen();
+    }
   };
 
   // Reset page when filters change
@@ -418,7 +448,7 @@ export default function CandidatesPage() {
                           color="gray"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleInvite("Direct Email");
+                            handleInvite("Direct Email", [record.candidate_id]);
                           }}
                         >
                           <IconMail size={16} />
@@ -442,7 +472,7 @@ export default function CandidatesPage() {
                               }
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleInvite("Direct Email");
+                                handleInvite("Direct Email", [record.candidate_id]);
                               }}
                             >
                               Send Email
@@ -551,7 +581,7 @@ export default function CandidatesPage() {
                       bg="blue.8"
                       p="xs"
                       style={{ borderRadius: "8px", cursor: "pointer" }}
-                      onClick={() => handleInvite(board)}
+                      onClick={() => handleSidebarInvite(board)}
                     >
                       <Text size="xs" fw={800}>
                         {board}
@@ -578,6 +608,12 @@ export default function CandidatesPage() {
         opened={updateOpened}
         onClose={updateClose}
         candidate={selectedCandidate}
+      />
+
+      <InviteSpecificCandidateModal 
+        opened={inviteModalOpened} 
+        onClose={inviteModalClose} 
+        platform={selectedPlatform} 
       />
 
       <Drawer
