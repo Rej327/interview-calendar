@@ -45,12 +45,14 @@ import {
 } from "recharts";
 import dayjs from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
+import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { fetchEvents } from "@/lib/store/calendarSlice";
 import { fetchCandidates } from "@/lib/store/candidatesSlice";
 import { notifications } from "@mantine/notifications";
 
 dayjs.extend(isoWeek);
+dayjs.extend(isSameOrAfter);
 
 export default function ReportsPage() {
   const [opened, { open, close }] = useDisclosure(false);
@@ -61,10 +63,10 @@ export default function ReportsPage() {
 
   const dispatch = useAppDispatch();
   const { events, loading: eventsLoading } = useAppSelector(
-    (state) => state.calendar,
+    (state: any) => state.calendar,
   );
   const { candidates, loading: candidatesLoading } = useAppSelector(
-    (state) => state.candidates,
+    (state: any) => state.candidates,
   );
 
   useEffect(() => {
@@ -77,47 +79,44 @@ export default function ReportsPage() {
   const filteredEvents = useMemo(() => {
     if (timeRange === "all") return events;
     const amount = timeRange === "week" ? 7 : timeRange === "month" ? 30 : 365;
+    const threshold = dayjs().subtract(amount, "day").startOf("day");
     return events.filter((e: any) =>
-      dayjs(e.start).isAfter(dayjs().subtract(amount, "day")),
+      dayjs(e.start).isSameOrAfter(threshold),
     );
   }, [events, timeRange]);
 
   const filteredCandidates = useMemo(() => {
     if (timeRange === "all") return candidates;
     const amount = timeRange === "week" ? 7 : timeRange === "month" ? 30 : 365;
-    const threshold = dayjs().subtract(amount, "day");
+    const threshold = dayjs().subtract(amount, "day").startOf("day");
 
     // Candidates who had an interview in the period
     const candidateNamesWithActivity = new Set(
-      filteredEvents.map(
-        (e: any) => e.extendedProps.candidate_name || e.extendedProps.candidate,
-      ),
+      filteredEvents.map((e: any) => e.extendedProps.candidate),
     );
 
     return candidates.filter(
       (c: any) =>
-        dayjs(c.applied_date).isAfter(threshold) ||
+        dayjs(c.applied_date).isSameOrAfter(threshold) ||
         candidateNamesWithActivity.has(c.name),
     );
   }, [candidates, filteredEvents, timeRange]);
 
   const kpiData = useMemo(() => {
+    // ... no changes to KPI logic, just showing context
     const totalInterviews = filteredEvents.length;
     const completed = filteredEvents.filter(
-      (e) => e.extendedProps.status === "COMPLETED",
+      (e: any) => e.extendedProps.status === "COMPLETED",
     ).length;
     const hired = filteredCandidates.filter(
       (c: any) => c.status === "HIRED",
     ).length;
     const totalPipeline = filteredCandidates.length;
 
-    // Conversion rate is hired / total candidates in the pipeline for that period
     const conversionRate =
       totalPipeline > 0 ? ((hired / totalPipeline) * 100).toFixed(1) : "0";
 
-    // Dynamic change calculation logic
     const calculateGrowth = (current: number) => {
-      // Mocked growth based on the magnitude for visual depth in demo
       if (current === 0) return { label: "0%", positive: true };
       const factor = (current % 15) + 2;
       return { label: `+${factor}%`, positive: true };
@@ -167,20 +166,21 @@ export default function ReportsPage() {
       format = "ddd DD";
     } else if (timeRange === "all" || timeRange === "year") {
       unit = "month";
-      count = 5; // last 6 months
+      count = 11; // last 12 months for comprehensive yearly view
       format = "MMM YYYY";
     } else {
       unit = "week";
-      count = 4; // last 5 weeks
-      format = "WK DD";
+      count = 7; // last 8 weeks for better monthly perspective
+      format = "MMM DD";
     }
+
 
     for (let i = count; i >= 0; i--) {
       const key = dayjs().subtract(i, unit).startOf(unit).format(format);
       data[key] = { scheduled: 0, completed: 0 };
     }
 
-    filteredEvents.forEach((e) => {
+    filteredEvents.forEach((e: any) => {
       const key = dayjs(e.start).startOf(unit).format(format);
       if (data[key]) {
         data[key].scheduled++;
@@ -282,7 +282,7 @@ export default function ReportsPage() {
           const candidateNamesWithActivity = new Set(
             filteredEvents.map(
               (e: any) =>
-                e.extendedProps.candidate_name || e.extendedProps.candidate,
+                e.extendedProps.candidate,
             ),
           );
           records = filteredCandidates.filter((c: any) =>
@@ -293,8 +293,7 @@ export default function ReportsPage() {
             if (c.status === "HIRED") return true;
             return filteredEvents.some(
               (e: any) =>
-                (e.extendedProps.candidate_name === c.name ||
-                  e.extendedProps.candidate === c.name) &&
+                e.extendedProps.candidate === c.name &&
                 e.extendedProps.status === "COMPLETED",
             );
           });
@@ -376,13 +375,10 @@ export default function ReportsPage() {
       sections.push("--- SECTION 5: RECENT INTERVIEW LOG ---");
       sections.push("Candidate,Date,Status,Interviewer");
       filteredEvents.forEach((e: any) => {
-        const cand =
-          e.extendedProps.candidate_name ||
-          e.extendedProps.candidate ||
-          "Unknown";
+        const cand = e.extendedProps.candidate || "Unknown";
         const date = dayjs(e.start).format("YYYY-MM-DD HH:mm");
         const status = e.extendedProps.status || "SCHEDULED";
-        const hr = e.extendedProps.assignedHR || "Recruitment Team";
+        const hr = e.extendedProps.interviewer || "Recruitment Team";
         sections.push(
           `"${cand.replace(/"/g, '""')}","${date}","${status}","${hr}"`,
         );
@@ -1037,7 +1033,7 @@ export default function ReportsPage() {
                                         <Group gap="sm">
                                             <Avatar src={record.extendedProps.avatar} size="sm" radius="xl" />
                                             <Box>
-                                                <Text size="sm" fw={800}>{record.extendedProps.candidate_name || record.extendedProps.candidate}</Text>
+                                                <Text size="sm" fw={800}>{record.extendedProps.candidate}</Text>
                                                 <Text size="10px" fw={700} c="dimmed">{record.extendedProps.role}</Text>
                                             </Box>
                                         </Group>
