@@ -42,6 +42,24 @@ describe('fetchCalendarEvents', () => {
     expect(result.success).toBe(false);
     expect(result.message).toBe('RPC failed');
   });
+
+  it('handles empty date parameters', async () => {
+    mockRpc.mockResolvedValueOnce({ data: [], error: null });
+    const result = await fetchCalendarEvents('', '');
+    expect(result.success).toBe(true);
+    expect(result.data).toEqual([]);
+    expect(mockRpc).toHaveBeenCalledWith('get_calendar_events', {
+      input_data: { start_date: '', end_date: '' },
+    });
+  });
+
+  it('handles large data responses sequentially', async () => {
+    const largeData = Array.from({ length: 1000 }, (_, i) => ({ id: `ev${i}` }));
+    mockRpc.mockResolvedValueOnce({ data: largeData, error: null });
+    const result = await fetchCalendarEvents('2020-01-01', '2030-01-01');
+    expect(result.success).toBe(true);
+    expect(result.data).toHaveLength(1000);
+  });
 });
 
 // ─── fetchCandidates ────────────────────────────────────────────────────────
@@ -82,6 +100,30 @@ describe('fetchCandidatesPaginated', () => {
     expect(result.success).toBe(false);
     expect(result.message).toBe('Timeout');
   });
+
+  it('handles empty results (0 matches)', async () => {
+    const mockData = { total_count: 0, records: [] };
+    mockRpc.mockResolvedValueOnce({ data: mockData, error: null });
+    const result = await fetchCandidatesPaginated({ limit: 10, offset: 0, query: 'does_not_exist' });
+    expect(result.success).toBe(true);
+    expect(result.data.records).toHaveLength(0);
+    expect(result.data.total_count).toBe(0);
+  });
+
+  it('handles large pagination request limits (large data edge cases)', async () => {
+    const largeParams = { limit: 10000, offset: 50000 };
+    const mockData = { 
+      total_count: 60000, 
+      records: Array.from({ length: 5000 }, (_, i) => ({ candidate_id: `c${i}` })) 
+    };
+    mockRpc.mockResolvedValueOnce({ data: mockData, error: null });
+    const result = await fetchCandidatesPaginated(largeParams);
+    expect(result.success).toBe(true);
+    expect(result.data.records).toHaveLength(5000);
+    expect(mockRpc).toHaveBeenCalledWith('get_candidates_portfolio_paginated', {
+      input_data: largeParams,
+    });
+  });
 });
 
 // ─── fetchRoles ─────────────────────────────────────────────────────────────
@@ -97,6 +139,13 @@ describe('fetchRoles', () => {
     mockRpc.mockResolvedValueOnce({ data: null, error: { message: 'Not found' } });
     const result = await fetchRoles();
     expect(result.success).toBe(false);
+  });
+
+  it('handles empty roles data gracefully', async () => {
+    mockRpc.mockResolvedValueOnce({ data: [], error: null });
+    const result = await fetchRoles();
+    expect(result.success).toBe(true);
+    expect(result.data).toHaveLength(0);
   });
 });
 
