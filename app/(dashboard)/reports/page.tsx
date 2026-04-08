@@ -85,22 +85,23 @@ export default function ReportsPage() {
     );
   }, [events, timeRange]);
 
+  // Performance Optimization: Deduplicate candidate names once into a Set
+  // to allow O(1) lookup in filtering loops below.
+  const activeCandidateSet = useMemo(() => {
+    return new Set(filteredEvents.map((e: any) => e.extendedProps.candidate));
+  }, [filteredEvents]);
+
   const filteredCandidates = useMemo(() => {
     if (timeRange === "all") return candidates;
     const amount = timeRange === "week" ? 7 : timeRange === "month" ? 30 : 365;
     const threshold = dayjs().subtract(amount, "day").startOf("day");
 
-    // Candidates who had an interview in the period
-    const candidateNamesWithActivity = new Set(
-      filteredEvents.map((e: any) => e.extendedProps.candidate),
-    );
-
     return candidates.filter(
       (c: any) =>
         dayjs(c.applied_date).isSameOrAfter(threshold) ||
-        candidateNamesWithActivity.has(c.name),
+        activeCandidateSet.has(c.name),
     );
-  }, [candidates, filteredEvents, timeRange]);
+  }, [candidates, activeCandidateSet, timeRange]);
 
   const kpiData = useMemo(() => {
     // ... no changes to KPI logic, just showing context
@@ -194,15 +195,8 @@ export default function ReportsPage() {
   const funnelData = useMemo(() => {
     const total = filteredCandidates.length;
 
-    // Candidates who had an interview activity in the period
-    const candidateNamesWithActivity = new Set(
-      filteredEvents.map(
-        (e: any) => e.extendedProps.candidate_name || e.extendedProps.candidate,
-      ),
-    );
-
     const inScreening = filteredCandidates.filter((c: any) =>
-      candidateNamesWithActivity.has(c.name),
+      activeCandidateSet.has(c.name),
     ).length;
 
     // Candidates who passed at least one interview (COMPLETED status in events)
@@ -279,14 +273,8 @@ export default function ReportsPage() {
         if (kpi.label === "TOTAL PIPELINE") {
           records = filteredCandidates;
         } else if (kpi.label === "IN SCREENING") {
-          const candidateNamesWithActivity = new Set(
-            filteredEvents.map(
-              (e: any) =>
-                e.extendedProps.candidate,
-            ),
-          );
           records = filteredCandidates.filter((c: any) =>
-            candidateNamesWithActivity.has(c.name),
+            activeCandidateSet.has(c.name),
           );
         } else if (kpi.label === "QUALIFIED") {
           records = filteredCandidates.filter((c: any) => {

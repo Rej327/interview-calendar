@@ -138,12 +138,13 @@ SELECT
     -- Distributed over the last 2 months and next month
     now() + (random() * interval '90 days') - interval '60 days',
     now() + (random() * interval '90 days') - interval '60 days' + interval '60 minutes',
-    (CASE (random() * 4)::int 
+    (CASE (floor(random() * 6))::int
         WHEN 0 THEN 'SCHEDULED'::public.INTERVIEW_STATUS
         WHEN 1 THEN 'CONFIRMED'::public.INTERVIEW_STATUS
         WHEN 2 THEN 'COMPLETED'::public.INTERVIEW_STATUS
         WHEN 3 THEN 'CANCELLED'::public.INTERVIEW_STATUS
-        ELSE 'COMPLETED'::public.INTERVIEW_STATUS
+        WHEN 4 THEN 'PENDING'::public.INTERVIEW_STATUS
+        ELSE 'RESCHEDULED'::public.INTERVIEW_STATUS
     END),
     'https://zoom.us/abc/' || (100000 + (random() * 899999))::int,
     'Candidate evaluation session for ' || step.interview_step_name || '. Experience and culture fit reviewed.'
