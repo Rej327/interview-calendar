@@ -938,7 +938,7 @@ export default function ReportsPage() {
         title={
           <Group gap="xs">
             <IconArrowUpRight size={18} color="var(--mantine-color-blue-6)" />
-            <Text fw={900} size="lg" style={{ letterSpacing: "-0.2px" }}>
+            <Text fw={900} size="lg" style={{ letterSpacing: "-0.2px" }} component="span">
               Deep Dive Analysis: {selectedReport?.label}
             </Text>
           </Group>
