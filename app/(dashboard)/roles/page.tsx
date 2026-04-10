@@ -30,6 +30,8 @@ import {
   IconEdit,
   IconTrash,
   IconDownload,
+  IconArrowRight,
+  IconPackageOff,
 } from "@tabler/icons-react";
 import { useDisclosure } from "@mantine/hooks";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
@@ -140,7 +142,13 @@ export default function RolesPage() {
   };
 
   return (
-    <Container fluid p="xl" bg="transparent" style={{ minHeight: "100vh" }}>
+    <Container
+      fluid
+      p="xl"
+      bg="transparent"
+      style={{ minHeight: "100vh" }}
+      className="animate-in"
+    >
       <Stack gap="xl">
         {/* Header */}
         <Group justify="space-between" align="flex-end">
@@ -150,38 +158,51 @@ export default function RolesPage() {
                 component={Link}
                 href="/"
                 variant="subtle"
-                color="gray"
+                color="blue.6"
                 size="compact-xs"
-                leftSection={<IconArrowLeft size={12} />}
+                fw={800}
+                leftSection={<IconArrowLeft size={14} />}
               >
-                Back to Dashboard
+                RETURN TO DASHBOARD
               </Button>
             </Group>
-            <Title order={1} fw={800} size="h2">
+            <Title
+              order={1}
+              fw={900}
+              size="h1"
+              style={{ letterSpacing: "-0.5px" }}
+            >
               Role Openings
             </Title>
-            <Text c="dimmed" size="sm" fw={500}>
-              Semantic search and smart management across your recruitment
-              positions.
+            <Text c="gray.9" size="sm" fw={600}>
+              Comprehensive management of organizational positions and
+              recruitment pipelines.
             </Text>
           </Box>
           <Group gap="md">
             <Button
               variant="default"
               radius="md"
-              leftSection={<IconDownload size={16} />}
+              h={48}
+              leftSection={<IconDownload size={18} />}
               onClick={handleExport}
+              style={{
+                border: "1px solid rgba(0,0,0,0.05)",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+              }}
             >
-              Export
+              Export Global Registry
             </Button>
             <Button
-              leftSection={<IconPlus size={16} />}
+              leftSection={<IconPlus size={18} />}
               radius="md"
               color="blue.9"
               px="xl"
+              h={48}
               onClick={handleCreateNew}
+              style={{ boxShadow: "0 4px 12px rgba(34, 139, 230, 0.25)" }}
             >
-              New Role
+              New Role Definition
             </Button>
           </Group>
         </Group>
@@ -191,29 +212,45 @@ export default function RolesPage() {
             <Card
               p={0}
               radius="xl"
-              shadow="sm"
-              withBorder={false}
-              style={{ overflow: "hidden" }}
+              className="glass-card"
+              style={{ border: "none" }}
             >
               <Box
                 p="md"
                 style={{
-                  borderBottom: "1px solid var(--mantine-color-default-border)",
+                  borderBottom: "1px solid rgba(0,0,0,0.05)",
                 }}
               >
                 <Group justify="stretch" w="100%">
                   <TextInput
-                    placeholder="Search roles, departments..."
-                    leftSection={<IconSearch size={16} />}
+                    placeholder="Filter by position title or department..."
+                    leftSection={
+                      <IconSearch
+                        size={18}
+                        color="var(--mantine-color-blue-6)"
+                      />
+                    }
                     radius="md"
                     size="md"
                     style={{ flex: 1 }}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.currentTarget.value)}
                     onKeyDown={handleKeyDown}
+                    rightSection={
+                      <ActionIcon
+                        variant="light"
+                        color="blue"
+                        onClick={() => setQuery(searchTerm)}
+                        aria-label="Filter"
+                      >
+                        <IconArrowRight size={16} aria-hidden="true" />
+                      </ActionIcon>
+                    }
                     styles={{
                       input: {
                         border: "none",
+                        backgroundColor: "transparent",
+                        fontWeight: 600,
                       },
                     }}
                   />
@@ -221,34 +258,52 @@ export default function RolesPage() {
               </Box>
 
               {loading ? (
-                <Center py={100}>
+                <div style={{ display: 'flex', justifyContent: 'center', padding: '100px 0' }}>
                   <Loader color="blue" variant="dots" />
-                </Center>
+                </div>
               ) : (
                 <DataTable
                   height={500}
                   records={filteredData}
                   idAccessor="role_id"
+                  noRecordsText="Operational registry currently yielding no tactical results."
+                  noRecordsIcon={
+                    <div style={{ padding: '80px', opacity: 0.4, textAlign: 'center' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                          <IconPackageOff size={60} stroke={1.5} color="var(--mantine-color-blue-9)" />
+                          <span style={{ fontWeight: 900, fontSize: 'var(--mantine-font-size-sm)', color: 'var(--mantine-color-dimmed)', textTransform: 'uppercase', letterSpacing: '1px', display: 'block' }}>
+                             No Role Definitions Detected
+                          </span>
+                        </div>
+                    </div>
+                  }
                   columns={[
                     {
                       accessor: "role_title",
-                      title: "POSITION",
+                      title: "POSITION ARCHITECTURE",
                       width: 400,
                       render: ({ role_title, role_department }: any) => (
                         <Group gap="sm">
                           <ThemeIcon
                             variant="light"
-                            color="blue"
+                            color="blue.1"
+                            c="blue.9"
                             radius="md"
-                            size="sm"
+                            size="md"
                           >
-                            <IconBriefcase size={16} />
+                            <IconBriefcase size={18} />
                           </ThemeIcon>
                           <Box>
-                            <Text size="sm" fw={800}>
+                            <Text size="sm" fw={900}>
                               {role_title}
                             </Text>
-                            <Text size="10px" c="dimmed" fw={600}>
+                            <Text
+                              size="10px"
+                              c="gray.9"
+                              fw={800}
+                              tt="uppercase"
+                              style={{ letterSpacing: "0.5px" }}
+                            >
                               {role_department}
                             </Text>
                           </Box>
@@ -257,13 +312,13 @@ export default function RolesPage() {
                     },
                     {
                       accessor: "status",
-                      title: "STATUS",
+                      title: "DEPLOYMENT STATUS",
                       render: () => (
                         <Badge
-                          variant="light"
+                          variant="filled"
                           size="xs"
                           radius="sm"
-                          color="teal.6"
+                          color="teal.8"
                         >
                           ACTIVE
                         </Badge>
@@ -271,9 +326,9 @@ export default function RolesPage() {
                     },
                     {
                       accessor: "role_created_at",
-                      title: "CREATED DATE",
+                      title: "ESTABLISHED",
                       render: ({ role_created_at }) => (
-                        <Text size="xs" fw={700} c="dimmed">
+                        <Text size="xs" fw={800} c="gray.9">
                           {new Date(role_created_at).toLocaleDateString()}
                         </Text>
                       ),
@@ -286,21 +341,30 @@ export default function RolesPage() {
                         <Group gap={4} justify="flex-end">
                           <Menu position="bottom-end" shadow="md" radius="md">
                             <Menu.Target>
-                              <ActionIcon variant="subtle" color="gray">
-                                <IconDotsVertical size={16} />
-                              </ActionIcon>
+                                <ActionIcon
+                                  variant="subtle"
+                                  color="gray.8"
+                                  radius="md"
+                                  size={36}
+                                  aria-label="Role Actions"
+                                >
+                                  <IconDotsVertical size={18} aria-hidden="true" />
+                                </ActionIcon>
                             </Menu.Target>
                             <Menu.Dropdown>
                               <Menu.Item
                                 leftSection={
                                   <IconEdit
                                     style={{ width: rem(14), height: rem(14) }}
+                                    aria-hidden="true"
                                   />
                                 }
                                 onClick={() => handleEditRole(role)}
+                                fw={700}
                               >
                                 Edit Role
                               </Menu.Item>
+                              <Menu.Divider />
                               <Menu.Item
                                 color="red"
                                 leftSection={
@@ -309,6 +373,7 @@ export default function RolesPage() {
                                   />
                                 }
                                 onClick={() => handleDeleteRoleClick(role)}
+                                fw={700}
                               >
                                 Delete Role
                               </Menu.Item>
@@ -323,7 +388,12 @@ export default function RolesPage() {
                   styles={{
                     root: { border: "none" },
                     header: {
-                      borderBottom: "1px solid var(--mantine-color-default-border)",
+                      borderBottom: "1px solid rgba(0,0,0,0.05)",
+                      fontWeight: 900,
+                      fontSize: "10px",
+                      color: "var(--mantine-color-gray-9)",
+                      textTransform: "uppercase",
+                      letterSpacing: "1px",
                     },
                   }}
                 />
@@ -333,8 +403,8 @@ export default function RolesPage() {
 
           <Grid.Col span={{ base: 12, lg: 3 }}>
             <Stack gap="xl">
-              <Card p="xl" radius="xl" shadow="sm">
-                <Title order={5} fw={800} mb="xl">
+              <Card p="xl" radius="xl" className="glass-card">
+                <Title order={5} fw={900} mb="xl">
                   ROLES SUMMARY
                 </Title>
                 <Stack gap="xl">
@@ -344,10 +414,10 @@ export default function RolesPage() {
                       paddingLeft: "16px",
                     }}
                   >
-                    <Text size="xs" fw={700} c="dimmed" tt="uppercase" mb={4}>
+                    <Text size="xs" fw={800} c="gray.8" tt="uppercase" mb={4}>
                       Total Roles
                     </Text>
-                    <Text size="24px" fw={900}>
+                    <Text size="28px" fw={900}>
                       {stats.total}
                     </Text>
                   </Box>
@@ -357,35 +427,61 @@ export default function RolesPage() {
                       paddingLeft: "16px",
                     }}
                   >
-                    <Text size="xs" fw={700} c="dimmed" tt="uppercase" mb={4}>
+                    <Text size="xs" fw={800} c="gray.8" tt="uppercase" mb={4}>
                       Departments
                     </Text>
-                    <Text size="24px" fw={900}>
+                    <Text size="28px" fw={900}>
                       {stats.departments}
                     </Text>
                   </Box>
                 </Stack>
               </Card>
 
-              <Card p="xl" radius="xl" shadow="sm" bg="blue.9" c="white">
+              <Card
+                p="xl"
+                radius="xl"
+                bg="blue.9"
+                c="white"
+                style={{ position: "relative", overflow: "hidden" }}
+              >
+                <Box
+                  style={{
+                    position: "absolute",
+                    top: -40,
+                    right: -40,
+                    width: 120,
+                    height: 120,
+                    background: "rgba(255,255,255,0.05)",
+                    borderRadius: "100px",
+                  }}
+                />
                 <Group gap="sm" mb="md">
                   <ThemeIcon size="lg" radius="md" color="blue.6">
                     <IconPlus size={20} />
                   </ThemeIcon>
-                  <Text fw={800}>Quick Actions</Text>
+                  <Text fw={900}>Strategic Planning</Text>
                 </Group>
-                <Text size="xs" c="blue.1" fw={500} mb="xl">
+                <Text
+                  size="xs"
+                  c="blue.1"
+                  fw={600}
+                  mb="xl"
+                  style={{ lineHeight: 1.6 }}
+                >
                   Define new recruitment pipelines or adjust existing role
-                  requirements.
+                  requirements for global scale.
                 </Text>
                 <Button
                   fullWidth
                   variant="white"
                   color="blue.9"
                   radius="md"
+                  h={45}
+                  fw={900}
                   onClick={handleCreateNew}
+                  style={{ boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}
                 >
-                  Add Position
+                  Create New Position
                 </Button>
               </Card>
             </Stack>

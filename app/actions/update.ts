@@ -35,3 +35,17 @@ export async function updateRole(role_id: string, updates: any) {
     return { success: false, message: error.message };
   }
 }
+
+export async function updateCandidate(input_data: { candidate_id: string; full_name?: string; email?: string; avatar_url?: string; status?: string; role_id?: string }) {
+  try {
+    const { data, error } = await supabaseAdmin.rpc("update_candidate", {
+      input_data,
+    });
+
+    if (error) throw error;
+    return { success: true, data };
+  } catch (error: any) {
+    console.error("updateCandidate Action Error:", error);
+    return { success: false, message: error.message };
+  }
+}

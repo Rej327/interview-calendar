@@ -31,3 +31,17 @@ export async function deleteRole(role_id: string) {
     return { success: false, message: error.message };
   }
 }
+
+export async function deleteCandidate(candidate_id: string) {
+  try {
+    const { data, error } = await supabaseAdmin.rpc("delete_candidate", {
+      input_data: { candidate_id },
+    });
+
+    if (error) throw error;
+    return { success: true, data };
+  } catch (error: any) {
+    console.error("deleteCandidate Action Error:", error);
+    return { success: false, message: error.message };
+  }
+}

@@ -26,6 +26,7 @@ import {
   IconClock,
   IconCalendarEvent,
   IconDotsVertical,
+  IconPackageOff,
 } from "@tabler/icons-react";
 import { useDisclosure } from "@mantine/hooks";
 import dayjs from "dayjs";
@@ -108,16 +109,29 @@ export default function InterviewsPage() {
   }, [selectedInterview]);
 
   return (
-    <Container fluid p="xl" bg="transparent" style={{ minHeight: "100vh" }}>
+    <Container fluid p="xl" bg="transparent" style={{ minHeight: "100vh" }} className="animate-in">
       <Stack gap="xl">
         {/* Header */}
         <Group justify="space-between" align="flex-end">
           <Box>
-            <Title order={1} fw={800} size="h2">Interview Sessions</Title>
-            <Text c="dimmed" size="sm" fw={500}>Monitor and manage all candidate interview sessions.</Text>
+            <Badge color="teal.4" variant="light" size="sm" mb={4} radius="sm">
+               SESSION ORCHESTRATION
+            </Badge>
+            <Title order={1} fw={900} size="h1" style={{ letterSpacing: '-0.5px' }}>
+               Interview Sessions
+            </Title>
+            <Text c="gray.9" size="sm" fw={600}>Monitor and manage all candidate interview sessions in real-time.</Text>
           </Box>
           <Group gap="md">
-            <Button leftSection={<IconCalendarEvent size={16} />} radius="md" color="var(--mantine-color-blue-filled)" px="xl" onClick={openSchedule}>
+            <Button 
+                leftSection={<IconCalendarEvent size={18} />} 
+                radius="md" 
+                color="blue.9" 
+                px="xl" 
+                h={48} 
+                onClick={openSchedule}
+                style={{ boxShadow: '0 4px 12px rgba(34, 139, 230, 0.25)' }}
+            >
               Schedule New Session
             </Button>
           </Group>
@@ -128,10 +142,10 @@ export default function InterviewsPage() {
             <Stack gap="xl">
                 <Tabs value={activeTab} onChange={(val) => dispatch(setActiveTab(val || "today"))} color="blue" variant="pills" radius="md">
                     <Tabs.List>
-                        <Tabs.Tab value="today" fw={700}>Today ({stats.today})</Tabs.Tab>
-                        <Tabs.Tab value="this-week" fw={700}>This Week ({stats.thisWeek})</Tabs.Tab>
-                        <Tabs.Tab value="upcoming" fw={700}>Upcoming ({stats.upcoming})</Tabs.Tab>
-                        <Tabs.Tab value="past" fw={700}>Past Interviews</Tabs.Tab>
+                        <Tabs.Tab value="today" fw={800} px="xl">Today <Badge ml={8} variant="light" size="xs">{stats.today}</Badge></Tabs.Tab>
+                        <Tabs.Tab value="this-week" fw={800} px="xl">Weekly <Badge ml={8} variant="light" size="xs">{stats.thisWeek}</Badge></Tabs.Tab>
+                        <Tabs.Tab value="upcoming" fw={800} px="xl">Upcoming <Badge ml={8} variant="light" size="xs">{stats.upcoming}</Badge></Tabs.Tab>
+                        <Tabs.Tab value="past" fw={800} px="xl">Archived</Tabs.Tab>
                     </Tabs.List>
 
                     <Tabs.Panel value={activeTab} pt="xl">
@@ -144,72 +158,75 @@ export default function InterviewsPage() {
                                         key={session.id} 
                                         p="xl" 
                                         radius="xl" 
-                                        shadow="sm" 
-                                        withBorder={false} 
+                                        className="glass-card"
                                         onClick={() => handleCardClick(session)}
                                         style={{ 
                                           cursor: "pointer", 
-                                          borderLeft: `6px solid ${session.backgroundColor || 'var(--mantine-color-blue-6)'}` 
+                                          borderLeft: `6px solid ${session.backgroundColor || 'var(--mantine-color-blue-6)'}`,
+                                          borderTop: 'none', borderRight: 'none', borderBottom: 'none'
                                         }}
                                     >
-                                        <Grid align="center" gutter={30}>
+                                        <Grid align="center" gutter={34}>
                                             <Grid.Col span={4}>
                                                 <Group gap="md">
-                                                    <Avatar src={session.extendedProps.avatar} radius="xl" size="md" />
+                                                    <Avatar src={session.extendedProps.avatar} alt={`Avatar of ${session.extendedProps.candidate}`} radius="xl" size="lg" style={{ border: '2px solid white', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }} />
                                                     <Box>
-                                                        <Text size="sm" fw={800}>{session.extendedProps.candidate}</Text>
-                                                        <Text size="10px" c="dimmed" fw={600}>{session.extendedProps.role}</Text>
+                                                        <Text size="sm" fw={900}>{session.extendedProps.candidate}</Text>
+                                                        <Text size="xs" c="blue.8" fw={700}>{session.extendedProps.role}</Text>
                                                     </Box>
                                                 </Group>
                                             </Grid.Col>
                                             <Grid.Col span={3}>
                                                 <Stack gap={4}>
-                                                    <Text size="xs" fw={800} c="dimmed">{session.extendedProps.type}</Text>
+                                                    <Text size="xs" fw={800} c="gray.8">SESSION TYPE</Text>
                                                     <Group gap={6}>
-                                                        <IconVideo size={14} color="var(--mantine-color-dimmed)"/>
-                                                        <Text size="xs" fw={700}>Zoom Meet</Text>
+                                                        <ThemeIcon size={20} radius="xl" variant="light" color="indigo">
+                                                          <IconVideo size={12} aria-hidden="true" />
+                                                        </ThemeIcon>
+                                                        <Text size="xs" fw={800}>{session.extendedProps.type}</Text>
                                                     </Group>
                                                 </Stack>
                                             </Grid.Col>
                                             <Grid.Col span={3}>
                                                 <Stack gap={4}>
-                                                    <Text size="xs" fw={800} c="dimmed">
-                                                      {dayjs(session.start).format("hh:mm A")}
-                                                    </Text>
+                                                    <Text size="xs" fw={800} c="gray.8">SCHEDULED BY</Text>
                                                     <Group gap={6}>
-                                                        <IconClock size={14} color="var(--mantine-color-dimmed)"/>
-                                                        <Text size="xs" fw={700}>Interviewer: {session.extendedProps.interviewer}</Text>
+                                                        <IconClock size={14} color="var(--mantine-color-blue-8)" aria-hidden="true"/>
+                                                        <Text size="xs" fw={800}>{session.extendedProps.interviewer}</Text>
                                                     </Group>
                                                 </Stack>
                                             </Grid.Col>
                                             <Grid.Col span={2}>
-                                                <Group justify="flex-end" gap="xs">
+                                                <Stack gap="xs" align="flex-end">
+                                                     <Text size="sm" fw={900} c="gray.9">
+                                                      {dayjs(session.start).format("hh:mm A")}
+                                                    </Text>
                                                     <Badge 
-                                                        size="xs" 
-                                                        radius="sm" 
+                                                        size="sm" 
+                                                        radius="md" 
                                                         color={session.backgroundColor}
                                                         variant="light"
+                                                        h={24}
                                                     >
                                                         {session.extendedProps.status}
                                                     </Badge>
-                                                    <ActionIcon variant="subtle" color="gray"><IconDotsVertical size={16}/></ActionIcon>
-                                                </Group>
+                                                </Stack>
                                             </Grid.Col>
                                         </Grid>
                                     </Card>
                                 ))
                             ) : (
-                                <Card p={80} radius="xl" withBorder style={{ borderStyle: "dashed" }}>
-                                    <Stack align="center" gap="md">
-                                        <ThemeIcon size={64} radius="xl" variant="light" color="gray">
-                                            <IconCalendarEvent size={32} />
-                                        </ThemeIcon>
-                                        <Box ta="center">
-                                            <Title order={4} fw={800}>No Sessions Found</Title>
-                                            <Text size="sm" c="dimmed" fw={500}>There are no interviews scheduled for this period.</Text>
-                                        </Box>
-                                    </Stack>
-                                </Card>
+                                <div style={{ padding: '100px 0', textAlign: "center", border: '2px dashed rgba(0,0,0,0.05)', borderRadius: '24px' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+                                        <div style={{ padding: '16px', borderRadius: '100px', backgroundColor: 'var(--mantine-color-gray-1)', color: 'var(--mantine-color-gray-6)', display: 'flex', alignItems: 'center' }}>
+                                            <IconPackageOff size={32} />
+                                        </div>
+                                        <div>
+                                            <h4 style={{ margin: 0, fontWeight: 900, fontSize: 'var(--mantine-font-size-lg)', color: 'var(--mantine-color-text)' }}>Strategic Registry Clear</h4>
+                                            <p style={{ margin: '4px 0 0', fontSize: 'var(--mantine-font-size-xs)', fontWeight: 700, color: 'var(--mantine-color-gray-8)' }}>Operational interview sessions currently yielding no tactical records for this period.</p>
+                                        </div>
+                                    </div>
+                                </div>
                             )}
                         </Stack>
                     </Tabs.Panel>
@@ -219,36 +236,37 @@ export default function InterviewsPage() {
 
           <Grid.Col span={{ base: 12, lg: 4 }}>
             <Stack gap="xl">
-                <Card p="xl" radius="xl" shadow="sm">
-                    <Title order={5} fw={800} mb="xl">SESSION INSIGHTS</Title>
+                <Card p="xl" radius="xl" className="glass-card">
+                    <Title order={5} fw={900} mb="xl">SESSION INSIGHTS</Title>
                     <Stack gap="xl">
-                        <Box style={{ borderLeft: "4px solid var(--mantine-color-blue-6)", paddingLeft: "16px" }}>
-                            <Text size="xs" fw={700} c="dimmed" tt="uppercase" mb={4}>Interviews Today</Text>
-                            <Text size="24px" fw={900}>{stats.today} Sessions</Text>
-                            <Text size="10px" fw={700} c="teal.6">Real-time Data</Text>
+                        <Box style={{ borderLeft: "4px solid var(--mantine-color-blue-8)", paddingLeft: "16px" }}>
+                            <Text size="xs" fw={800} c="gray.8" tt="uppercase" mb={4}>Interviews Today</Text>
+                            <Text size="28px" fw={900}>{stats.today} Active</Text>
+                            <Text size="10px" fw={800} c="teal.8">REAL-TIME DATA FEED</Text>
                         </Box>
-                        <Box style={{ borderLeft: "4px solid var(--mantine-color-teal-6)", paddingLeft: "16px" }}>
-                            <Text size="xs" fw={700} c="dimmed" tt="uppercase" mb={4}>Planned This Week</Text>
-                            <Text size="24px" fw={900}>{stats.thisWeek} Sessions</Text>
+                        <Box style={{ borderLeft: "4px solid var(--mantine-color-teal-8)", paddingLeft: "16px" }}>
+                            <Text size="xs" fw={800} c="gray.8" tt="uppercase" mb={4}>Planned This Week</Text>
+                            <Text size="28px" fw={900}>{stats.thisWeek} Sessions</Text>
                         </Box>
                     </Stack>
                 </Card>
 
-                <Card p="xl" radius="xl" shadow="sm" bg="teal.6" c="white">
-                    <Group gap="sm" mb="md">
-                        <ThemeIcon size="lg" radius="md" color="teal.4"><IconBriefcase size={20}/></ThemeIcon>
-                        <Title order={6} fw={800}>Staff Availability</Title>
+                <Card p="xl" radius="xl" bg="teal.9" c="white" style={{ position: 'relative', overflow: 'hidden' }}>
+                    <Box style={{ position: 'absolute', top: -30, left: -30, width: 100, height: 100, background: 'rgba(255,255,255,0.05)', borderRadius: '100px' }} />
+                    <Group gap="sm" mb="lg">
+                        <ThemeIcon size="lg" radius="md" color="teal.5"><IconBriefcase size={20}/></ThemeIcon>
+                        <Title order={6} fw={900}>Staff Availability</Title>
                     </Group>
-                    <Text size="xs" c="teal.0" fw={500} mb="xl">
-                        Ensure you have enough interviewers available for upcoming priority rounds.
+                    <Text size="xs" c="teal.1" fw={600} mb="xl" style={{ lineHeight: 1.6 }}>
+                        Ensure you have enough interviewers available for upcoming priority rounds. Current staff capacity is high.
                     </Text>
                     <AvatarGroup spacing="sm">
-                        <Avatar src="https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah" size="sm" radius="xl" />
-                        <Avatar src="https://api.dicebear.com/7.x/avataaars/svg?seed=David" size="sm" radius="xl" />
-                        <Avatar src="https://api.dicebear.com/7.x/avataaars/svg?seed=HR" size="sm" radius="xl" />
-                        <Avatar size="sm" radius="xl">+5</Avatar>
+                        <Avatar src="https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah" alt="Recruiter Sarah" size="md" radius="xl" style={{ border: '2px solid var(--mantine-color-teal-9)' }} />
+                        <Avatar src="https://api.dicebear.com/7.x/avataaars/svg?seed=David" alt="Recruiter David" size="md" radius="xl" style={{ border: '2px solid var(--mantine-color-teal-9)' }} />
+                        <Avatar src="https://api.dicebear.com/7.x/avataaars/svg?seed=HR" alt="HR Team" size="md" radius="xl" style={{ border: '2px solid var(--mantine-color-teal-9)' }} />
+                        <Avatar size="md" radius="xl" style={{ border: '2px solid var(--mantine-color-teal-9)' }} alt="More recruiters">+5</Avatar>
                     </AvatarGroup>
-                    <Button fullWidth mt="xl" radius="md" color="teal.8" fw={700} onClick={() => router.push("/calendar")}>Check Full Schedule</Button>
+                    <Button fullWidth mt="xl" radius="md" color="teal.7" h={45} fw={800} onClick={() => router.push("/calendar")}>Verify Schedule</Button>
                 </Card>
             </Stack>
           </Grid.Col>
