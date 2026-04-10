@@ -257,7 +257,7 @@ export default function CandidatesPage() {
             <Title order={1} fw={900} size="h1" style={{ letterSpacing: '-0.5px' }}>
               Candidates Portfolio
             </Title>
-            <Text c="dimmed" size="sm" fw={600}>
+            <Text c="gray.9" size="sm" fw={600}>
               Managing {totalCount} profiles across active organizational pipelines.
             </Text>
           </Box>
@@ -323,8 +323,8 @@ export default function CandidatesPage() {
                     rightSectionWidth={80}
                     styles={{ input: { border: "none", backgroundColor: 'transparent', fontWeight: 600 } }}
                   />
-                  <ActionIcon variant={statusFilters.length > 0 || rolesFilter.length > 0 ? "filled" : "light"} size={42} radius="md" color="blue" onClick={filterOpen}>
-                    <IconFilter size={20} />
+                  <ActionIcon variant={statusFilters.length > 0 || rolesFilter.length > 0 ? "filled" : "light"} size={42} radius="md" color="blue" onClick={filterOpen} aria-label="Filter candidates">
+                    <IconFilter size={20} aria-hidden="true" />
                   </ActionIcon>
                 </Group>
               </Box>
@@ -360,10 +360,10 @@ export default function CandidatesPage() {
                     accessor: "name", title: "CANDIDATE IDENTITY", width: 320, sortable: true,
                     render: ({ name, role, avatar }: any) => (
                       <Group gap="sm">
-                        <Avatar src={avatar} radius="xl" size="md" style={{ border: '2px solid white', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }} />
+                        <Avatar src={avatar} alt={`Avatar of ${name}`} radius="xl" size="md" style={{ border: '2px solid white', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }} />
                         <Box>
                           <Text size="sm" fw={900}>{name}</Text>
-                          <Text size="10px" c="dimmed" fw={800} tt="uppercase" style={{ letterSpacing: '0.5px' }}>{role}</Text>
+                          <Text size="10px" c="gray.9" fw={800} tt="uppercase" style={{ letterSpacing: '0.5px' }}>{role}</Text>
                         </Box>
                       </Group>
                     ),
@@ -371,7 +371,7 @@ export default function CandidatesPage() {
                   {
                     accessor: "status", title: "PIPELINE STATUS", sortable: true,
                     render: ({ status }: any) => (
-                      <Badge variant="dot" size="sm" radius="md" fw={800} color={status === "HIRED" ? "teal.6" : status === "ACTIVE" ? "blue.6" : status === "REJECTED" ? "red.6" : status === "WITHDRAWN" ? "indigo.6" : "gray.6"}>
+                      <Badge variant="dot" size="sm" radius="md" fw={800} color={status === "HIRED" ? "teal.8" : status === "ACTIVE" ? "blue.8" : status === "REJECTED" ? "red.8" : status === "WITHDRAWN" ? "indigo.8" : "gray.8"}>
                         {status}
                       </Badge>
                     ),
@@ -379,20 +379,20 @@ export default function CandidatesPage() {
                   {
                     accessor: "applied_date", title: "REGISTRATION DATE", sortable: true,
                     render: (c: any) => (
-                      <Text size="xs" fw={800} c="dimmed">{new Date(c.applied_date).toLocaleDateString()}</Text>
+                      <Text size="xs" fw={800} c="gray.9">{new Date(c.applied_date).toLocaleDateString()}</Text>
                     ),
                   },
                   {
                     accessor: "actions", title: "", textAlign: "right",
                     render: (record: any) => (
                       <Group gap={4} justify="flex-end">
-                        <ActionIcon variant="subtle" color="blue.6" radius="md" loading={sendingInvite} onClick={(e) => { e.stopPropagation(); handleInvite("Direct Email", [record.candidate_id]); }}>
-                          <IconMail size={18} />
+                        <ActionIcon variant="subtle" color="blue.7" radius="md" size={36} loading={sendingInvite} onClick={(e) => { e.stopPropagation(); handleInvite("Direct Email", [record.candidate_id]); }} aria-label={`Send invitation to ${record.name}`}>
+                          <IconMail size={18} aria-hidden="true" />
                         </ActionIcon>
                         <Menu position="bottom-end" shadow="lg" radius="md">
                           <Menu.Target>
-                            <ActionIcon variant="subtle" color="gray" radius="md" onClick={(e) => e.stopPropagation()}>
-                              <IconDotsVertical size={18} />
+                            <ActionIcon variant="subtle" color="gray.8" radius="md" size={36} onClick={(e) => e.stopPropagation()} aria-label={`More actions for ${record.name}`}>
+                              <IconDotsVertical size={18} aria-hidden="true" />
                             </ActionIcon>
                           </Menu.Target>
                           <Menu.Dropdown>
@@ -421,7 +421,7 @@ export default function CandidatesPage() {
                   root: { border: "none" },
                   header: {
                     borderBottom: "1px solid rgba(0,0,0,0.05)",
-                    fontWeight: 900, fontSize: '10px', color: 'var(--mantine-color-dimmed)', textTransform: 'uppercase', letterSpacing: '1px'
+                    fontWeight: 900, fontSize: '10px', color: 'var(--mantine-color-gray-9)', textTransform: 'uppercase', letterSpacing: '1px'
                   },
                 }}
               />
@@ -434,11 +434,11 @@ export default function CandidatesPage() {
                 <Title order={5} fw={900} mb="xl">POOL SUMMARY</Title>
                 <Stack gap="xl">
                   <Box style={{ borderLeft: "4px solid var(--mantine-color-blue-9)", paddingLeft: "16px" }}>
-                    <Text size="xs" fw={800} c="dimmed" tt="uppercase" mb={4}>Global Index</Text>
+                    <Text size="xs" fw={800} c="gray.8" tt="uppercase" mb={4}>Global Index</Text>
                     <Text size="32px" fw={900}>{totalCount}</Text>
                   </Box>
                   <Box style={{ borderLeft: "4px solid var(--mantine-color-teal-6)", paddingLeft: "16px" }}>
-                    <Text size="xs" fw={800} c="dimmed" tt="uppercase" mb={4}>Active Registry</Text>
+                    <Text size="xs" fw={800} c="gray.8" tt="uppercase" mb={4}>Active Registry</Text>
                     <Text size="32px" fw={900}>{candidates.length}</Text>
                   </Box>
                 </Stack>

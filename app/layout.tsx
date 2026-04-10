@@ -18,10 +18,10 @@ const poppins = Poppins({
 
 export const metadata: Metadata = {
   title: {
-    default: "Interview Calendar",
-    template: "%s | Interview Calendar",
+    default: "Formsly Interview Calendar | Strategic Recruitment Dashboard",
+    template: "%s | Formsly Interview Calendar",
   },
-  description: "Schedule and manage interview sessions with ease",
+  description: "Formsly Interview Calendar is a high-performance recruitment analytics portal for scheduling, managing, and optimizing your organization's hiring journey and interview sessions.",
   formatDetection: { telephone: false },
 };
 

@@ -135,7 +135,7 @@ export default function CalendarPage() {
             <Title order={1} fw={800} size="h2">
               {view === "day" ? "Day" : view === "week" ? "Weekly" : "Monthly"} Schedule
             </Title>
-            <Text c="dimmed" size="sm">
+            <Text c="gray.9" size="sm" fw={600}>
               Manage and track candidate interview progressions.
             </Text>
           </Box>
@@ -157,7 +157,7 @@ export default function CalendarPage() {
                 label: { fontWeight: 700 },
               }}
             />
-            <Button leftSection={<IconPlus size={16} />} radius="md" color="blue.9" px="xl" onClick={openNewSlot}>
+            <Button leftSection={<IconPlus size={16} aria-hidden="true" />} radius="md" color="blue.9" px="xl" onClick={openNewSlot}>
               New Slot
             </Button>
 
@@ -210,15 +210,15 @@ export default function CalendarPage() {
                     </Title>
                     <Stack gap="xl">
                       <Box style={{ borderLeft: "4px solid var(--mantine-color-blue-9)", paddingLeft: "20px" }}>
-                        <Text size="xs" fw={700} c="dimmed" tt="uppercase" mb={4}>
+                        <Text size="xs" fw={700} c="gray.8" tt="uppercase" mb={4}>
                           Weekly Interviews
                         </Text>
                         <Text size="38px" fw={900}>
                           {events.filter((e) => dayjs(e.start).isAfter(dayjs().startOf("week"))).length}
                         </Text>
                       </Box>
-                      <Box style={{ borderLeft: "4px solid var(--mantine-color-teal-6)", paddingLeft: "20px" }}>
-                        <Text size="xs" fw={700} c="dimmed" tt="uppercase" mb={4}>
+                      <Box style={{ borderLeft: "4px solid var(--mantine-color-teal-8)", paddingLeft: "20px" }}>
+                        <Text size="xs" fw={700} c="gray.8" tt="uppercase" mb={4}>
                           Avg. Time to Hire
                         </Text>
                         <Text size="38px" fw={900}>
@@ -254,7 +254,7 @@ export default function CalendarPage() {
                         month: { width: "100%", tableLayout: "fixed" },
                         monthsList: { width: "100%", tableLayout: "fixed" },
                         yearsList: { width: "100%", tableLayout: "fixed" },
-                        weekday: { fontWeight: 700, fontSize: "10px", color: "var(--mantine-color-dimmed)" },
+                        weekday: { fontWeight: 700, fontSize: "10px", color: "var(--mantine-color-gray-9)" },
                         day: { borderRadius: "100%", fontWeight: 600 },
                       }}
                       hideOutsideDates
@@ -268,19 +268,19 @@ export default function CalendarPage() {
                     </Title>
                     <Stack gap="md">
                       <Group gap="sm">
-                        <Box w={10} h={10} bg="blue.4" style={{ borderRadius: "50%" }} />
+                        <Box w={10} h={10} bg="blue.8" style={{ borderRadius: "50%" }} />
                         <Text size="xs" fw={600} c="blue.0">
                           HR Interview
                         </Text>
                       </Group>
                       <Group gap="sm">
-                        <Box w={10} h={10} bg="violet.4" style={{ borderRadius: "50%" }} />
+                        <Box w={10} h={10} bg="violet.8" style={{ borderRadius: "50%" }} />
                         <Text size="xs" fw={600} c="blue.0">
                           Department Interview
                         </Text>
                       </Group>
                       <Group gap="sm">
-                        <Box w={10} h={10} bg="teal.4" style={{ borderRadius: "50%" }} />
+                        <Box w={10} h={10} bg="teal.8" style={{ borderRadius: "50%" }} />
                         <Text size="xs" fw={600} c="blue.0">
                           Requestor Interview
                         </Text>

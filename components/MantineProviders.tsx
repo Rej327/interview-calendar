@@ -28,7 +28,7 @@ export default function MantineProviders({ children }: { children: React.ReactNo
 
     /** Brand colour */
     primaryColor: "blue",
-    primaryShade: { light: 6, dark: 5 },
+    primaryShade: { light: 7, dark: 5 },
 
     /** Border radius */
     radius: {

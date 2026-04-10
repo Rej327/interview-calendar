@@ -25,7 +25,6 @@ export default function MainLayout({
         collapsed: { mobile: !opened },
       }}
       padding="0"
-
       withBorder={false}
       styles={{
         main: { 
@@ -44,17 +43,27 @@ export default function MainLayout({
         },
       }}
     >
+      <a
+        href="#main-content"
+        className="skip-link"
+      >
+        Skip to main content
+      </a>
 
 
-      <AppShell.Header>
+      <AppShell.Header component="header">
         <AppHeader opened={opened} toggle={toggle} />
       </AppShell.Header>
 
-      <AppShell.Navbar>
+      <AppShell.Navbar component="nav" aria-label="Main Navigation">
         <AppNavbar onClose={toggle} />
       </AppShell.Navbar>
 
-      <AppShell.Main>{children}</AppShell.Main>
+      <AppShell.Main component="main">
+        <div id="main-content" style={{ outline: 'none' }} tabIndex={-1}>
+          {children}
+        </div>
+      </AppShell.Main>
     </AppShell>
   );
 }

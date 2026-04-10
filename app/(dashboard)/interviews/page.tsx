@@ -120,7 +120,7 @@ export default function InterviewsPage() {
             <Title order={1} fw={900} size="h1" style={{ letterSpacing: '-0.5px' }}>
                Interview Sessions
             </Title>
-            <Text c="dimmed" size="sm" fw={600}>Monitor and manage all candidate interview sessions in real-time.</Text>
+            <Text c="gray.9" size="sm" fw={600}>Monitor and manage all candidate interview sessions in real-time.</Text>
           </Box>
           <Group gap="md">
             <Button 
@@ -169,19 +169,19 @@ export default function InterviewsPage() {
                                         <Grid align="center" gutter={34}>
                                             <Grid.Col span={4}>
                                                 <Group gap="md">
-                                                    <Avatar src={session.extendedProps.avatar} radius="xl" size="lg" style={{ border: '2px solid white', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }} />
+                                                    <Avatar src={session.extendedProps.avatar} alt={`Avatar of ${session.extendedProps.candidate}`} radius="xl" size="lg" style={{ border: '2px solid white', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }} />
                                                     <Box>
                                                         <Text size="sm" fw={900}>{session.extendedProps.candidate}</Text>
-                                                        <Text size="xs" c="blue.7" fw={700}>{session.extendedProps.role}</Text>
+                                                        <Text size="xs" c="blue.8" fw={700}>{session.extendedProps.role}</Text>
                                                     </Box>
                                                 </Group>
                                             </Grid.Col>
                                             <Grid.Col span={3}>
                                                 <Stack gap={4}>
-                                                    <Text size="xs" fw={800} c="dimmed">SESSION TYPE</Text>
+                                                    <Text size="xs" fw={800} c="gray.8">SESSION TYPE</Text>
                                                     <Group gap={6}>
                                                         <ThemeIcon size={20} radius="xl" variant="light" color="indigo">
-                                                          <IconVideo size={12} />
+                                                          <IconVideo size={12} aria-hidden="true" />
                                                         </ThemeIcon>
                                                         <Text size="xs" fw={800}>{session.extendedProps.type}</Text>
                                                     </Group>
@@ -189,16 +189,16 @@ export default function InterviewsPage() {
                                             </Grid.Col>
                                             <Grid.Col span={3}>
                                                 <Stack gap={4}>
-                                                    <Text size="xs" fw={800} c="dimmed">SCHEDULED BY</Text>
+                                                    <Text size="xs" fw={800} c="gray.8">SCHEDULED BY</Text>
                                                     <Group gap={6}>
-                                                        <IconClock size={14} color="var(--mantine-color-blue-6)"/>
+                                                        <IconClock size={14} color="var(--mantine-color-blue-8)" aria-hidden="true"/>
                                                         <Text size="xs" fw={800}>{session.extendedProps.interviewer}</Text>
                                                     </Group>
                                                 </Stack>
                                             </Grid.Col>
                                             <Grid.Col span={2}>
                                                 <Stack gap="xs" align="flex-end">
-                                                     <Text size="sm" fw={900} c="dimmed">
+                                                     <Text size="sm" fw={900} c="gray.9">
                                                       {dayjs(session.start).format("hh:mm A")}
                                                     </Text>
                                                     <Badge 
@@ -223,7 +223,7 @@ export default function InterviewsPage() {
                                         </div>
                                         <div>
                                             <h4 style={{ margin: 0, fontWeight: 900, fontSize: 'var(--mantine-font-size-lg)', color: 'var(--mantine-color-text)' }}>Strategic Registry Clear</h4>
-                                            <p style={{ margin: '4px 0 0', fontSize: 'var(--mantine-font-size-xs)', fontWeight: 700, color: 'var(--mantine-color-dimmed)' }}>Operational interview sessions currently yielding no tactical records for this period.</p>
+                                            <p style={{ margin: '4px 0 0', fontSize: 'var(--mantine-font-size-xs)', fontWeight: 700, color: 'var(--mantine-color-gray-8)' }}>Operational interview sessions currently yielding no tactical records for this period.</p>
                                         </div>
                                     </div>
                                 </div>
@@ -239,13 +239,13 @@ export default function InterviewsPage() {
                 <Card p="xl" radius="xl" className="glass-card">
                     <Title order={5} fw={900} mb="xl">SESSION INSIGHTS</Title>
                     <Stack gap="xl">
-                        <Box style={{ borderLeft: "4px solid var(--mantine-color-blue-6)", paddingLeft: "16px" }}>
-                            <Text size="xs" fw={800} c="dimmed" tt="uppercase" mb={4}>Interviews Today</Text>
+                        <Box style={{ borderLeft: "4px solid var(--mantine-color-blue-8)", paddingLeft: "16px" }}>
+                            <Text size="xs" fw={800} c="gray.8" tt="uppercase" mb={4}>Interviews Today</Text>
                             <Text size="28px" fw={900}>{stats.today} Active</Text>
-                            <Text size="10px" fw={800} c="teal.6">REAL-TIME DATA FEED</Text>
+                            <Text size="10px" fw={800} c="teal.8">REAL-TIME DATA FEED</Text>
                         </Box>
-                        <Box style={{ borderLeft: "4px solid #51cf66", paddingLeft: "16px" }}>
-                            <Text size="xs" fw={800} c="dimmed" tt="uppercase" mb={4}>Planned This Week</Text>
+                        <Box style={{ borderLeft: "4px solid var(--mantine-color-teal-8)", paddingLeft: "16px" }}>
+                            <Text size="xs" fw={800} c="gray.8" tt="uppercase" mb={4}>Planned This Week</Text>
                             <Text size="28px" fw={900}>{stats.thisWeek} Sessions</Text>
                         </Box>
                     </Stack>
@@ -261,10 +261,10 @@ export default function InterviewsPage() {
                         Ensure you have enough interviewers available for upcoming priority rounds. Current staff capacity is high.
                     </Text>
                     <AvatarGroup spacing="sm">
-                        <Avatar src="https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah" size="md" radius="xl" style={{ border: '2px solid var(--mantine-color-teal-9)' }} />
-                        <Avatar src="https://api.dicebear.com/7.x/avataaars/svg?seed=David" size="md" radius="xl" style={{ border: '2px solid var(--mantine-color-teal-9)' }} />
-                        <Avatar src="https://api.dicebear.com/7.x/avataaars/svg?seed=HR" size="md" radius="xl" style={{ border: '2px solid var(--mantine-color-teal-9)' }} />
-                        <Avatar size="md" radius="xl" style={{ border: '2px solid var(--mantine-color-teal-9)' }}>+5</Avatar>
+                        <Avatar src="https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah" alt="Recruiter Sarah" size="md" radius="xl" style={{ border: '2px solid var(--mantine-color-teal-9)' }} />
+                        <Avatar src="https://api.dicebear.com/7.x/avataaars/svg?seed=David" alt="Recruiter David" size="md" radius="xl" style={{ border: '2px solid var(--mantine-color-teal-9)' }} />
+                        <Avatar src="https://api.dicebear.com/7.x/avataaars/svg?seed=HR" alt="HR Team" size="md" radius="xl" style={{ border: '2px solid var(--mantine-color-teal-9)' }} />
+                        <Avatar size="md" radius="xl" style={{ border: '2px solid var(--mantine-color-teal-9)' }} alt="More recruiters">+5</Avatar>
                     </AvatarGroup>
                     <Button fullWidth mt="xl" radius="md" color="teal.7" h={45} fw={800} onClick={() => router.push("/calendar")}>Verify Schedule</Button>
                 </Card>

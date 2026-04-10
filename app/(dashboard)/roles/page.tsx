@@ -174,7 +174,7 @@ export default function RolesPage() {
             >
               Role Openings
             </Title>
-            <Text c="dimmed" size="sm" fw={600}>
+            <Text c="gray.9" size="sm" fw={600}>
               Comprehensive management of organizational positions and
               recruitment pipelines.
             </Text>
@@ -241,8 +241,9 @@ export default function RolesPage() {
                         variant="light"
                         color="blue"
                         onClick={() => setQuery(searchTerm)}
+                        aria-label="Filter"
                       >
-                        <IconArrowRight size={16} />
+                        <IconArrowRight size={16} aria-hidden="true" />
                       </ActionIcon>
                     }
                     styles={{
@@ -298,7 +299,7 @@ export default function RolesPage() {
                             </Text>
                             <Text
                               size="10px"
-                              c="dimmed"
+                              c="gray.9"
                               fw={800}
                               tt="uppercase"
                               style={{ letterSpacing: "0.5px" }}
@@ -317,7 +318,7 @@ export default function RolesPage() {
                           variant="filled"
                           size="xs"
                           radius="sm"
-                          color="teal.6"
+                          color="teal.8"
                         >
                           ACTIVE
                         </Badge>
@@ -327,7 +328,7 @@ export default function RolesPage() {
                       accessor: "role_created_at",
                       title: "ESTABLISHED",
                       render: ({ role_created_at }) => (
-                        <Text size="xs" fw={800} c="dimmed">
+                        <Text size="xs" fw={800} c="gray.9">
                           {new Date(role_created_at).toLocaleDateString()}
                         </Text>
                       ),
@@ -340,19 +341,22 @@ export default function RolesPage() {
                         <Group gap={4} justify="flex-end">
                           <Menu position="bottom-end" shadow="md" radius="md">
                             <Menu.Target>
-                              <ActionIcon
-                                variant="subtle"
-                                color="gray"
-                                radius="md"
-                              >
-                                <IconDotsVertical size={18} />
-                              </ActionIcon>
+                                <ActionIcon
+                                  variant="subtle"
+                                  color="gray.8"
+                                  radius="md"
+                                  size={36}
+                                  aria-label="Role Actions"
+                                >
+                                  <IconDotsVertical size={18} aria-hidden="true" />
+                                </ActionIcon>
                             </Menu.Target>
                             <Menu.Dropdown>
                               <Menu.Item
                                 leftSection={
                                   <IconEdit
                                     style={{ width: rem(14), height: rem(14) }}
+                                    aria-hidden="true"
                                   />
                                 }
                                 onClick={() => handleEditRole(role)}
@@ -387,7 +391,7 @@ export default function RolesPage() {
                       borderBottom: "1px solid rgba(0,0,0,0.05)",
                       fontWeight: 900,
                       fontSize: "10px",
-                      color: "var(--mantine-color-dimmed)",
+                      color: "var(--mantine-color-gray-9)",
                       textTransform: "uppercase",
                       letterSpacing: "1px",
                     },
@@ -410,7 +414,7 @@ export default function RolesPage() {
                       paddingLeft: "16px",
                     }}
                   >
-                    <Text size="xs" fw={800} c="dimmed" tt="uppercase" mb={4}>
+                    <Text size="xs" fw={800} c="gray.8" tt="uppercase" mb={4}>
                       Total Roles
                     </Text>
                     <Text size="28px" fw={900}>
@@ -423,7 +427,7 @@ export default function RolesPage() {
                       paddingLeft: "16px",
                     }}
                   >
-                    <Text size="xs" fw={800} c="dimmed" tt="uppercase" mb={4}>
+                    <Text size="xs" fw={800} c="gray.8" tt="uppercase" mb={4}>
                       Departments
                     </Text>
                     <Text size="28px" fw={900}>

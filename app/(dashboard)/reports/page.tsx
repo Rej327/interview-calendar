@@ -80,9 +80,7 @@ export default function ReportsPage() {
     if (timeRange === "all") return events;
     const amount = timeRange === "week" ? 7 : timeRange === "month" ? 30 : 365;
     const threshold = dayjs().subtract(amount, "day").startOf("day");
-    return events.filter((e: any) =>
-      dayjs(e.start).isSameOrAfter(threshold),
-    );
+    return events.filter((e: any) => dayjs(e.start).isSameOrAfter(threshold));
   }, [events, timeRange]);
 
   // Performance Optimization: Deduplicate candidate names once into a Set
@@ -175,7 +173,6 @@ export default function ReportsPage() {
       format = "MMM DD";
     }
 
-
     for (let i = count; i >= 0; i--) {
       const key = dayjs().subtract(i, unit).startOf(unit).format(format);
       data[key] = { scheduled: 0, completed: 0 };
@@ -243,7 +240,6 @@ export default function ReportsPage() {
       },
     ];
   }, [filteredCandidates, filteredEvents]);
-
 
   const handleKpiClick = (kpi: any) => {
     let records: any[] = [];
@@ -417,7 +413,7 @@ export default function ReportsPage() {
         {/* Header Section */}
         <Group justify="space-between" align="flex-end" className="no-print">
           <Box>
-            <Badge color="blue.4" variant="light" size="sm" mb={4} radius="sm">
+            <Badge color="blue.8" variant="light" size="sm" mb={4} radius="sm">
               ANALYTICS & INSIGHTS
             </Badge>
             <Title
@@ -428,7 +424,7 @@ export default function ReportsPage() {
             >
               Hiring Performance
             </Title>
-            <Text c="dimmed" size="sm" fw={600}>
+            <Text c="gray.9" size="sm" fw={600}>
               Strategic data visualization and organizational recruitment
               efficiency.
             </Text>
@@ -442,7 +438,8 @@ export default function ReportsPage() {
                   leftSection={
                     <IconCalendar
                       size={18}
-                      color="var(--mantine-color-blue-6)"
+                      color="var(--mantine-color-blue-8)"
+                      aria-hidden="true"
                     />
                   }
                   radius="md"
@@ -481,7 +478,7 @@ export default function ReportsPage() {
             <Menu shadow="xl" width={240} radius="lg" position="bottom-end">
               <Menu.Target>
                 <Button
-                  leftSection={<IconDownload size={18} />}
+                  leftSection={<IconDownload size={18} aria-hidden="true" />}
                   radius="md"
                   color="blue.9"
                   px="xl"
@@ -500,14 +497,16 @@ export default function ReportsPage() {
                   Data Synthesis Options
                 </Menu.Label>
                 <Menu.Item
-                  leftSection={<IconArrowUpRight size={16} />}
+                  leftSection={
+                    <IconArrowUpRight size={16} aria-hidden="true" />
+                  }
                   onClick={() => handleExportReport("summary")}
                 >
                   <Box>
                     <Text fw={700} size="sm">
                       Summary Snapshot (CSV)
                     </Text>
-                    <Text size="xs" c="dimmed">
+                    <Text size="xs" c="gray.8">
                       Core KPIs and trend summaries only.
                     </Text>
                   </Box>
@@ -520,7 +519,7 @@ export default function ReportsPage() {
                     <Text fw={700} size="sm">
                       Deep Analytical Core (CSV)
                     </Text>
-                    <Text size="xs" c="dimmed">
+                    <Text size="xs" c="gray.8">
                       Full candidate logs & interview history.
                     </Text>
                   </Box>
@@ -552,7 +551,7 @@ export default function ReportsPage() {
               <Text
                 size="xs"
                 fw={800}
-                c="dimmed"
+                c="gray.9"
                 tt="uppercase"
                 mb="xs"
                 style={{ letterSpacing: "0.5px" }}
@@ -565,7 +564,7 @@ export default function ReportsPage() {
                 </Text>
                 <Badge
                   variant="dot"
-                  color={kpi.positive ? "teal.6" : "red.6"}
+                  color={kpi.positive ? "teal.8" : "red.8"}
                   size="sm"
                   fw={800}
                 >
@@ -602,7 +601,7 @@ export default function ReportsPage() {
                         ? "Weekly Trends"
                         : "Monthly Overview"}
                   </Title>
-                  <Text size="xs" c="dimmed" fw={700}>
+                  <Text size="xs" c="gray.9" fw={700}>
                     {timeRange === "week"
                       ? "Last 7 days breakdown"
                       : timeRange === "month"
@@ -618,7 +617,7 @@ export default function ReportsPage() {
                       bg="blue.9"
                       style={{ borderRadius: "50%" }}
                     />
-                    <Text size="xs" fw={800} c="dimmed">
+                    <Text size="xs" fw={800} c="gray.8">
                       Scheduled
                     </Text>
                   </Group>
@@ -629,7 +628,7 @@ export default function ReportsPage() {
                       bg="blue.1"
                       style={{ borderRadius: "50%" }}
                     />
-                    <Text size="xs" fw={800} c="dimmed">
+                    <Text size="xs" fw={800} c="gray.8">
                       Completed
                     </Text>
                   </Group>
@@ -648,7 +647,7 @@ export default function ReportsPage() {
                       dataKey="name"
                       axisLine={false}
                       tickLine={false}
-                      tick={{ fontSize: 10, fontWeight: 800, fill: "#adb5bd" }}
+                      tick={{ fontSize: 10, fontWeight: 800, fill: "#495057" }}
                     />
                     <YAxis hide />
                     <Tooltip
@@ -690,7 +689,7 @@ export default function ReportsPage() {
               <Title order={5} fw={900} mb={4}>
                 Pipeline Distribution
               </Title>
-              <Text size="xs" c="dimmed" fw={700} mb="xl">
+              <Text size="xs" c="gray.9" fw={700} mb="xl">
                 {timeRange === "all"
                   ? "Snapshot of overall system activity."
                   : `Showing breakdown for the selected period.`}
@@ -700,7 +699,7 @@ export default function ReportsPage() {
                 {[
                   {
                     label: "POOLING",
-                    color: "orange.4",
+                    color: "orange.8",
                     count: filteredCandidates.filter(
                       (c: any) => c.status === "POOLING",
                     ).length,
@@ -714,14 +713,14 @@ export default function ReportsPage() {
                   },
                   {
                     label: "HIRED",
-                    color: "teal.6",
+                    color: "teal.8",
                     count: filteredCandidates.filter(
                       (c: any) => c.status === "HIRED",
                     ).length,
                   },
                   {
                     label: "REJECTED",
-                    color: "red.4",
+                    color: "red.8",
                     count: filteredCandidates.filter(
                       (c: any) => c.status === "REJECTED",
                     ).length,
@@ -752,6 +751,7 @@ export default function ReportsPage() {
                       color={item.color}
                       size="lg"
                       radius="xl"
+                      aria-label={`${item.label} distribution: ${item.count} items`}
                     />
                   </Box>
                 ))}
@@ -919,15 +919,12 @@ export default function ReportsPage() {
         </SimpleGrid>
 
         <Group
-          justify="space-between"
+          justify="flex-end"
           mt="xl"
           pt="xl"
           style={{ borderTop: "1px solid rgba(0,0,0,0.05)" }}
           className="no-print"
         >
-          <Text size="xs" fw={900} c="dimmed" style={{ letterSpacing: "1px" }}>
-            ORCHESTRATED BY ANTIGRAVITY ENGINE
-          </Text>
           <Text size="xs" c="dimmed" fw={700}>
             Proprietary Analytics Port • System Pulse: Optimal •{" "}
             {dayjs().format("YYYY")}
@@ -957,93 +954,142 @@ export default function ReportsPage() {
       >
         <Stack gap="xl">
           <Box p="md" bg="blue.0" style={{ borderRadius: "16px" }}>
-            <Text size="sm" c="blue.9" fw={700} mb={4}>IDENTIFIED LOGIC</Text>
+            <Text size="sm" c="blue.9" fw={700} mb={4}>
+              IDENTIFIED LOGIC
+            </Text>
             <Text size="xs" c="blue.7" fw={600} style={{ lineHeight: 1.5 }}>
-              This analytical vector includes {selectedReport?.records?.length || 0} unique records identified within the active 
-              organizational aggregation period. Data is synchronized with real-time database state.
+              This analytical vector includes{" "}
+              {selectedReport?.records?.length || 0} unique records identified
+              within the active organizational aggregation period. Data is
+              synchronized with real-time database state.
             </Text>
           </Box>
 
           <Box>
             <Group justify="space-between" mb="xs">
-                <Text fw={800} size="sm" tt="uppercase" c="dimmed">Detailed Record Registry</Text>
-                <Badge variant="light" color="blue">{selectedReport?.records?.length} Records</Badge>
+              <Text fw={800} size="sm" tt="uppercase" c="dimmed">
+                Detailed Record Registry
+              </Text>
+              <Badge variant="light" color="blue">
+                {selectedReport?.records?.length} Records
+              </Badge>
             </Group>
             <Divider mb="lg" />
-            
+
             <ScrollArea h={400} offsetScrollbars>
-                {selectedReport?.type === "candidate" ? (
-                    <Table verticalSpacing="sm">
-                        <Table.Thead>
-                            <Table.Tr>
-                                <Table.Th>Candidate</Table.Th>
-                                <Table.Th>Target Role</Table.Th>
-                                <Table.Th>Status</Table.Th>
-                            </Table.Tr>
-                        </Table.Thead>
-                        <Table.Tbody>
-                            {selectedReport?.records?.map((record: any, idx: number) => (
-                                <Table.Tr key={idx}>
-                                    <Table.Td>
-                                        <Group gap="sm">
-                                            <Avatar src={record.avatar} size="sm" radius="xl" />
-                                            <Text size="sm" fw={800}>{record.name}</Text>
-                                        </Group>
-                                    </Table.Td>
-                                    <Table.Td>
-                                        <Text size="xs" fw={700} c="blue.7">{record.role}</Text>
-                                    </Table.Td>
-                                    <Table.Td>
-                                        <Badge size="xs" radius="sm" variant="outline" color={
-                                            record.status === 'HIRED' ? 'teal' : 
-                                            record.status === 'REJECTED' ? 'red' : 'blue'
-                                        }>
-                                            {record.status}
-                                        </Badge>
-                                    </Table.Td>
-                                </Table.Tr>
-                            ))}
-                        </Table.Tbody>
-                    </Table>
-                ) : (
-                    <Table verticalSpacing="sm">
-                        <Table.Thead>
-                            <Table.Tr>
-                                <Table.Th>Candidate</Table.Th>
-                                <Table.Th>Session Schedule</Table.Th>
-                                <Table.Th>Intelligence Status</Table.Th>
-                            </Table.Tr>
-                        </Table.Thead>
-                        <Table.Tbody>
-                            {selectedReport?.records?.map((record: any, idx: number) => (
-                                <Table.Tr key={idx}>
-                                    <Table.Td>
-                                        <Group gap="sm">
-                                            <Avatar src={record.extendedProps.avatar} size="sm" radius="xl" />
-                                            <Box>
-                                                <Text size="sm" fw={800}>{record.extendedProps.candidate}</Text>
-                                                <Text size="10px" fw={700} c="dimmed">{record.extendedProps.role}</Text>
-                                            </Box>
-                                        </Group>
-                                    </Table.Td>
-                                    <Table.Td>
-                                        <Text size="xs" fw={800}>{dayjs(record.start).format("MMM DD, hh:mm A")}</Text>
-                                    </Table.Td>
-                                    <Table.Td>
-                                        <Badge size="xs" radius="sm" color={record.extendedProps.status === 'COMPLETED' ? 'teal.6' : 'blue.6'}>
-                                            {record.extendedProps.status || 'SCHEDULED'}
-                                        </Badge>
-                                    </Table.Td>
-                                </Table.Tr>
-                            ))}
-                        </Table.Tbody>
-                    </Table>
-                )}
-                {(!selectedReport?.records || selectedReport.records.length === 0) && (
-                    <Center py={40}>
-                        <Text size="xs" c="dimmed" fw={800}>NO DATA IDENTIFIED FOR THIS VECTOR</Text>
-                    </Center>
-                )}
+              {selectedReport?.type === "candidate" ? (
+                <Table verticalSpacing="sm">
+                  <Table.Thead>
+                    <Table.Tr>
+                      <Table.Th>Candidate</Table.Th>
+                      <Table.Th>Target Role</Table.Th>
+                      <Table.Th>Status</Table.Th>
+                    </Table.Tr>
+                  </Table.Thead>
+                  <Table.Tbody>
+                    {selectedReport?.records?.map(
+                      (record: any, idx: number) => (
+                        <Table.Tr key={idx}>
+                          <Table.Td>
+                            <Group gap="sm">
+                              <Avatar
+                                src={record.avatar}
+                                size="sm"
+                                radius="xl"
+                              />
+                              <Text size="sm" fw={800}>
+                                {record.name}
+                              </Text>
+                            </Group>
+                          </Table.Td>
+                          <Table.Td>
+                            <Text size="xs" fw={700} c="blue.7">
+                              {record.role}
+                            </Text>
+                          </Table.Td>
+                          <Table.Td>
+                            <Badge
+                              size="xs"
+                              radius="sm"
+                              variant="outline"
+                              color={
+                                record.status === "HIRED"
+                                  ? "teal"
+                                  : record.status === "REJECTED"
+                                    ? "red"
+                                    : "blue"
+                              }
+                            >
+                              {record.status}
+                            </Badge>
+                          </Table.Td>
+                        </Table.Tr>
+                      ),
+                    )}
+                  </Table.Tbody>
+                </Table>
+              ) : (
+                <Table verticalSpacing="sm">
+                  <Table.Thead>
+                    <Table.Tr>
+                      <Table.Th>Candidate</Table.Th>
+                      <Table.Th>Session Schedule</Table.Th>
+                      <Table.Th>Intelligence Status</Table.Th>
+                    </Table.Tr>
+                  </Table.Thead>
+                  <Table.Tbody>
+                    {selectedReport?.records?.map(
+                      (record: any, idx: number) => (
+                        <Table.Tr key={idx}>
+                          <Table.Td>
+                            <Group gap="sm">
+                              <Avatar
+                                src={record.extendedProps.avatar}
+                                size="sm"
+                                radius="xl"
+                              />
+                              <Box>
+                                <Text size="sm" fw={800}>
+                                  {record.extendedProps.candidate}
+                                </Text>
+                                <Text size="10px" fw={700} c="dimmed">
+                                  {record.extendedProps.role}
+                                </Text>
+                              </Box>
+                            </Group>
+                          </Table.Td>
+                          <Table.Td>
+                            <Text size="xs" fw={800}>
+                              {dayjs(record.start).format("MMM DD, hh:mm A")}
+                            </Text>
+                          </Table.Td>
+                          <Table.Td>
+                            <Badge
+                              size="xs"
+                              radius="sm"
+                              color={
+                                record.extendedProps.status === "COMPLETED"
+                                  ? "teal.6"
+                                  : "blue.6"
+                              }
+                            >
+                              {record.extendedProps.status || "SCHEDULED"}
+                            </Badge>
+                          </Table.Td>
+                        </Table.Tr>
+                      ),
+                    )}
+                  </Table.Tbody>
+                </Table>
+              )}
+              {(!selectedReport?.records ||
+                selectedReport.records.length === 0) && (
+                <Center py={40}>
+                  <Text size="xs" c="dimmed" fw={800}>
+                    NO DATA IDENTIFIED FOR THIS VECTOR
+                  </Text>
+                </Center>
+              )}
             </ScrollArea>
           </Box>
 

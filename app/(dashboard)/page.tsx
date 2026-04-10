@@ -81,7 +81,7 @@ export default function DashboardPage() {
         value: events.length.toString(),
         change: "+5%",
         positive: true,
-        icon: <IconBriefcase size={22} />,
+        icon: <IconBriefcase size={22} aria-hidden="true" />,
         color: "blue",
       },
       {
@@ -89,7 +89,7 @@ export default function DashboardPage() {
         value: candidates.length.toString(),
         change: "+12%",
         positive: true,
-        icon: <IconUsers size={22} />,
+        icon: <IconUsers size={22} aria-hidden="true" />,
         color: "indigo",
       },
       {
@@ -97,7 +97,7 @@ export default function DashboardPage() {
         value: todayCount.toString(),
         change: todayCount > 0 ? "+2" : "0",
         positive: true,
-        icon: <IconCalendarEvent size={22} />,
+        icon: <IconCalendarEvent size={22} aria-hidden="true" />,
         color: "teal",
       },
       {
@@ -105,7 +105,7 @@ export default function DashboardPage() {
         value: `${avgDuration}m`,
         change: "-2m",
         positive: false,
-        icon: <IconClock size={22} />,
+        icon: <IconClock size={22} aria-hidden="true" />,
         color: "orange",
       },
       {
@@ -113,7 +113,7 @@ export default function DashboardPage() {
         value: roles.length.toString(),
         change: "+2",
         positive: true,
-        icon: <IconSettings size={22} />,
+        icon: <IconSettings size={22} aria-hidden="true" />,
         color: "violet",
       },
     ];
@@ -166,15 +166,15 @@ export default function DashboardPage() {
   return (
     <Container fluid p="xl" bg="transparent" style={{ minHeight: "100vh" }} className="animate-in">
       <Stack gap="xl">
-        <Group justify="space-between" align="flex-end">
+        <Group justify="space-between" align="flex-end" component="header">
           <Box>
-            <Badge color="blue.4" variant="light" size="sm" mb={4} radius="sm">
+            <Badge color="blue.9" variant="filled" size="sm" mb={4} radius="sm">
                RECRUITMENT ANALYTICS PORTAL
             </Badge>
             <Title order={1} fw={900} size="h1" style={{ letterSpacing: '-0.5px' }}>
               Strategic Dashboard
             </Title>
-            <Text c="dimmed" size="sm" fw={600}>
+            <Text c="gray.8" size="sm" fw={600}>
               Comprehensive overview of your organization's hiring performance.
             </Text>
           </Box>
@@ -189,7 +189,7 @@ export default function DashboardPage() {
               leftSection={<IconBriefcase size={18} />}
               style={{ border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}
             >
-              View Active Roles
+              Browse All Roles
             </Button>
             <Button
               leftSection={<IconPlus size={18} />}
@@ -207,21 +207,21 @@ export default function DashboardPage() {
 
         <SimpleGrid cols={{ base: 1, sm: 2, lg: 5 }} spacing="xl">
           {stats.map((stat, i) => (
-            <Card key={i} p="xl" radius="xl" className="glass-card" style={{ border: 'none' }}>
+            <Card key={i} p="xl" radius="xl" className="glass-card" style={{ border: 'none' }} aria-label={`${stat.label} statistic`}>
               <Group justify="space-between" mb="lg">
                 <ThemeIcon variant="light" color={stat.color} radius="md" size="xl">
                   {stat.icon}
                 </ThemeIcon>
-                <Badge variant="dot" color={stat.positive ? "teal.6" : "red.6"} size="sm" fw={800}>
+                <Badge variant="dot" color={stat.positive ? "teal.8" : "red.8"} size="sm" fw={800}>
                   {stat.change}
                 </Badge>
               </Group>
-              <Text size="xs" fw={800} c="dimmed" tt="uppercase" mb={4} style={{ letterSpacing: '0.5px' }}>
+              <Text component="h2" size="xs" fw={800} c="gray.8" tt="uppercase" mb={4} style={{ letterSpacing: '0.5px' }}>
                 {stat.label}
               </Text>
-              <Title order={3} fw={900} size="32px">
+              <Text fz="32px" fw={900}>
                 {stat.value}
-              </Title>
+              </Text>
             </Card>
           ))}
         </SimpleGrid>
@@ -234,14 +234,14 @@ export default function DashboardPage() {
                   <Box>
                      <Group gap="xs" mb={4}>
                         <IconClock size={20} color="var(--mantine-color-blue-6)" />
-                        <Title order={4} fw={900}>Today's Interview Pipeline</Title>
+                        <Title order={2} size="h4" fw={900}>Today's Interview Pipeline</Title>
                      </Group>
-                    <Text size="xs" c="dimmed" fw={600}>
+                    <Text size="xs" c="gray.9" fw={600}>
                       Real-time monitoring of all active and upcoming interview sessions.
                     </Text>
                   </Box>
-                  <Button onClick={() => router.push("/calendar")} variant="subtle" color="blue" size="sm" fw={800} radius="md">
-                    SEE CALENDAR
+                  <Button component={Link} href="/calendar" variant="subtle" color="blue" size="sm" fw={800} radius="md">
+                    View Entire Interview Schedule
                   </Button>
                 </Group>
 
@@ -256,7 +256,7 @@ export default function DashboardPage() {
                         <Group justify="space-between">
                           <Group gap="lg">
                             <Box style={{ position: 'relative' }}>
-                                <Avatar src={item.extendedProps.avatar} radius="xl" size="lg" style={{ border: '2px solid white', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }} />
+                                <Avatar src={item.extendedProps.avatar} alt={`Avatar of ${item.extendedProps.candidate}`} radius="xl" size="lg" style={{ border: '2px solid white', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }} />
                                 { (item.extendedProps.status === "CONFIRMED" || item.extendedProps.status === "SCHEDULED") && (
                                     <Box style={{ 
                                         position: 'absolute', bottom: 0, right: 0, width: 14, height: 14, borderRadius: 14, 
@@ -266,17 +266,17 @@ export default function DashboardPage() {
                             </Box>
                             <Box>
                               <Text size="md" fw={900}>{item.extendedProps.candidate}</Text>
-                              <Text size="xs" c="blue.6" fw={700}>{item.extendedProps.role}</Text>
-                              <Text size="xs" c="dimmed" fw={600} mt={4}>{item.extendedProps.type}</Text>
+                              <Text size="xs" c="blue.8" fw={700}>{item.extendedProps.role}</Text>
+                              <Text size="xs" c="gray.7" fw={600} mt={4}>{item.extendedProps.type}</Text>
                             </Box>
                           </Group>
                           <Group gap={60}>
                             <Box ta="right">
-                              <Text size="xs" fw={800} c="dimmed">SESSION TIME</Text>
+                            <Text size="xs" fw={800} c="gray.8">SESSION TIME</Text>
                               <Text size="sm" fw={900}>{dayjs(item.start).format("hh:mm A")}</Text>
-                              <Text size="10px" fw={700} c="dimmed">Duration: {dayjs(item.end).diff(dayjs(item.start), 'minute')}m</Text>
+                              <Text size="12px" fw={700} c="gray.8">Duration: {dayjs(item.end).diff(dayjs(item.start), 'minute')}m</Text>
                             </Box>
-                            <Badge variant="light" size="md" radius="md" color={item.extendedProps.status === "COMPLETED" ? "teal.6" : "blue.6"} px="md" h={32}>
+                            <Badge variant="filled" size="md" radius="md" color={item.extendedProps.status === "COMPLETED" ? "teal.8" : "blue.9"} px="md" h={32}>
                                 {item.extendedProps.status}
                             </Badge>
                           </Group>
@@ -287,11 +287,11 @@ export default function DashboardPage() {
                     <div style={{ padding: '80px 0', textAlign: "center", border: '2px dashed rgba(0,0,0,0.05)', borderRadius: '24px' }}>
                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
                           <div style={{ padding: '16px', borderRadius: '100px', backgroundColor: 'var(--mantine-color-gray-1)', color: 'var(--mantine-color-gray-6)', display: 'flex', alignItems: 'center' }}>
-                             <IconCalendarEvent size={32} />
+                             <IconCalendarEvent size={32} aria-hidden="true" />
                           </div>
                           <div>
                              <h4 style={{ margin: 0, fontWeight: 900, fontSize: 'var(--mantine-font-size-lg)', color: 'var(--mantine-color-text)' }}>No Sessions Today</h4>
-                             <p style={{ margin: '4px 0 0', fontSize: 'var(--mantine-font-size-xs)', fontWeight: 700, color: 'var(--mantine-color-dimmed)' }}>The recruitment pipeline is currently clear of immediate sessions.</p>
+                             <p style={{ margin: '4px 0 0', fontSize: 'var(--mantine-font-size-xs)', fontWeight: 700, color: 'var(--mantine-color-gray-7)' }}>The recruitment pipeline is currently clear of immediate sessions.</p>
                           </div>
                        </div>
                     </div>
@@ -300,16 +300,16 @@ export default function DashboardPage() {
               </Card>
 
               <Card p="xl" radius="xl" className="glass-card">
-                <Title order={4} fw={900} mb="xl">Strategic Hiring Pipeline</Title>
+                <Title order={2} size="h4" fw={900} mb="xl">Strategic Hiring Pipeline</Title>
                 <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="xl">
                    <Stack gap="xl">
                     {pipeline.map((stage, i) => ( stage.label !== "Total Candidates" && (
                         <Box key={i}>
                         <Group justify="space-between" mb={8}>
-                            <Text size="xs" fw={800} c="gray.7">{stage.label}</Text>
+                            <Text size="xs" fw={800} c="gray.8">{stage.label}</Text>
                             <Text size="xs" fw={900}>{stage.total > 0 ? Math.round((stage.value / stage.total) * 100) : 0}%</Text>
                         </Group>
-                        <Progress value={stage.total > 0 ? (stage.value / stage.total) * 100 : 0} color={stage.color} size="lg" radius="xl" />
+                        <Progress value={stage.total > 0 ? (stage.value / stage.total) * 100 : 0} color={stage.color} size="lg" radius="xl" aria-label={`${stage.label} progress: ${stage.total > 0 ? Math.round((stage.value / stage.total) * 100) : 0}%`} />
                         </Box>
                     )))}
                    </Stack>
@@ -317,7 +317,7 @@ export default function DashboardPage() {
                       <Text size="xs" fw={800} c="blue.9" tt="uppercase" mb="xs">Growth Metrics</Text>
                       <Title order={2} fw={900} c="blue.9" mb="md">{candidates.length} New Targets</Title>
                       <Text size="sm" c="blue.7" fw={600} style={{ lineHeight: 1.6 }}>
-                         You have achieved and exceeded current recruitment goals by 12% this quarter. Keep the momentum high.
+                         You have achieved and exceeded current recruitment targets by 12% this quarter. Continuous monitoring of these benchmarks ensures long-term operational excellence.
                       </Text>
                    </Box>
                 </SimpleGrid>
@@ -329,15 +329,15 @@ export default function DashboardPage() {
             <Stack gap="xl">
               <Card p="xl" radius="xl" bg="blue.9" c="white" style={{ position: 'relative', overflow: 'hidden' }}>
                  <Box style={{ position: 'absolute', top: -20, right: -20, width: 120, height: 120, background: 'rgba(255,255,255,0.1)', borderRadius: '100px' }} />
-                <Title order={6} fw={800} mb="lg" style={{ letterSpacing: '1px' }}>MONTHLY VELOCITY</Title>
-                <Text size="xs" c="blue.1" fw={500} mb="xl">Total system activity analyzed across {events.length} sessions.</Text>
+                <Title order={2} size="h6" fw={800} mb="lg" style={{ letterSpacing: '1px' }}>MONTHLY VELOCITY</Title>
+                <Text size="xs" c="blue.1" fw={500} mb="xl">Detailed analysis of system activity generated across {events.length} sessions.</Text>
                 <Stack gap="xl">
                   <Box style={{ borderLeft: "4px solid rgba(255,255,255,0.3)", paddingLeft: "16px" }}>
-                    <Text size="10px" fw={800} c="blue.2" tt="uppercase" mb={4}>Completed This Quarter</Text>
+                    <Text size="12px" fw={800} c="blue.1" tt="uppercase" mb={4}>Completed This Quarter</Text>
                     <Text size="32px" fw={900}>{events.filter((e) => e.extendedProps.status === "COMPLETED").length}</Text>
                   </Box>
                   <Box style={{ borderLeft: "4px solid #51cf66", paddingLeft: "16px" }}>
-                    <Text size="10px" fw={800} c="blue.2" tt="uppercase" mb={4}>Candidate Satisfaction</Text>
+                    <Text size="12px" fw={800} c="blue.1" tt="uppercase" mb={4}>Candidate Satisfaction</Text>
                     <Text size="32px" fw={900}>98%</Text>
                   </Box>
                 </Stack>
@@ -345,17 +345,17 @@ export default function DashboardPage() {
 
               <Card p="xl" radius="xl" className="glass-card">
                  <Group justify="space-between" mb="xl">
-                    <Title order={5} fw={900}>TOP RECRUITERS</Title>
-                    <ActionIcon variant="subtle" radius="md"><IconSettings size={18}/></ActionIcon>
+                    <Title order={2} size="h5" fw={900}>TOP RECRUITERS</Title>
+                    <ActionIcon variant="subtle" radius="md" size={36} color="gray.8" aria-label="Recruiter Settings"><IconSettings size={20} aria-hidden="true" /></ActionIcon>
                  </Group>
                 <Stack gap="md">
                   {activeRecruiters.slice(0, 4).map((recruiter, i) => (
                       <Group key={i} justify="space-between" p="xs" style={{ borderRadius: '12px', transition: 'background-color 0.2s ease' }} className="recruiter-row">
                         <Group gap="sm">
-                           <Avatar src={recruiter.avatar} size="md" radius="xl" />
+                           <Avatar src={recruiter.avatar} alt={`Avatar of ${recruiter.name}`} size="md" radius="xl" />
                            <Box>
                               <Text size="sm" fw={900}>{recruiter.name}</Text>
-                              <Text size="10px" c="dimmed" fw={700}>Global Recruitment Staff</Text>
+                               <Text size="12px" c="gray.8" fw={700}>Global Recruitment Staff</Text>
                            </Box>
                         </Group>
                         <Badge variant="dot" color="blue">Top Performance</Badge>

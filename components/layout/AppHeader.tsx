@@ -56,6 +56,7 @@ export default function AppHeader({ opened, toggle }: AppHeaderProps) {
         leftSection={<IconSearch size={16} stroke={1.5} />}
         size="sm"
         radius="md"
+        aria-label="Search appointments or candidates"
         style={{ flex: 1 }}
         styles={{
           input: {
@@ -70,24 +71,24 @@ export default function AppHeader({ opened, toggle }: AppHeaderProps) {
           <Tooltip label="Notifications" withArrow position="bottom">
             <ActionIcon
               variant="subtle"
-              color="gray"
-              size="lg"
+              color="gray.8"
+              size={40}
               radius="xl"
               aria-label="Notifications"
             >
-              <IconBell size={20} stroke={1.5} />
+              <IconBell size={22} stroke={1.5} aria-hidden="true" />
             </ActionIcon>
           </Tooltip>
 
           <Tooltip label="History" withArrow position="bottom">
             <ActionIcon
               variant="subtle"
-              color="gray"
-              size="lg"
+              color="gray.8"
+              size={40}
               radius="xl"
               aria-label="History"
             >
-              <IconHistory size={20} stroke={1.5} />
+              <IconHistory size={22} stroke={1.5} aria-hidden="true" />
             </ActionIcon>
           </Tooltip>
 
@@ -98,18 +99,18 @@ export default function AppHeader({ opened, toggle }: AppHeaderProps) {
           >
             <ActionIcon
               variant="subtle"
-              color="gray"
-              size="lg"
+              color="gray.8"
+              size={40}
               radius="xl"
               onClick={() => toggleColorScheme()}
               aria-label="Toggle color scheme"
             >
               {!mounted ? (
-                <IconMoon size={20} stroke={1.5} />
+                <IconMoon size={22} stroke={1.5} aria-hidden="true" />
               ) : isDark ? (
-                <IconSun size={20} stroke={1.5} />
+                <IconSun size={22} stroke={1.5} aria-hidden="true" />
               ) : (
-                <IconMoon size={20} stroke={1.5} />
+                <IconMoon size={22} stroke={1.5} aria-hidden="true" />
               )}
             </ActionIcon>
           </Tooltip>
@@ -120,6 +121,7 @@ export default function AppHeader({ opened, toggle }: AppHeaderProps) {
             <Avatar
               size={36}
               radius="md"
+              alt="User profile"
               src="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-1.png"
               style={{
                 cursor: "pointer",
